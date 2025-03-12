@@ -1,0 +1,87 @@
+; Write back no allocate direct mapped cache
+; 4 words per line
+; 2 lines of cache in this demo
+
+; w -> raw write
+; r -> raw read
+; rl -> raw read whole line
+; cl -> raw read cache line (prints raw line and cache metadata)
+; s -> store
+; f -> fetch
+; h -> has address
+
+w m 0 2
+
+; Store without fetch doesn't change cache
+h c 0 ; Does cache have address 0
+cl 0 ; Print the raw data for cache line 0
+rl m 0 ; Read the addresses [0 - 3] from memory
+
+s c 0 0 1 ; Store to cache 4 times (time to write to memory)
+s c 0 0 1 ;
+s c 0 0 1 ;
+s c 0 0 1 ;
+
+h c 0 ; Still not in cache (no allocate)
+cl 0
+rl m 0
+
+; Fetch before store changes cache
+
+f c 0 0 1 ; Takes 5 cycles
+f c 0 0 1
+f c 0 0 1
+f c 0 0 1
+f c 0 0 1
+
+h c 0
+rl c 0
+cl 0
+rl m 0
+
+s c 0 1 2
+s c 0 1 2
+s c 0 1 2
+s c 0 1 2
+
+h c 0
+rl c 0
+cl 0
+rl m 0
+
+
+; Show clock only updates after the same requester sends request
+s c 0 1 2
+s c 1 1 2 ; Store other ID
+f c 0 8 1 ; Fetch same id
+s c 0 1 2
+s c 0 1 2
+s c 0 1 2
+
+; Show other line works
+
+f c 0 8 1
+f c 0 8 1
+f c 0 8 1
+f c 0 8 1
+f c 0 8 1
+
+h c 0
+rl c 0
+rl c 8
+cl 0
+rl m 0
+rl m 8
+
+
+cl 1
+h c 1
+rl c 1
+f c 0 5 1
+f c 0 5 1
+f c 0 5 1
+f c 0 5 1
+f c 0 5 1
+cl 1
+h c 1
+rl c 1
