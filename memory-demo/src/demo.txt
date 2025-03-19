@@ -58,13 +58,15 @@ s c 0 1 2
 s c 0 1 2
 s c 0 1 2
 
-; Show other line works
+; Show eviction
 
 f c 0 8 1
 f c 0 8 1
 f c 0 8 1
 f c 0 8 1
 f c 0 8 1
+
+; Show other line works
 
 h c 0
 rl c 0
@@ -84,4 +86,4 @@ f c 0 5 1
 f c 0 5 1
 cl 1
 h c 1
-rl c 1
+rl c 4
