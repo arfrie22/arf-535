@@ -369,3 +369,8 @@ impl PipelineInner for WritebackStage {
         todo!()
     }
 }
+
+// For april 2 make sure you have enough
+// load, store, branch, arithmatic operations
+// load 2 add store, change counter, jump
+// cache 1 cycle, dram 2 cycle 
