@@ -1,0 +1,1782 @@
+[
+    {
+        "name": "General",
+        "description": "",
+        "opcodes": [
+            {
+                "name": "Trap",
+                "pneumonic": "TRAP",
+                "description": "Used in simulator to pause execution, and return control to the simulator's UI.",
+                "bits": []
+            },
+            {
+                "name": "Push Integer Register",
+                "pneumonic": "PUSH Rx",
+                "description": "Pushes the value of Rx onto the stack (SP) and increase SP by 1.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Push Floating-Point Register",
+                "pneumonic": "PUSH Fx",
+                "description": "Pushes the value of Fx onto the stack (SP) and increase SP by 1.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Pop Integer Register",
+                "pneumonic": "POP Rx",
+                "description": "Pops the top value from the stack (SP) into Rx and decrease SP by 1",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Pop Floating-Point Register",
+                "pneumonic": "POP Fx",
+                "description": "Pops the top value from the stack (SP) into Fx and decrease SP by 1",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Swap Register",
+                "pneumonic": "SWP Rx Fy",
+                "description": "Swaps the integer register Rx with the value of the floating-point register Fy.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Integer Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Floating-Point Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Stall",
+                "pneumonic": "STALL Rx",
+                "description": "Stalls the pipeline at execute for Rx clock cycles.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Branch",
+        "description": "The condition code for a branch is testing a bit inside the Status Register, consult the table to see the short name. In the ASM write the instruction as (B).(COND) where (B) is the branch instruction and (COND) is the short condition code.",
+        "opcodes": [
+            {
+                "name": "Register Jump",
+                "pneumonic": "B Rx",
+                "description": "Sets the program counter to Rx.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Indirect Jump",
+                "pneumonic": "B [Rx + I << S]",
+                "description": "Sets the program counter to the value stored at the memory location in Rx offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Indirect with Register Offset Jump",
+                "pneumonic": "B [Rx + Ro << S]",
+                "description": "Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Relative Jump",
+                "pneumonic": "BR Rx",
+                "description": "Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Immediate Jump",
+                "pneumonic": "B _label_",
+                "description": "Sets the program counter to the address of the label.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Immediate Relative Jump",
+                "pneumonic": "BO _offset_",
+                "description": "Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number).",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "_offset_",
+                        "long": "Signed Offset",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Register Jump with Link",
+                "pneumonic": "BL Rx",
+                "description": "Sets the link register to (PC + 1). Sets the program counter to Rx.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Indirect Jump with Link",
+                "pneumonic": "BL [Rx + I << S]",
+                "description": "Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Indirect with Register Offset Jump with Link",
+                "pneumonic": "BL [Rx + Ro << S]",
+                "description": "Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Relative Jump with Link",
+                "pneumonic": "BRL Rx",
+                "description": "Sets the link register to (PC + 1). Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Immediate Jump with Link",
+                "pneumonic": "BL _label_",
+                "description": "Sets the link register to (PC + 1). Sets the program counter to label.",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Immediate Relative Jump with Link",
+                "pneumonic": "BOL _offset_",
+                "description": "Sets the link register to (PC + 1). Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number that is sign extended).",
+                "bits": [
+                    {
+                        "short": "Condition",
+                        "long": "Condition code bit",
+                        "count": 5
+                    },
+                    {
+                        "short": "_offset_",
+                        "long": "Signed Offset",
+                        "count": 16
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Integer Register",
+        "description": "",
+        "opcodes": [
+            {
+                "name": "Integer Load Low",
+                "pneumonic": "LDL Rx _value_",
+                "description": "Loads the 16-bit immediate value into the lower 16 bits of register Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Immediate Value",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Integer Load High",
+                "pneumonic": "LDH Rx _value_",
+                "description": "Loads the 16-bit immediate value into the higher 16 bits of register Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Immediate Value",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Swap Integer Registers",
+                "pneumonic": "SWP Rx Ry",
+                "description": "Swaps the values of Rx and Ry.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "First Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Second Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Copy Integer Register",
+                "pneumonic": "LDR Rx Ry",
+                "description": "Sets the value of Rx to the value of Ry.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Load Integer Register Indirect",
+                "pneumonic": "LDR Rx [Ry + I << S]",
+                "description": "Sets the value of Rx to the value of stored at the data memory location at Ry offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Load Integer Register Indirect with Register Offset",
+                "pneumonic": "LDR Rx [Ry + Ro << S]",
+                "description": "Sets the value of Rx to the value of stored at the data memory location at Ry offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Load Integer Register Indirect Program",
+                "pneumonic": "LDR Rx P[Ry + I << S]",
+                "description": "Sets the value of Rx to the value of stored at the program memory location at Ry offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Load Integer Register Indirect with Register Offset Program",
+                "pneumonic": "LDR Rx P[Ry + Ro << S]",
+                "description": "Sets the value of Rx to the value of stored at the program memory location at Ry offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Store Integer Register Indirect",
+                "pneumonic": "STR [Rx + I << S] Ry",
+                "description": "Stores the value of Ry into the data memory location at Rx offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Store Integer Register Indirect with Register Offset Indirect",
+                "pneumonic": "STR [Rx + Ro << S] Ry",
+                "description": "Stores the value of Ry into the data memory location at Rx offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Store Integer Register Indirect Program",
+                "pneumonic": "STR P[Rx + I << S] Ry",
+                "description": "Stores the value of Ry into the program memory location at Rx offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Store Integer Register Indirect with Register Offset Program",
+                "pneumonic": "STR P[Rx + Ro << S] Ry",
+                "description": "Stores the value of Ry into the program memory location at Rx offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Integer Load Data",
+                "pneumonic": "LDR Rx _label_",
+                "description": "Loads the value at data memory address label into the register Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address in data",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Integer Load Program",
+                "pneumonic": "LDR Rx _label_",
+                "description": "Loads the value at program memory address label into the register Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Addres in programs",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Integer Store Data",
+                "pneumonic": "STR Rx _label_",
+                "description": "Stores the value in Rx into the data memory address label.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address in data",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Integer Store Program",
+                "pneumonic": "STR Rx _label_",
+                "description": "Stores the value in Rx into the program memory address label.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address in program",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Unsigned Zero Extend",
+                "pneumonic": "ZEX Rx Ry _count_",
+                "description": "Stores the value of Ry into Rx where the top 31 - _count_ bits are zero.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_count_",
+                        "long": "Bit Count",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Sign Extend",
+                "pneumonic": "SEX Rx Ry _count_",
+                "description": "Stores the value of Ry into Rx where the top 31 - _count_ bits are sign extended.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_count_",
+                        "long": "Bit Count",
+                        "count": 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Floating-Point Register",
+        "description": "",
+        "opcodes": [
+            {
+                "name": "Floating-Point Load Low",
+                "pneumonic": "LDL Fx _value_",
+                "description": "Loads the 16-bit immediate value into the lower 16 bits of register Fx.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Immediate Value",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Floating-Point Load High",
+                "pneumonic": "LDH Fx _value_",
+                "description": "Loads the 16-bit immediate value into the higher 16 bits of register Fx.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Immediate Value",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Swap Floating-Point Registers",
+                "pneumonic": "SWP Fx Fy",
+                "description": "Swaps the values of Fx and Fy.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "First Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Second Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Copy Floating-Point Register",
+                "pneumonic": "LDR Fx Fy",
+                "description": "Sets the value of Fx to the value of Fy.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Load Floating-Point Register Indirect",
+                "pneumonic": "LDR Fx [Ry + I << S]",
+                "description": "Sets the value of Fx to the value of stored at the data memory location at Ry offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Load Floating-Point Register Indirect with Register Offset",
+                "pneumonic": "LDR Fx [Ry + Ro << S]",
+                "description": "Sets the value of Fx to the value of stored at the data memory location at Ry offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Store Floating-Point Register Indirect",
+                "pneumonic": "STR [Rx + I << S] Fy",
+                "description": "Stores the value of Fy into the data memory location at Rx offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Store Floating-Point Register Indirect with Register Offset",
+                "pneumonic": "STR [Rx + Ro << S] Fy",
+                "description": "Stores the value of Fy into the data memory location at Rx offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
+            },
+            {
+                "name": "Floating-Point Load Data",
+                "pneumonic": "LDR Fx _label_",
+                "description": "Loads the value at data memory address label into the register Fx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address in data",
+                        "count": 16
+                    }
+                ]
+            },
+            {
+                "name": "Floating-Point Store Data",
+                "pneumonic": "STR Fx _label_",
+                "description": "Stores the value in Fx into the data memory address label.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Source Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Destination Address in data",
+                        "count": 16
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Integer ALU",
+        "description": "",
+        "opcodes": [
+            {
+                "name": "Integer Compare",
+                "pneumonic": "CMP Rx Ry",
+                "description": "Stores the condition variables.\n- Sets EQ if $\"Rx\" = \"Ry\"$\n- Sets GT if $\"Rx\" > \"Ry\"$\n- Sets LT if $\"Rx\" < \"Ry\"$\n- Sets GE if $\"Rx\" >= \"Ry\"$\n- Sets LE if $\"Rx\" <= \"Ry\"$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "First Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Second Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Integer Compare Single Against Zero",
+                "pneumonic": "CMP Rx",
+                "description": "Stores the condition variables.\n- Sets EQ if $\"Rx\" = 0$\n- Sets GT if $\"Rx\" > 0$\n- Sets LT if $\"Rx\" < 0$\n- Sets GE if $\"Rx\" >= 0$\n- Sets LE if $\"Rx\" <= 0$\n- Sets EVEN if $\"Rx\" % 2 = 0$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Add Unsigned Integer",
+                "pneumonic": "ADD Rx Ry Rz",
+                "description": "Sets Rx := Ry + Rz.\\\nSets overflow bit if $\"Ry\" + \"Rz\" >= 2^32$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Subtract Unsigned Integer",
+                "pneumonic": "SUB Rx Ry Rz",
+                "description": "Sets Rx := Ry - Rz.\\\nSets underflow bit if $\"Ry\" - \"Rz\" < 0$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Multiply Unsigned Integer",
+                "pneumonic": "MUL Rx Ry Rz",
+                "description": "Sets Rx := Ry \\* Rz.\\\nSets overflow bit if $\"Ry\" times \"Rz\" >= 2^32$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Divide Unsigned Integer",
+                "pneumonic": "DIV Rx Ry Rz",
+                "description": "Sets Rx := Ry / Rz.\\\nSets divide by zero bit if $\"Rz\" = 0$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Modulo Unsigned Integer",
+                "pneumonic": "MOD Rx Ry Rz",
+                "description": "Sets Rx := Ry % Rz.\\\nSets divide by zero bit if $\"Rz\" = 0$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Add Signed Integer",
+                "pneumonic": "ADDS Rx Ry Rz",
+                "description": "Sets Rx := Ry + Rz (treats all registers as signed).\\\nSets overflow bit if $\"Ry\" + \"Rz\" >= 2^31 - 1$. Sets underflow bit if $\"Ry\" + \"Rz\" < -2^31$.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Subtract Signed Integer",
+                "pneumonic": "SUBS Rx Ry Rz",
+                "description": "Sets Rx := Ry - Rz (treats all registers as signed).\\\nSets overflow bit if $\"Ry\" - \"Rz\" >= 2^31 - 1$. Sets underflow bit if $\"Ry\" - \"Rz\" < -2^31$.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Multiply Signed Integer",
+                "pneumonic": "MULS Rx Ry Rz",
+                "description": "Sets Rx := Ry \\* Rz (treats all registers as signed).\\\nSets overflow bit if $\"Ry\" times \"Rz\" >= 2^31 - 1$. Sets underflow bit if $\"Ry\" times \"Rz\" < -2^31$.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Divide Signed Integer",
+                "pneumonic": "DIVS Rx Ry Rz",
+                "description": "Sets Rx := Ry / Rz (treats all registers as signed).\\\nSets divide by zero bit if $\"Rz\" = 0$",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Modulo Signed Integer",
+                "pneumonic": "MODS Rx Ry Rz",
+                "description": "Sets Rx := Ry % Rz (treats all registers as signed).\\\nSets divide by zero bit if $\"Rz\" = 0$.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Bitwise AND",
+                "pneumonic": "AND Rx Ry Rz",
+                "description": "Sets Rx := Ry & Rz.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Bitwise OR",
+                "pneumonic": "OR Rx Ry Rz",
+                "description": "Sets Rx := Ry | Rz",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Bitwise NOT",
+                "pneumonic": "NOT Rx Ry",
+                "description": "Sets Rx := ~Ry",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Bitwise XOR",
+                "pneumonic": "XOR Rx Ry Rz",
+                "description": "Sets Rx := Ry ^ Rz",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Logical Shift Left",
+                "pneumonic": "LSL Rx Ry _value_",
+                "description": "Shifts Ry left by value bits, where 0 is the new value on the right and the extra bit falls off. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Logical Shift Right",
+                "pneumonic": "LSR Rx Ry _value_",
+                "description": "Shifts Ry right by value bits, where 0 is the new value on the left and the extra bit falls off. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Arithmetic Shift Left",
+                "pneumonic": "ASL Rx Ry _value_",
+                "description": "Shifts Ry left by value bits, where 0 is the new value on the right and only up to the 31st bit, the 32nd bit remains untouched. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Arithmetic Shift Right",
+                "pneumonic": "ASR Rx Ry _value_",
+                "description": "Shifts Ry right by value bits, where the 32nd bit is now the value of what it was previously and the extra bit falls off. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Rotate Right",
+                "pneumonic": "RTR Rx Ry _value_",
+                "description": "Shifts Ry right by value bits, the bit that falls off gets shifted back in. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Logical Shift Left Register",
+                "pneumonic": "LSL Rx Ry Rz",
+                "description": "Shifts Ry left by value bits, where 0 is the new value on the right and the extra bit falls off. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Logical Shift Right Register",
+                "pneumonic": "LSR Rx Ry Rz",
+                "description": "Shifts Ry right by value bits, where 0 is the new value on the left and the extra bit falls off. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Arithmetic Shift Left Register",
+                "pneumonic": "ASL Rx Ry Rz",
+                "description": "Shifts Ry left by value bits, where 0 is the new value on the right and only up to the 31st bit, the 32nd bit remains untouched. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Arithmetic Shift Right Register",
+                "pneumonic": "ASR Rx Ry Rz",
+                "description": "Shifts Ry right by value bits, where the 32nd bit is now the value of what it was previously and the extra bit falls off. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Rotate Right Register",
+                "pneumonic": "RTR Rx Ry Rz",
+                "description": "Shifts Ry right by value bits, the bit that falls off gets shifted back in. Value stored in Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Rz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Map Unsigned To Signed",
+                "pneumonic": "MUS Rx Ry",
+                "description": "Equivalent of storing (Ry-0x80000000) into Rx without loosing any bits due to casting due to signed numbers having one less bit.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Map Signed To Unsigned",
+                "pneumonic": "MSU Rx Ry",
+                "description": "Equivalent of storing (Ry+0x80000000) into Rx without loosing any bits due to casting due to signed numbers having one less bit.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Floating-Point ALU",
+        "description": "",
+        "opcodes": [
+            {
+                "name": "Floating-Point Compare",
+                "pneumonic": "CMP Fx Fy",
+                "description": "Stores the condition variables.\n- Sets EQ if $\"Fx\" = \"Fy\"$\n- Sets GT if $\"Fx\" > \"Fy\"$\n- Sets LT if $\"Fx\" < \"Fy\"$\n- Sets GE if $\"Fx\" >= \"Fy\"$\n- Sets LE if $\"Fx\" <= \"Fy\"$",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "First Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Second Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Floating-Point Compare Single Against Zero",
+                "pneumonic": "CMP Fx",
+                "description": "Stores the condition variables.\n- Sets EQ if $\"Fx\" = 0$\n- Sets GT if $\"Fx\" > 0$\n- Sets LT if $\"Fx\" < 0$\n- Sets GE if $\"Fx\" >= 0$\n- Sets LE if $\"Fx\" <= 0$\n- Sets FINF if $\"Fx\" = plus.minus infinity$\n- Sets FZ if $\"Fx\" = plus.minus 0$\n- Sets FNAN if $\"Fx\" = \"NAN\"$",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Add Floating-Point",
+                "pneumonic": "ADD Fx Fy Fz",
+                "description": "Sets Fx := Fy + Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.", 
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Subtract Floating-Point",
+                "pneumonic": "SUB Fx Fy Fz",
+                "description": "Sets Fx := Fy - Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Multiply Floating-Point",
+                "pneumonic": "MUL Fx Fy Fz",
+                "description": "Sets Fx := Fy \\* Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Divide Floating-Point",
+                "pneumonic": "DIV Fx Fy Fz",
+                "description": "Sets Fx := Fy / Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register 1",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fz",
+                        "long": "Source Register 2",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Cast to Float",
+                "pneumonic": "CST Fx Ry",
+                "description": "Converts the value of Ry into a float and stores it in Fx.",
+                "bits": [
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Cast from Float",
+                "pneumonic": "CST Rx Fy",
+                "description": "Converts the value of Fy into a signed integer (rounded towards zero) and stores it in Rx.\\\nSets OVRF if $\"Fy\" > 2^31 - 1$. Sets UNDF if $\"Fy\" < -2^31$.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Timers",
+        "description": "",
+        "opcodes": [
+            {
+                "name": "Set Timer",
+                "pneumonic": "SETT Tx Ry",
+                "description": "Sets the value of the timer (timer) to the value of Rx",
+                "bits": [
+                    {
+                        "short": "Tx",
+                        "long": "Destination Timer",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Get Current Timer",
+                "pneumonic": "GETT Tx Ry",
+                "description": "Sets Rx to the value of the timer (timer)",
+                "bits": [
+                    {
+                        "short": "Tx",
+                        "long": "Destination Timer",
+                        "count": 5
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Check Timer",
+                "pneumonic": "CHKT Tx",
+                "description": "Sets the EQ flag if the current value of timer (timer) is zero and if it is restart the timer to the previously set value.",
+                "bits": [
+                    {
+                        "short": "Tx",
+                        "long": "Destination Timer",
+                        "count": 5
+                    }
+                ]
+            },
+            {
+                "name": "Clear Timer",
+                "pneumonic": "CLRT Tx",
+                "description": "Sets the timer (timer) to zero.",
+                "bits": [
+                    {
+                        "short": "Tx",
+                        "long": "Destination Timer",
+                        "count": 5
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "RFU",
+        "description": "This section is intentionally left blank as it is reserved for future use.\\\nAll opcodes of this type will be interpreted as a NOP.",
+        "opcodes": []
+    }
+]

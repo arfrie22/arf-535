@@ -1,13 +1,13 @@
-use std::{cell::{Cell, RefCell}, rc::Rc};
+use std::{cell::{Cell, RefCell}, fmt, rc::Rc};
 
 const MEMORY_SIZE: usize = 2usize.pow(16);
-const fn raw_address(address: u32) -> usize {
+pub const fn raw_address(address: u32) -> usize {
     (address as usize) & 0xFFFF
 }
 
 const LINE_SIZE: usize = 4;
 
-const fn line_offset(address: usize) -> usize {
+pub const fn line_offset(address: usize) -> usize {
     address & 0b11
 }
 
@@ -37,13 +37,13 @@ pub struct Request {
     next_level_done: bool,
 }
 
-pub trait FrontMemory {
+pub trait FrontMemory: fmt::Debug {
     fn fetch(&mut self, requester_id: u32, address: u32) -> Result<[u32; LINE_SIZE], MemoryError>;
     fn store(&mut self, requester_id: u32, address: u32, value: u32) -> Result<(), MemoryError>;
     fn cancel(&mut self, requester_id: u32) -> Result<(), MemoryError>;
 }
 
-pub trait InnerMemory {
+pub trait InnerMemory: fmt::Debug {
     fn read(&mut self, address: u32) -> Result<u32, MemoryError>;
     fn read_line(&mut self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError>;
     fn write(&mut self, address: u32, value: u32) -> Result<(), MemoryError>;
@@ -52,6 +52,7 @@ pub trait InnerMemory {
     fn is_terminal(&self) -> bool;
 }
 
+#[derive(Debug)]
 pub struct ClockedMemory<const T: usize, MEM: InnerMemory> {
     current_request: Option<Request>,
     memory: Rc<RefCell<MEM>>,
@@ -211,6 +212,7 @@ impl<const T: usize, MEM: InnerMemory> FrontMemory for ClockedMemory<T, MEM> {
     }
 }
 
+#[derive(Debug)]
 pub struct Memory {
     inner: [u32; MEMORY_SIZE]
 }
@@ -260,6 +262,7 @@ pub struct CacheStruct {
     valid: bool,
 }
 
+#[derive(Debug)]
 pub struct DirectCache<const C: usize> {
     cache: [[u32; LINE_SIZE]; C],
     data: [CacheStruct; C],

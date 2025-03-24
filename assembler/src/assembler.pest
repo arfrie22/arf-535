@@ -1,0 +1,11 @@
+line          = { instruction | COMMENT | "" }
+instruction   = ${ pneumonic ~ WHITESPACE+ ~ arguments ~ COMMENT }
+pneumonic = {}
+arguments = {}
+
+time        = { time_hour ~ time_minute ~ time_second }
+time_hour   = { ASCII_DIGIT{2} }
+time_minute = { ASCII_DIGIT{2} }
+time_second = { ASCII_DIGIT{2} }
+
+WHITESPACE = {" " | "\t"}

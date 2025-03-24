@@ -1,4 +1,4 @@
 [workspace]
 resolver = "2"
 name = "arf-535"
-members = ["gui", "memory-demo", "simulator"]
+members = [ "assembler","gui", "memory-demo", "simulator"]
