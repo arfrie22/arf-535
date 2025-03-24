@@ -4,6 +4,7 @@ import re
 output_file = open("../simulator/src/instruction.rs", "w+")
 
 with open('instructions.json') as f:
+    output_file.write("use crate::enums::{Condition, FPRegister, Register, Timer};\n\n")
     output_file.write("#[derive(Debug, Clone, Copy, PartialEq, Eq)]\n")
     output_file.write("pub enum Instruction {\n")
     output_file.write("    Invalid(u32),\n")
@@ -31,10 +32,16 @@ with open('instructions.json') as f:
                     v = "value"
                     if re.match("R[a-z]", bit_data["short"]):
                         #int reg
-                        t = "Registers"
+                        t = "Register"
                     elif re.match("F[a-z]", bit_data["short"]):
                         #float reg
-                        t = "FloatingPointRegisters"
+                        t = "FPRegister"
+                    elif re.match("T[a-z]", bit_data["short"]):
+                        #timer reg
+                        t = "Timer"
+                    elif re.match("Condition", bit_data["short"]):
+                        #condition code
+                        t = "Condition"
                     
                     enum += arg_name + ": " + t
 
@@ -51,7 +58,7 @@ with open('instructions.json') as f:
 
             output_file.write("    " + enum + ",\n")
     output_file.write("}\n\n")
-    output_file.write("impl From<u32> for Instructions {\n")
+    output_file.write("impl From<u32> for Instruction {\n")
     output_file.write("    fn from(value: u32) -> Self {\n")
     output_file.write("        match value >> 24 {\n")
     output_file.write(parses)

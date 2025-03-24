@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use instruction::Instructions;
+use instruction::Instruction;
 use memory::FrontMemory;
 use pipeline::{DecodeStage, ExecuteResult, ExecuteStage, FetchStage, MemoryStage, PipelineStage, WritebackRegister, WritebackStage};
 
@@ -35,7 +35,7 @@ pub struct SimulatorState {
     pipeline_stage: PipelineStages,
     fetch_address: Option<u32>,
     fetch_result: Option<u32>,
-    decode_result: Option<Instructions>,
+    decode_result: Option<Instruction>,
     execute_result: Option<ExecuteResult>,
     memory_result: Option<WritebackRegister>,
 }
@@ -45,14 +45,12 @@ type SimulatorStateCell = Rc<RefCell<SimulatorState>>;
 
 #[cfg(test)]
 mod tests {
-    use crate::enums::Instructions;
-
-    use super::*;
+    use crate::instruction::Instruction;
 
     #[test]
     fn it_works() {
         let a: u32 = 0x050FC000;
-        println!("{:?}", Instructions::from(a));
+        println!("{:?}", Instruction::from(a));
         let result = 2+2;
         assert_eq!(result, 4);
     }

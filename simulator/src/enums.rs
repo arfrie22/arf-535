@@ -51,7 +51,7 @@ pub enum Register {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
 #[repr(usize)]
-pub enum FloatingPointRegister {
+pub enum FPRegister {
     F0 = 0,
     F1,
     F2,
@@ -86,18 +86,90 @@ pub enum FloatingPointRegister {
     F31,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[repr(usize)]
+pub enum Timer {
+    T0 = 0,
+    T1,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    T8,
+    T9,
+    T10,
+    T11,
+    T12,
+    T13,
+    T14,
+    T15,
+    T16,
+    T17,
+    T18,
+    T19,
+    T20,
+    T21,
+    T22,
+    T23,
+    T24,
+    T25,
+    T26,
+    T27,
+    T28,
+    T29,
+    T30,
+    T31,
+}
 
-// 0. Always True () [Value of bit does not affect branch instruction] _This is a normal branch_
-// + Never True (NVR) [Value of bit does not affect branch instruction]  _This is a NOP_
-// + Equal (EQ)
-// + Greater Than (GT)
-// + Less Than (LT)
-// + Greater Than or Equal To (GE)
-// + Less Than or Equal To (LE)
-// + Overflow (OVRF)
-// + Underflow (UNDF)
-// + Divide by zero (DIVZ)
-// + Parity / Is Even (EVEN)
-// + Floating Point Infinity (FINF)
-// + Floating Point Zero (FZ)
-// + Floating Point Not-A-Number (FNAN)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[repr(usize)]
+pub enum Condition {
+    // C0
+    AlwaysTrue = 0,
+    // C1
+    NeverTrue,
+    // C2
+    Equal,
+    // C3
+    GreaterThan,
+    // C4
+    LessThan,
+    // C5
+    GreaterEqual,
+    // C6
+    LessEqual,
+    // C7
+    Overflow,
+    // C8
+    Underflow,
+    // C9
+    DivideByZero,
+    // C10
+    IsEven,
+    // C11
+    FloatingPointInfinity,
+    // C12
+    FloatingPointZero,
+    // C13
+    FloatingPointNotANumber,
+    C14,
+    C15,
+    C16,
+    C17,
+    C18,
+    C19,
+    C20,
+    C21,
+    C22,
+    C23,
+    C24,
+    C25,
+    C26,
+    C27,
+    C28,
+    C29,
+    C30,
+    C31,
+}

@@ -49,7 +49,7 @@ Bits of Status Register and Short Condition Code
 + Less Than or Equal To (LE)
 + Overflow (OVRF)
 + Underflow (UNDF)
-+ Divide by zero (DIVZ)
++ Divide By Zero (DIVZ)
 + Parity / Is Even (EVEN)
 + Floating Point Infinity (FINF)
 + Floating Point Zero (FZ)
