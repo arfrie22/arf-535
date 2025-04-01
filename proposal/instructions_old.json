@@ -7,12 +7,7 @@
                 "name": "Trap",
                 "pneumonic": "TRAP",
                 "description": "Used in simulator to pause execution, and return control to the simulator's UI.",
-                "bits": [],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                "bits": []
             },
             {
                 "name": "Push Integer Register",
@@ -26,12 +21,7 @@
                         "read": true,
                         "write": false
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Push Floating-Point Register",
@@ -45,12 +35,7 @@
                         "read": true,
                         "write": false
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Pop Integer Register",
@@ -64,12 +49,7 @@
                         "read": false,
                         "write": true
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Pop Floating-Point Register",
@@ -83,12 +63,7 @@
                         "read": false,
                         "write": true
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Swap Register",
@@ -109,12 +84,7 @@
                         "read": true,
                         "write": true
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Stall",
@@ -128,12 +98,7 @@
                         "read": true,
                         "write": false
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             }
         ]
     },
@@ -158,14 +123,7 @@
                         "read": true,
                         "write": false
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Indirect Jump",
@@ -184,16 +142,17 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Indirect with Register Offset Jump",
@@ -219,15 +178,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Relative Jump",
@@ -242,18 +198,9 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Immediate Jump",
@@ -270,14 +217,7 @@
                         "long": "Destination Address",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Immediate Relative Jump",
@@ -294,14 +234,7 @@
                         "long": "Signed Offset",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Register Jump with Link",
@@ -316,18 +249,9 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Indirect Jump with Link",
@@ -342,20 +266,19 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Indirect with Register Offset Jump with Link",
@@ -370,9 +293,7 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -381,15 +302,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Relative Jump with Link",
@@ -404,18 +322,9 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Immediate Jump with Link",
@@ -432,14 +341,7 @@
                         "long": "Destination Address",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Immediate Relative Jump with Link",
@@ -456,14 +358,7 @@
                         "long": "Signed Offset",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             }
         ]
     },
@@ -479,21 +374,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_value_",
                         "long": "Immediate Value",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Integer Load High",
@@ -503,21 +391,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_value_",
                         "long": "Immediate Value",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Swap Integer Registers",
@@ -527,23 +408,14 @@
                     {
                         "short": "Rx",
                         "long": "First Register",
-                        "count": 5,
-                        "read": true,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Second Register",
-                        "count": 5,
-                        "read": true,
-                        "write": true
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Copy Integer Register",
@@ -553,23 +425,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Load Integer Register Indirect",
@@ -579,25 +442,24 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Load Integer Register Indirect with Register Offset",
@@ -607,16 +469,12 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -625,13 +483,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Load Integer Register Indirect Program",
@@ -641,25 +498,24 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Load Integer Register Indirect with Register Offset Program",
@@ -669,16 +525,12 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -687,13 +539,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Store Integer Register Indirect",
@@ -703,25 +554,24 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Store Integer Register Indirect with Register Offset Indirect",
@@ -731,16 +581,12 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -749,13 +595,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Store Integer Register Indirect Program",
@@ -765,25 +610,24 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Store Integer Register Indirect with Register Offset Program",
@@ -793,16 +637,12 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -811,13 +651,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Integer Load Data",
@@ -827,21 +666,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_label_",
                         "long": "Destination Address in data",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Integer Load Program",
@@ -851,21 +683,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_label_",
                         "long": "Destination Addres in programs",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Integer Store Data",
@@ -875,21 +700,14 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "_label_",
                         "long": "Destination Address in data",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Integer Store Program",
@@ -899,21 +717,14 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "_label_",
                         "long": "Destination Address in program",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Unsigned Zero Extend",
@@ -923,24 +734,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_count_", "long": "Bit Count", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_count_",
+                        "long": "Bit Count",
+                        "count": 5
+                    }
+                ]
             },
             {
                 "name": "Sign Extend",
@@ -950,24 +756,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_count_", "long": "Bit Count", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_count_",
+                        "long": "Bit Count",
+                        "count": 5
+                    }
+                ]
             }
         ]
     },
@@ -983,21 +784,14 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_value_",
                         "long": "Immediate Value",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Floating-Point Load High",
@@ -1007,21 +801,14 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_value_",
                         "long": "Immediate Value",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Swap Floating-Point Registers",
@@ -1031,23 +818,14 @@
                     {
                         "short": "Fx",
                         "long": "First Register",
-                        "count": 5,
-                        "read": true,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Second Register",
-                        "count": 5,
-                        "read": true,
-                        "write": true
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Copy Floating-Point Register",
@@ -1057,23 +835,14 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Load Floating-Point Register Indirect",
@@ -1083,25 +852,24 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Load Floating-Point Register Indirect with Register Offset",
@@ -1111,16 +879,12 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -1129,13 +893,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Store Floating-Point Register Indirect",
@@ -1145,25 +908,24 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "I",
+                        "long": "Offset",
+                        "count": 5
+                    },
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Store Floating-Point Register Indirect with Register Offset",
@@ -1173,16 +935,12 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ro",
@@ -1191,13 +949,12 @@
                         "read": true,
                         "write": false
                     },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "S",
+                        "long": "Shift",
+                        "count": 4
+                    }
+                ]
             },
             {
                 "name": "Floating-Point Load Data",
@@ -1207,21 +964,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "_label_",
                         "long": "Destination Address in data",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Floating-Point Store Data",
@@ -1231,21 +981,14 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "_label_",
                         "long": "Destination Address in data",
                         "count": 16
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             }
         ]
     },
@@ -1261,25 +1004,14 @@
                     {
                         "short": "Rx",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": false, "write": true }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Integer Compare Single Against Zero",
@@ -1289,18 +1021,9 @@
                     {
                         "short": "Rx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": false, "write": true }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Add Unsigned Integer",
@@ -1310,30 +1033,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Subtract Unsigned Integer",
@@ -1343,30 +1055,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Multiply Unsigned Integer",
@@ -1376,30 +1077,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Divide Unsigned Integer",
@@ -1409,30 +1099,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Modulo Unsigned Integer",
@@ -1442,30 +1121,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Add Signed Integer",
@@ -1475,30 +1143,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Subtract Signed Integer",
@@ -1508,30 +1165,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Multiply Signed Integer",
@@ -1541,30 +1187,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Divide Signed Integer",
@@ -1574,30 +1209,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Modulo Signed Integer",
@@ -1607,30 +1231,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Bitwise AND",
@@ -1640,30 +1253,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Bitwise OR",
@@ -1673,30 +1275,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Bitwise NOT",
@@ -1706,30 +1297,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Bitwise XOR",
@@ -1739,30 +1319,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Logical Shift Left",
@@ -1772,24 +1341,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_value_", "long": "Shift Amount", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
             },
             {
                 "name": "Logical Shift Right",
@@ -1799,24 +1363,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_value_", "long": "Shift Amount", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
             },
             {
                 "name": "Arithmetic Shift Left",
@@ -1826,24 +1385,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_value_", "long": "Shift Amount", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
             },
             {
                 "name": "Arithmetic Shift Right",
@@ -1853,24 +1407,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_value_", "long": "Shift Amount", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
             },
             {
                 "name": "Rotate Right",
@@ -1880,24 +1429,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
-                    { "short": "_value_", "long": "Shift Amount", "count": 5 }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                    {
+                        "short": "_value_",
+                        "long": "Shift Amount",
+                        "count": 5
+                    }
+                ]
             },
             {
                 "name": "Logical Shift Left Register",
@@ -1907,30 +1451,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Logical Shift Right Register",
@@ -1940,30 +1473,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Arithmetic Shift Left Register",
@@ -1973,30 +1495,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Arithmetic Shift Right Register",
@@ -2006,30 +1517,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Rotate Right Register",
@@ -2039,30 +1539,19 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Rz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Map Unsigned To Signed",
@@ -2072,23 +1561,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Map Signed To Unsigned",
@@ -2098,23 +1578,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             }
         ]
     },
@@ -2130,25 +1601,14 @@
                     {
                         "short": "Fx",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": false, "write": true }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Floating-Point Compare Single Against Zero",
@@ -2158,51 +1618,31 @@
                     {
                         "short": "Fx",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": false, "write": true }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Add Floating-Point",
                 "pneumonic": "ADD Fx Fy Fz",
-                "description": "Sets Fx := Fy + Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "description": "Sets Fx := Fy + Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.", 
                 "bits": [
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Fz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Subtract Floating-Point",
@@ -2212,30 +1652,19 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Fz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Multiply Floating-Point",
@@ -2245,30 +1674,19 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Fz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Divide Floating-Point",
@@ -2278,30 +1696,19 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     },
                     {
                         "short": "Fz",
                         "long": "Source Register 2",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Cast to Float",
@@ -2311,23 +1718,14 @@
                     {
                         "short": "Fx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Cast from Float",
@@ -2337,23 +1735,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Fy",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             }
         ]
     },
@@ -2369,23 +1758,14 @@
                     {
                         "short": "Tx",
                         "long": "Destination Timer",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ry",
                         "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Get Current Timer",
@@ -2395,23 +1775,14 @@
                     {
                         "short": "Rx",
                         "long": "Destination Register",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     },
                     {
                         "short": "Ty",
                         "long": "Source Timer",
-                        "count": 5,
-                        "read": true,
-                        "write": false
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Check Timer",
@@ -2421,16 +1792,9 @@
                     {
                         "short": "Tx",
                         "long": "Destination Timer",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             },
             {
                 "name": "Clear Timer",
@@ -2440,16 +1804,9 @@
                     {
                         "short": "Tx",
                         "long": "Destination Timer",
-                        "count": 5,
-                        "read": false,
-                        "write": true
+                        "count": 5
                     }
-                ],
-                "extra_reg": {
-                    "registers": [],
-                    "f_registers": [],
-                    "timers": []
-                }
+                ]
             }
         ]
     },

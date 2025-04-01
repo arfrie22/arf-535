@@ -95,7 +95,7 @@ impl<const T: usize, MEM: InnerMemory> ClockedMemory<T, MEM> {
             }
             None => {
                 self.current_request = Some(Request { requester_id, timer: T-1, address, action, next_level: false, next_level_done: false });
-                t = T;
+                t = T-1;
             }
         }
 

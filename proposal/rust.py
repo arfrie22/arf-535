@@ -4,13 +4,15 @@ import re
 output_file = open("../simulator/src/instruction.rs", "w+")
 
 with open('instructions.json') as f:
-    output_file.write("use crate::enums::{Condition, FPRegister, Register, Timer};\n\n")
+    output_file.write("use crate::{enums::{Condition, FPRegister, Register, Timer}, RegisterSet};\n\n")
     output_file.write("#[derive(Debug, Clone, Copy, PartialEq, Eq)]\n")
     output_file.write("pub enum Instruction {\n")
     output_file.write("    Invalid(u32),\n")
     data = json.load(f)
     parses = ""
     intos = ""
+    read_regs = ""
+    write_regs = ""
     for type_i, type_data in enumerate(data):
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
             name = opcode_data["name"].replace(" ", "").replace("-", "") + ""
@@ -20,38 +22,86 @@ with open('instructions.json') as f:
             parses += "            0x{:02x} => Self::{}".format((type_i << 5) | opcode_i, name)
             intos += "            Self::{}".format(name)
             shifts = "0x{:02x} << 24".format((type_i << 5) | opcode_i)
+            read_regs += "            Self::{}".format(name)
+            write_regs += "            Self::{}".format(name)
+            
+            read_data = {"registers": [], "f_registers": [], "timers": []}
+            write_data = {"registers": [], "f_registers": [], "timers": []}
+
 
             if len(bits) > 0:
                 enum += " { "
                 parses += " { "
                 intos += " { "
                 shifts = f"({shifts})"
+                read_regs += " { "
+                write_regs += " { "
                 opcode_bit_remaining = 32-8
+                read = False
+                write = False
+                read_unused = False
+                write_unused = False
                 for i, bit_data in enumerate(bits):
                     opcode_bit_remaining -= bit_data["count"]
                     if (i > 0):
                         enum += ", "
                         parses += ", "
                         intos += ", "
+                    
+                    if read:
+                        read_regs += ", "
+                        read = False
+                    if write:
+                        write_regs += ", "
+                        write = False
                     arg_name = bit_data["short"].replace("_", "").lower()
                     arg_type = "u32"
                     parse_value = "value"
                     into_value = arg_name
+
                     if re.match("R[a-z]", bit_data["short"]):
                         #int reg
                         arg_type = "Register"
+                        if bit_data["read"]:
+                            read_data["registers"].append("*" + arg_name)
+                            read = True
+                        if bit_data["write"]:
+                            write_data["registers"].append("*" + arg_name)
+                            write = True
                     elif re.match("F[a-z]", bit_data["short"]):
                         #float reg
                         arg_type = "FPRegister"
+                        if bit_data["read"]:
+                            read_data["f_registers"].append("*" + arg_name)
+                            read = True
+                        if bit_data["write"]:
+                            write_data["f_registers"].append("*" + arg_name)
+                            write = True
                     elif re.match("T[a-z]", bit_data["short"]):
                         #timer reg
                         arg_type = "Timer"
+                        if bit_data["read"]:
+                            read_data["timers"].append("*" + arg_name)
+                            read = True
+                        if bit_data["write"]:
+                            write_data["timers"].append("*" + arg_name)
+                            write = True
                     elif re.match("Condition", bit_data["short"]):
                         #condition code
                         arg_type = "Condition"
                     
                     enum += arg_name + ": " + arg_type
                     intos += arg_name
+
+                    if read:
+                        read_regs += arg_name
+                    else:
+                        read_unused = True
+                    
+                    if write:
+                        write_regs += arg_name
+                    else:
+                        write_unused = True
 
                     if arg_type != "u32":
                        parse_value = "(value as usize)"
@@ -66,9 +116,49 @@ with open('instructions.json') as f:
                 enum += " }"
                 parses += " }"
                 intos += " }"
+
+                if read_unused:
+                    if read:
+                        read_regs += ", "
+                    read_regs += ".."
+                read_regs += " }"
+
+                
+                if write_unused:
+                    read = False
+                    if write:
+                        write_regs += ", "
+                    write_regs += ".."
+                write_regs += " }"
+            
+            for reg in opcode_data["extra_reg"]["registers"]:
+                name = f"Register::try_from({reg["number"]}).unwrap()" 
+                if reg["read"]:
+                    read_data["registers"].append(name)
+                if reg["write"]:
+                    write_data["registers"].append(name)
+            
+            for reg in opcode_data["extra_reg"]["f_registers"]:
+                name = f"FPRegister::try_from({reg["number"]}).unwrap()" 
+                if reg["read"]:
+                    read_data["f_registers"].append(name)
+                if reg["write"]:
+                    write_data["f_registers"].append(name)
+            
+            for reg in opcode_data["extra_reg"]["timers"]:
+                name = f"Timer::try_from({reg["number"]}).unwrap()" 
+                if reg["read"]:
+                    read_data["timers"].append(name)
+                if reg["write"]:
+                    write_data["timers"].append(name)
+                
             parses += ",\n"
             intos += " => " + shifts
             intos += ",\n"
+            read_regs += " => " + f"RegisterSet{{ registers: vec![{", ".join(read_data["registers"])}], f_registers: vec![{", ".join(read_data["f_registers"])}], timers: vec![{", ".join(read_data["timers"])}]  }}"
+            read_regs += ",\n"
+            write_regs += " => " + f"RegisterSet{{ registers: vec![{", ".join(write_data["registers"])}], f_registers: vec![{", ".join(write_data["f_registers"])}], timers: vec![{", ".join(write_data["timers"])}]  }}"
+            write_regs += ",\n"
 
             output_file.write("    " + enum + ",\n")
     output_file.write("}\n\n")
@@ -85,6 +175,20 @@ with open('instructions.json') as f:
     output_file.write("        match self {\n")
     output_file.write(intos)
     output_file.write("            Self::Invalid(value) => value,\n")
+    output_file.write("        }\n")
+    output_file.write("    }\n")
+    output_file.write("}\n\n")
+    output_file.write("impl Instruction {\n")
+    output_file.write("    pub fn read_registers(&self) -> RegisterSet {\n")
+    output_file.write("        match self {\n")
+    output_file.write(read_regs)
+    output_file.write("            Self::Invalid(_value) => Default::default(),\n")
+    output_file.write("        }\n")
+    output_file.write("    }\n")
+    output_file.write("    pub fn write_registers(&self) -> RegisterSet {\n")
+    output_file.write("        match self {\n")
+    output_file.write(write_regs)
+    output_file.write("            Self::Invalid(_value) => Default::default(),\n")
     output_file.write("        }\n")
     output_file.write("    }\n")
     output_file.write("}\n\n")

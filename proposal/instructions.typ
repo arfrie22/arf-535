@@ -535,7 +535,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [1], [0], [0], [0], [0], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[First Register], table.cell(colspan: 5)[Second Register], table.cell(colspan: 14)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 14)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x01 (Integer Compare Single Against Zero) \
 CMP Rx \
@@ -552,7 +552,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [1], [0], [0], [0], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Register], table.cell(colspan: 19)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 19)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x02 (Add Unsigned Integer) \
 ADD Rx Ry Rz \
@@ -865,7 +865,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [1], [0], [1], [0], [0], [0], [0], [0], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[First Register], table.cell(colspan: 5)[Second Register], table.cell(colspan: 14)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 14)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x01 (Floating-Point Compare Single Against Zero) \
 CMP Fx \
@@ -884,7 +884,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [1], [0], [1], [0], [0], [0], [0], [1], table.cell(colspan: 5)[Fx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Register], table.cell(colspan: 19)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 19)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x02 (Add Floating-Point) \
 ADD Fx Fy Fz \
@@ -970,15 +970,15 @@ align: center,
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Timer], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x01 (Get Current Timer) \
-GETT Tx Ry \
+GETT Rx Ty \
 Sets Rx to the value of the timer (timer)]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [1], [0], [0], [0], [0], [0], [1], table.cell(colspan: 5)[Tx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Timer], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
+[1], [1], [0], [0], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ty], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Timer], table.cell(colspan: 14)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x02 (Check Timer) \
 CHKT Tx \
