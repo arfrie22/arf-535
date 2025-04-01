@@ -612,47 +612,47 @@ impl PipelineInner for MemoryStage {
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
-        match state_ref.memory_state.as_ref().unwrap().memory {
-            MemoryAction::None => {}
-            MemoryAction::Read(memory_bank, _address) => match memory_bank {
-                MemoryBank::Data => state_ref
-                    .data_memory
-                    .borrow_mut()
-                    .cancel(4)
-                    .unwrap(),
-                MemoryBank::Program => state_ref
-                    .program_memory
-                    .borrow_mut()
-                    .cancel(4)
-                    .unwrap(),
-            },
-            MemoryAction::Write(memory_bank, _address, _value) => match memory_bank {
-                MemoryBank::Data => state_ref
-                    .data_memory
-                    .borrow_mut()
-                    .cancel(4)
-                    .unwrap(),
-                MemoryBank::Program => state_ref
-                    .program_memory
-                    .borrow_mut()
-                    .cancel(4)
-                    .unwrap(),
-            },
+        if let Some(state) = state_ref.memory_state.as_ref() {
+            match state.memory {
+                MemoryAction::None => {}
+                MemoryAction::Read(memory_bank, _address) => match memory_bank {
+                    MemoryBank::Data => state_ref
+                        .data_memory
+                        .borrow_mut()
+                        .cancel(4)
+                        .unwrap(),
+                    MemoryBank::Program => state_ref
+                        .program_memory
+                        .borrow_mut()
+                        .cancel(4)
+                        .unwrap(),
+                },
+                MemoryAction::Write(memory_bank, _address, _value) => match memory_bank {
+                    MemoryBank::Data => state_ref
+                        .data_memory
+                        .borrow_mut()
+                        .cancel(4)
+                        .unwrap(),
+                    MemoryBank::Program => state_ref
+                        .program_memory
+                        .borrow_mut()
+                        .cancel(4)
+                        .unwrap(),
+                },
+            }
+
+            let holds = state
+            .writeback
+            .holds.clone();
+
+            decrement_inflight(
+                &mut state_ref.inflight,
+                &holds,
+            );
+
+            state_ref.memory_state = None;
+            state_ref.memory_result = Some(WritebackState { registers: vec![], holds: Default::default() });
         }
-
-        let holds = state_ref
-        .memory_state
-        .as_ref()
-        .unwrap()
-        .writeback
-        .holds.clone();
-
-        decrement_inflight(
-            &mut state_ref.inflight,
-            &holds,
-        );
-        state.borrow_mut().memory_state = None;
-        state.borrow_mut().memory_result = Some(WritebackState { registers: vec![], holds: Default::default() });
         Ok(())
     }
 }
@@ -667,6 +667,7 @@ pub struct WritebackState {
 pub struct WritebackStage;
 impl PipelineInner for WritebackStage {
     fn call(state: &SimulatorStateCell, blocked: bool) -> Result<(), PipelineError> {
+        let (res, should_squash) = {
         let mut state_ref = state.borrow_mut();
         if state_ref.writeback_state.is_none() {
             if let Some(result) = state_ref.memory_result.take() {
@@ -677,21 +678,24 @@ impl PipelineInner for WritebackStage {
             }
         }
 
-        if blocked {
+        let mut should_squash = false;
+        let res = if blocked {
             Err(PipelineError::Stalled)
         } else if state_ref.squashes.writeback {
             Ok(())
         } else {
             let wb_state = state_ref.writeback_state.take().unwrap();
-            println!("wb: {:?}", wb_state);
             for r in wb_state.registers {
                 match r {
                     WritebackRegister::Standard(register, value) => {
-                        state_ref.registers[register as usize] = value.unwrap()
+                        state_ref.registers[register as usize] = value.unwrap();
+                        if register == Register::PC {
+                            should_squash = true;
+                        }
                     }
                     WritebackRegister::FloatingPoint(f_register, value) => {
                         state_ref.f_registers[f_register as usize] =
-                            f32::from_ne_bytes(value.unwrap().to_ne_bytes())
+                            f32::from_ne_bytes(value.unwrap().to_ne_bytes());
                     }
                     WritebackRegister::Timer(timer, value) => {
                         state_ref.timers[timer as usize].previous_set = value.unwrap();
@@ -701,9 +705,24 @@ impl PipelineInner for WritebackStage {
             }
 
             decrement_inflight(&mut state_ref.inflight, &wb_state.holds);
-
             Ok(())
+        };
+
+        (res, should_squash)
+        };
+
+        if should_squash {
+            let fetch = state.borrow().pipeline_stage.fetch.clone();
+            fetch.borrow_mut().squash().unwrap();
+            let decode = state.borrow().pipeline_stage.decode.clone();
+            decode.borrow_mut().squash().unwrap();
+            let execute = state.borrow().pipeline_stage.execute.clone();
+            execute.borrow_mut().squash().unwrap();
+            let memory = state.borrow().pipeline_stage.memory.clone();
+            memory.borrow_mut().squash().unwrap();
         }
+
+        res
     }
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
