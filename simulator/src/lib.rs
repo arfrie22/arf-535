@@ -4,7 +4,7 @@ use enums::{FPRegister, Register, Timer};
 use instruction::Instruction;
 use memory::{FrontMemory, InnerMemory};
 use pipeline::{
-    DecodeStage, DecodeState, ExecuteResult, ExecuteStage, ExecuteState, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackRegister, WritebackStage, WritebackState
+    DecodeStage, DecodeState, ExecuteResult, ExecuteStage, ExecuteState, FetchResult, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackRegister, WritebackStage, WritebackState
 };
 
 pub mod enums;
@@ -62,7 +62,7 @@ pub struct SimulatorState {
     pub inflight: InFlightRegisters,
     pub squashes: StageBool,
     pub fetch_state: Option<u32>,
-    pub fetch_result: Option<u32>,
+    pub fetch_result: Option<FetchResult>,
     pub decode_state: Option<DecodeState>,
     pub decode_result: Option<ExecuteState>,
     pub execute_state: Option<ExecuteState>,

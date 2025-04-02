@@ -1,7 +1,10 @@
 use std::{cell::RefCell, fmt, marker::PhantomData, rc::Rc};
 
 use crate::{
-    enums::{FPRegister, Register, Timer}, instruction::Instruction, memory::line_offset, InFlightRegisters, RegisterSet, SimulatorState, SimulatorStateCell
+    enums::{FPRegister, Register, Timer},
+    instruction::Instruction,
+    memory::line_offset,
+    InFlightRegisters, RegisterSet, SimulatorState, SimulatorStateCell,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -78,7 +81,11 @@ pub struct PipelineStage<T: PipelineInner> {
 
 impl<T: PipelineInner> PipelineStage<T> {
     pub fn new(next: Option<Rc<RefCell<dyn PipelineOutter>>>) -> Self {
-        Self { next, simulator: None, inner: PhantomData }
+        Self {
+            next,
+            simulator: None,
+            inner: PhantomData,
+        }
     }
 
     pub fn initalize_simulator_cell(&mut self, simulator: SimulatorStateCell) {
@@ -99,10 +106,9 @@ impl<T: PipelineInner> PipelineOutter for PipelineStage<T> {
 
             // if done and previous is done, take next down line
             match next.borrow_mut().call(blocked) {
-                _ => {}
-                // Ok(()) => todo!(),
-                // Err(PipelineError::Stalled) => todo!(),
-                // Err(e) => todo!(),
+                _ => {} // Ok(()) => todo!(),
+                        // Err(PipelineError::Stalled) => todo!(),
+                        // Err(e) => todo!(),
             }
         }
 
@@ -111,12 +117,18 @@ impl<T: PipelineInner> PipelineOutter for PipelineStage<T> {
 
     fn squash(&mut self) -> Result<(), PipelineError> {
         match T::squash(self.simulator.as_ref().unwrap()) {
-            Ok(v) => {
-                Ok(v)
-            }
+            Ok(v) => Ok(v),
             Err(e) => Err(e),
         }
     }
+}
+
+// TODO: For ALU operations add a bit at start of insturctions to cause it to update status register.
+
+#[derive(Debug, Clone)]
+pub struct FetchResult {
+    pub pc: u32,
+    pub value: u32,
 }
 
 #[derive(Debug)]
@@ -144,20 +156,17 @@ impl PipelineInner for FetchStage {
                 Err(PipelineError::Stalled)
             } else {
                 Ok(())
-            }
+            };
         }
 
         let res = if state_ref.fetch_result.is_none() {
             let address = state_ref.fetch_state.unwrap();
 
-            let res = state_ref
-                .program_memory
-                .borrow_mut()
-                .fetch(1, address);
+            let res = state_ref.program_memory.borrow_mut().fetch(1, address);
 
             match res {
                 Ok(v) => {
-                    state_ref.fetch_result = Some(v[line_offset(address as usize)]);
+                    state_ref.fetch_result = Some(FetchResult {pc: address, value: v[line_offset(address as usize)]});
                     state_ref.fetch_state = None;
                     state_ref.hold_fetch = true;
                     Ok(())
@@ -177,18 +186,16 @@ impl PipelineInner for FetchStage {
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
-        let _ = state_ref
-            .program_memory
-            .borrow_mut()
-            .cancel(1);
+        let _ = state_ref.program_memory.borrow_mut().cancel(1);
         state_ref.fetch_state = None;
-        state_ref.fetch_result = None; 
+        state_ref.fetch_result = None;
         Ok(())
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct DecodeState {
+    pub pc: u32,
     pub instruction: Instruction,
     pub read_registers: RegisterSet,
     pub write_registers: RegisterSet,
@@ -196,6 +203,7 @@ pub struct DecodeState {
 
 #[derive(Debug, Clone)]
 pub struct ExecuteState {
+    pub pc: u32,
     pub instruction: Instruction,
     pub registers: RegisterSet,
     pub timer: usize,
@@ -209,10 +217,11 @@ impl PipelineInner for DecodeStage {
         if state_ref.decode_state.is_none() {
             if state_ref.decode_result.is_none() {
                 if let Some(result) = state_ref.fetch_result.take() {
-                    let instruction = Instruction::from(result);
+                    let instruction = Instruction::from(result.value);
                     let read_registers = instruction.read_registers();
                     let write_registers = instruction.write_registers();
                     state_ref.decode_state = Some(DecodeState {
+                        pc: result.pc,
                         instruction,
                         read_registers,
                         write_registers,
@@ -238,11 +247,9 @@ impl PipelineInner for DecodeStage {
         } else {
             let decode_state = state_ref.decode_state.take().unwrap();
             let timer = decode_state.instruction.cycle_count(&mut state_ref);
-            increment_inflight(
-                &mut state_ref.inflight,
-                &decode_state.write_registers,
-            );
+            increment_inflight(&mut state_ref.inflight, &decode_state.write_registers);
             state_ref.decode_result = Some(ExecuteState {
+                pc: decode_state.pc,
                 instruction: decode_state.instruction,
                 registers: decode_state.write_registers,
                 timer,
@@ -254,9 +261,14 @@ impl PipelineInner for DecodeStage {
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
-        let instruction = state_ref.decode_state.clone().unwrap().instruction;
-        state_ref.decode_state = None;
-        state_ref.decode_result = Some(ExecuteState { instruction, registers: Default::default(), timer: 1 });
+        if let Some(state) = state_ref.decode_state.take() {
+            state_ref.decode_result = Some(ExecuteState {
+                pc: state.pc,
+                instruction: state.instruction,
+                registers: Default::default(),
+                timer: 1,
+            });
+        }
         Ok(())
     }
 }
@@ -308,65 +320,132 @@ impl Instruction {
             Instruction::SwapRegister { rx, fy } => todo!(),
             Instruction::Stall { rx } => todo!(),
             Instruction::RegisterJump { condition, rx } => todo!(),
-            Instruction::IndirectJump { condition, rx, i, s } => todo!(),
-            Instruction::IndirectwithRegisterOffsetJump { condition, rx, ro, s } => todo!(),
+            Instruction::IndirectJump {
+                condition,
+                rx,
+                i,
+                s,
+            } => todo!(),
+            Instruction::IndirectwithRegisterOffsetJump {
+                condition,
+                rx,
+                ro,
+                s,
+            } => todo!(),
             Instruction::RelativeJump { condition, rx } => {
                 let pc = state.registers[Register::PC as usize];
                 let val_rx = state.registers[*rx as usize];
                 // TODO: Overflow bit
                 // TODO: Check condition
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(Register::PC, Some(pc + val_rx))] }
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(Register::PC, Some(pc + val_rx))],
+                }
             }
             Instruction::ImmediateJump { condition, label } => {
                 // TODO: Check condition
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(Register::PC, Some(*label))] }
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(Register::PC, Some(*label))],
+                }
             }
             Instruction::ImmediateRelativeJump { condition, offset } => todo!(),
             Instruction::RegisterJumpwithLink { condition, rx } => todo!(),
-            Instruction::IndirectJumpwithLink { condition, rx, i, s } => todo!(),
-            Instruction::IndirectwithRegisterOffsetJumpwithLink { condition, rx, ro, s } => todo!(),
+            Instruction::IndirectJumpwithLink {
+                condition,
+                rx,
+                i,
+                s,
+            } => todo!(),
+            Instruction::IndirectwithRegisterOffsetJumpwithLink {
+                condition,
+                rx,
+                ro,
+                s,
+            } => todo!(),
             Instruction::RelativeJumpwithLink { condition, rx } => todo!(),
             Instruction::ImmediateJumpwithLink { condition, label } => todo!(),
             Instruction::ImmediateRelativeJumpwithLink { condition, offset } => todo!(),
             Instruction::IntegerLoadLow { rx, value } => {
                 let val_rx = state.registers[*rx as usize];
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some((val_rx & 0xFFFF0000) | *value))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some((val_rx & 0xFFFF0000) | *value),
+                    )],
+                }
+            }
             Instruction::IntegerLoadHigh { rx, value } => {
                 let val_rx = state.registers[*rx as usize];
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some((val_rx & 0x0000FFFF) | *value))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some((val_rx & 0x0000FFFF) | *value),
+                    )],
+                }
+            }
             Instruction::SwapIntegerRegisters { rx, ry } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_ry = state.registers[*ry as usize];
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry)), WritebackRegister::Standard(*ry, Some(val_rx))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![
+                        WritebackRegister::Standard(*rx, Some(val_ry)),
+                        WritebackRegister::Standard(*ry, Some(val_rx)),
+                    ],
+                }
+            }
             Instruction::CopyIntegerRegister { rx, ry } => {
                 let val_ry = state.registers[*ry as usize];
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry))],
+                }
+            }
             Instruction::LoadIntegerRegisterIndirect { rx, ry, i, s } => todo!(),
             Instruction::LoadIntegerRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => todo!(),
             Instruction::LoadIntegerRegisterIndirectProgram { rx, ry, i, s } => todo!(),
-            Instruction::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, ry, ro, s } => todo!(),
+            Instruction::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, ry, ro, s } => {
+                todo!()
+            }
             Instruction::StoreIntegerRegisterIndirect { rx, ry, i, s } => todo!(),
-            Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect { rx, ry, ro, s } => todo!(),
+            Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect {
+                rx,
+                ry,
+                ro,
+                s,
+            } => todo!(),
             Instruction::StoreIntegerRegisterIndirectProgram { rx, ry, i, s } => todo!(),
-            Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetProgram { rx, ry, ro, s } => todo!(),
-            Instruction::IntegerLoadData { rx, label } => {
-                ExecuteResult { memory: MemoryAction::Read(MemoryBank::Data, *label), writeback: vec![WritebackRegister::Standard(*rx, None)] }
+            Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetProgram {
+                rx,
+                ry,
+                ro,
+                s,
+            } => todo!(),
+            Instruction::IntegerLoadData { rx, label } => ExecuteResult {
+                memory: MemoryAction::Read(MemoryBank::Data, *label),
+                writeback: vec![WritebackRegister::Standard(*rx, None)],
             },
-            Instruction::IntegerLoadProgram { rx, label } => {
-                ExecuteResult { memory: MemoryAction::Read(MemoryBank::Program, *label), writeback: vec![WritebackRegister::Standard(*rx, None)] }
+            Instruction::IntegerLoadProgram { rx, label } => ExecuteResult {
+                memory: MemoryAction::Read(MemoryBank::Program, *label),
+                writeback: vec![WritebackRegister::Standard(*rx, None)],
             },
             Instruction::IntegerStoreData { rx, label } => {
                 let val_rx = state.registers[*rx as usize];
-                ExecuteResult { memory: MemoryAction::Write(MemoryBank::Data, *label, val_rx), writeback: Vec::new() }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, *label, val_rx),
+                    writeback: Vec::new(),
+                }
+            }
             Instruction::IntegerStoreProgram { rx, label } => {
                 let val_rx = state.registers[*rx as usize];
-                ExecuteResult { memory: MemoryAction::Write(MemoryBank::Program, *label, val_rx), writeback: Vec::new() }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Program, *label, val_rx),
+                    writeback: Vec::new(),
+                }
+            }
             Instruction::UnsignedZeroExtend { rx, ry, count } => todo!(),
             Instruction::SignExtend { rx, ry, count } => todo!(),
             Instruction::FloatingPointLoadLow { fx, value } => todo!(),
@@ -374,9 +453,13 @@ impl Instruction {
             Instruction::SwapFloatingPointRegisters { fx, fy } => todo!(),
             Instruction::CopyFloatingPointRegister { fx, fy } => todo!(),
             Instruction::LoadFloatingPointRegisterIndirect { fx, ry, i, s } => todo!(),
-            Instruction::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, ry, ro, s } => todo!(),
+            Instruction::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, ry, ro, s } => {
+                todo!()
+            }
             Instruction::StoreFloatingPointRegisterIndirect { rx, fy, i, s } => todo!(),
-            Instruction::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, fy, ro, s } => todo!(),
+            Instruction::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, fy, ro, s } => {
+                todo!()
+            }
             Instruction::FloatingPointLoadData { rx, label } => todo!(),
             Instruction::FloatingPointStoreData { rx, label } => todo!(),
             Instruction::IntegerCompare { rx, ry } => todo!(),
@@ -385,38 +468,56 @@ impl Instruction {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Overflow bit
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + val_rz))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + val_rz))],
+                }
+            }
             Instruction::SubtractUnsignedInteger { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Underflow bit
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry - val_rz))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry - val_rz))],
+                }
+            }
             Instruction::MultiplyUnsignedInteger { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Overflow bit
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry * val_rz))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry * val_rz))],
+                }
+            }
             Instruction::DivideUnsignedInteger { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Div 0 bit
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry / val_rz))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry / val_rz))],
+                }
+            }
             Instruction::ModuloUnsignedInteger { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Div 0 bit
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry % val_rz))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry % val_rz))],
+                }
+            }
             Instruction::AddSignedInteger { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Overflow bit
-                ExecuteResult { memory: MemoryAction::None, writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + val_rz))] }
-            },
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + val_rz))],
+                }
+            }
             Instruction::SubtractSignedInteger { rx, ry, rz } => todo!(),
             Instruction::MultiplySignedInteger { rx, ry, rz } => todo!(),
             Instruction::DivideSignedInteger { rx, ry, rz } => todo!(),
@@ -476,7 +577,7 @@ impl PipelineInner for ExecuteStage {
                 Err(PipelineError::Stalled)
             } else {
                 Ok(())
-            }
+            };
         }
 
         if state_ref.execute_state.as_ref().unwrap().timer > 0 {
@@ -491,6 +592,8 @@ impl PipelineInner for ExecuteStage {
             state_ref.execute_result = Some(MemoryState {
                 memory: execute.memory,
                 writeback: WritebackState {
+                    pc: execute_state.pc,
+                    instruction: execute_state.instruction,
                     registers: execute.writeback,
                     holds: execute_state.registers,
                 },
@@ -502,13 +605,19 @@ impl PipelineInner for ExecuteStage {
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
-        let registers = state_ref.execute_state.as_ref().unwrap().registers.clone();
-        decrement_inflight(
-            &mut state_ref.inflight,
-            &registers,
-        );
-        state_ref.execute_state = None;
-        state_ref.execute_result = Some(MemoryState { memory: MemoryAction::None, writeback: WritebackState { registers: vec![], holds: Default::default() } });
+        if let Some(state) = state_ref.execute_state.take() {
+            decrement_inflight(&mut state_ref.inflight, &state.registers);
+
+            state_ref.execute_result = Some(MemoryState {
+                memory: MemoryAction::None,
+                writeback: WritebackState {
+                    pc: state.pc,
+                    instruction: state.instruction,
+                    registers: vec![],
+                    holds: Default::default(),
+                },
+            });
+        }
         Ok(())
     }
 }
@@ -542,7 +651,7 @@ impl PipelineInner for MemoryStage {
                 Err(PipelineError::Stalled)
             } else {
                 Ok(())
-            }
+            };
         }
 
         let res = if state_ref.memory_result.is_none() {
@@ -554,14 +663,10 @@ impl PipelineInner for MemoryStage {
                 }
                 MemoryAction::Read(memory_bank, address) => {
                     match match memory_bank {
-                        MemoryBank::Data => state_ref
-                            .data_memory
-                            .borrow_mut()
-                            .fetch(4, address),
-                        MemoryBank::Program => state_ref
-                            .program_memory
-                            .borrow_mut()
-                            .fetch(4, address),
+                        MemoryBank::Data => state_ref.data_memory.borrow_mut().fetch(4, address),
+                        MemoryBank::Program => {
+                            state_ref.program_memory.borrow_mut().fetch(4, address)
+                        }
                     } {
                         Ok(v) => {
                             let res = v[line_offset(address as usize)];
@@ -586,10 +691,9 @@ impl PipelineInner for MemoryStage {
                 }
                 MemoryAction::Write(memory_bank, address, value) => {
                     match match memory_bank {
-                        MemoryBank::Data => state_ref
-                            .data_memory
-                            .borrow_mut()
-                            .store(4, address, value),
+                        MemoryBank::Data => {
+                            state_ref.data_memory.borrow_mut().store(4, address, value)
+                        }
                         MemoryBank::Program => state_ref
                             .program_memory
                             .borrow_mut()
@@ -617,46 +721,29 @@ impl PipelineInner for MemoryStage {
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
-        if let Some(state) = state_ref.memory_state.as_ref() {
+        if let Some(state) = state_ref.memory_state.take() {
             match state.memory {
                 MemoryAction::None => {}
                 MemoryAction::Read(memory_bank, _address) => match memory_bank {
-                    MemoryBank::Data => state_ref
-                        .data_memory
-                        .borrow_mut()
-                        .cancel(4)
-                        .unwrap(),
-                    MemoryBank::Program => state_ref
-                        .program_memory
-                        .borrow_mut()
-                        .cancel(4)
-                        .unwrap(),
+                    MemoryBank::Data => state_ref.data_memory.borrow_mut().cancel(4).unwrap(),
+                    MemoryBank::Program => state_ref.program_memory.borrow_mut().cancel(4).unwrap(),
                 },
                 MemoryAction::Write(memory_bank, _address, _value) => match memory_bank {
-                    MemoryBank::Data => state_ref
-                        .data_memory
-                        .borrow_mut()
-                        .cancel(4)
-                        .unwrap(),
-                    MemoryBank::Program => state_ref
-                        .program_memory
-                        .borrow_mut()
-                        .cancel(4)
-                        .unwrap(),
+                    MemoryBank::Data => state_ref.data_memory.borrow_mut().cancel(4).unwrap(),
+                    MemoryBank::Program => state_ref.program_memory.borrow_mut().cancel(4).unwrap(),
                 },
             }
 
-            let holds = state
-            .writeback
-            .holds.clone();
+            let holds = state.writeback.holds.clone();
 
-            decrement_inflight(
-                &mut state_ref.inflight,
-                &holds,
-            );
+            decrement_inflight(&mut state_ref.inflight, &holds);
 
-            state_ref.memory_state = None;
-            state_ref.memory_result = Some(WritebackState { registers: vec![], holds: Default::default() });
+            state_ref.memory_result = Some(WritebackState {
+                pc: state.writeback.pc,
+                instruction: state.writeback.instruction,
+                registers: vec![],
+                holds: Default::default(),
+            });
         }
         Ok(())
     }
@@ -664,6 +751,8 @@ impl PipelineInner for MemoryStage {
 
 #[derive(Debug, Clone)]
 pub struct WritebackState {
+    pub pc: u32,
+    pub instruction: Instruction,
     pub registers: Vec<WritebackRegister>,
     pub holds: RegisterSet,
 }
@@ -673,48 +762,48 @@ pub struct WritebackStage;
 impl PipelineInner for WritebackStage {
     fn call(state: &SimulatorStateCell, blocked: bool) -> Result<(), PipelineError> {
         let (res, should_squash) = {
-        let mut state_ref = state.borrow_mut();
-        if state_ref.writeback_state.is_none() {
-            if let Some(result) = state_ref.memory_result.take() {
-                state_ref.writeback_state = Some(result);
-                state_ref.squashes.writeback = state_ref.squashes.memory;
-            } else {
-                return Ok(());
-            }
-        }
-
-        let mut should_squash = false;
-        let res = if blocked {
-            Err(PipelineError::Stalled)
-        } else if state_ref.squashes.writeback {
-            Ok(())
-        } else {
-            let wb_state = state_ref.writeback_state.take().unwrap();
-            for r in wb_state.registers {
-                match r {
-                    WritebackRegister::Standard(register, value) => {
-                        state_ref.registers[register as usize] = value.unwrap();
-                        if register == Register::PC {
-                            should_squash = true;
-                        }
-                    }
-                    WritebackRegister::FloatingPoint(f_register, value) => {
-                        state_ref.f_registers[f_register as usize] =
-                            f32::from_ne_bytes(value.unwrap().to_ne_bytes());
-                    }
-                    WritebackRegister::Timer(timer, value) => {
-                        state_ref.timers[timer as usize].previous_set = value.unwrap();
-                        state_ref.timers[timer as usize].value = value.unwrap();
-                    }
+            let mut state_ref = state.borrow_mut();
+            if state_ref.writeback_state.is_none() {
+                if let Some(result) = state_ref.memory_result.take() {
+                    state_ref.writeback_state = Some(result);
+                    state_ref.squashes.writeback = state_ref.squashes.memory;
+                } else {
+                    return Ok(());
                 }
             }
 
-            decrement_inflight(&mut state_ref.inflight, &wb_state.holds);
-            state_ref.hold_fetch = false;
-            Ok(())
-        };
+            let mut should_squash = false;
+            let res = if blocked {
+                Err(PipelineError::Stalled)
+            } else if state_ref.squashes.writeback {
+                Ok(())
+            } else {
+                let wb_state = state_ref.writeback_state.take().unwrap();
+                for r in wb_state.registers {
+                    match r {
+                        WritebackRegister::Standard(register, value) => {
+                            state_ref.registers[register as usize] = value.unwrap();
+                            if register == Register::PC {
+                                should_squash = true;
+                            }
+                        }
+                        WritebackRegister::FloatingPoint(f_register, value) => {
+                            state_ref.f_registers[f_register as usize] =
+                                f32::from_ne_bytes(value.unwrap().to_ne_bytes());
+                        }
+                        WritebackRegister::Timer(timer, value) => {
+                            state_ref.timers[timer as usize].previous_set = value.unwrap();
+                            state_ref.timers[timer as usize].value = value.unwrap();
+                        }
+                    }
+                }
 
-        (res, should_squash)
+                decrement_inflight(&mut state_ref.inflight, &wb_state.holds);
+                state_ref.hold_fetch = false;
+                Ok(())
+            };
+
+            (res, should_squash)
         };
 
         if should_squash {
@@ -733,17 +822,10 @@ impl PipelineInner for WritebackStage {
 
     fn squash(state: &SimulatorStateCell) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
-        
-        let holds = state_ref
-        .writeback_state
-        .as_ref()
-        .unwrap()
-        .holds.clone();
 
-        decrement_inflight(
-            &mut state_ref.inflight,
-            &holds,
-        );
+        let holds = state_ref.writeback_state.as_ref().unwrap().holds.clone();
+
+        decrement_inflight(&mut state_ref.inflight, &holds);
 
         state_ref.writeback_state = None;
         state_ref.hold_fetch = false;

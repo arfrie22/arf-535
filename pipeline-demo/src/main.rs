@@ -1,6 +1,6 @@
 use std::{cell::{RefCell, RefMut}, io::{self, Write}, rc::Rc};
 
-use simulator::{enums::Register, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory}, pipeline::PipelineOutter, Simulator, SimulatorState};
+use simulator::{enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory}, pipeline::PipelineOutter, Simulator, SimulatorState};
 
 const DATA_M_CYCLES: usize = 2;
 const PROG_M_CYCLES: usize = 2;
@@ -74,7 +74,7 @@ fn main() {
     raw_program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(7, Instruction::IntegerStoreData { rx: Register::R2, label: 0 }.into()).unwrap();
     
-    raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { condition: simulator::enums::Condition::AlwaysTrue, label: 5 }.into()).unwrap();
+    raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
 
     let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_cache, data_cache);
@@ -85,7 +85,7 @@ fn main() {
     print_reg(&state);
     print_states(&state);
 
-    for _ in 0..100 {
+    loop {
         let mut input = String::new();
         print!("> ");
         io::stdout().flush().unwrap();
