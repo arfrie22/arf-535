@@ -22,21 +22,21 @@ fn print_states(state: &Rc<RefCell<SimulatorState>>) {
     }
 
     print!("Decode ");
-    if state_ref.fetch_state.is_some() {
+    if state_ref.decode_state.is_some() {
         println!("state: {:?}", state_ref.decode_state);
     } else {
         println!("result: {:?}", state_ref.decode_result);
     }
 
     print!("Execute ");
-    if state_ref.fetch_state.is_some() {
+    if state_ref.execute_state.is_some() {
         println!("state: {:?}", state_ref.execute_state);
     } else {
         println!("result: {:?}", state_ref.execute_result);
     }
 
     print!("Memory ");
-    if state_ref.fetch_state.is_some() {
+    if state_ref.memory_state.is_some() {
         println!("state: {:?}", state_ref.memory_state);
     } else {
         println!("result: {:?}", state_ref.memory_result);
@@ -77,9 +77,11 @@ fn main() {
     raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { condition: simulator::enums::Condition::AlwaysTrue, label: 5 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
 
-    let simulator = Simulator::new(raw_program_memory, raw_data_cache, program_cache, data_cache);
+    let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_cache, data_cache);
+    // let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_memory, data_memory);
     
     let state = simulator.get_state();
+    // state.borrow_mut().single_instruction_pipeline = true;
     print_reg(&state);
     print_states(&state);
 

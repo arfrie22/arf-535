@@ -70,6 +70,8 @@ pub struct SimulatorState {
     pub memory_state: Option<MemoryState>,
     pub memory_result: Option<WritebackState>,
     pub writeback_state: Option<WritebackState>,
+    pub hold_fetch: bool,
+    pub single_instruction_pipeline: bool,
 }
 
 impl SimulatorState {
@@ -117,6 +119,8 @@ impl SimulatorState {
             memory_state: None,
             memory_result: None,
             writeback_state: None,
+            hold_fetch: false,
+            single_instruction_pipeline: false,
         }));
 
         simulator

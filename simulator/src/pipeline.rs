@@ -124,6 +124,10 @@ pub struct FetchStage;
 impl PipelineInner for FetchStage {
     fn call(state: &SimulatorStateCell, blocked: bool) -> Result<(), PipelineError> {
         let mut state_ref = state.borrow_mut();
+        if state_ref.single_instruction_pipeline && state_ref.hold_fetch {
+            return Ok(());
+        }
+
         if state_ref.fetch_state.is_none() {
             if state_ref.fetch_result.is_none() {
                 let address = state_ref.registers[Register::PC as usize];
@@ -155,6 +159,7 @@ impl PipelineInner for FetchStage {
                 Ok(v) => {
                     state_ref.fetch_result = Some(v[line_offset(address as usize)]);
                     state_ref.fetch_state = None;
+                    state_ref.hold_fetch = true;
                     Ok(())
                 }
                 Err(_) => Err(PipelineError::Stalled),
@@ -705,6 +710,7 @@ impl PipelineInner for WritebackStage {
             }
 
             decrement_inflight(&mut state_ref.inflight, &wb_state.holds);
+            state_ref.hold_fetch = false;
             Ok(())
         };
 
@@ -740,6 +746,7 @@ impl PipelineInner for WritebackStage {
         );
 
         state_ref.writeback_state = None;
+        state_ref.hold_fetch = false;
         Ok(())
     }
 }
