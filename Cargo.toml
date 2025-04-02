@@ -2,3 +2,6 @@
 resolver = "2"
 name = "arf-535"
 members = [ "assembler","gui", "memory-demo", "pipeline-demo", "simulator"]
+
+[workspace.dependencies]
+simulator = { path = "simulator" }

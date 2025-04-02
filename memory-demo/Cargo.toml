@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 pest = "2.7.15"
 ratatui = "0.29.0"
-simulator = { path = "../simulator" }
+simulator = { workspace = true }
