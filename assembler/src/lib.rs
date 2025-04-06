@@ -1,14 +1,30 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use pest::Parser;
+use pest_derive::Parser;
+use simulator::instruction::Instruction;
+
+#[derive(Parser)]
+#[grammar = "assembler.pest"]
+pub struct AssemblerParser;
+
+pub fn assemble(input: &str) -> Vec<Instruction> {
+    let vec = AssemblerParser::parse(Rule::file, input).unwrap();
+    vec![]
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::assemble;
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        let input = "
+        test_2: 
+        SWP pc r3
+        SWP R1 f1
+        STR [R1  + 0x4] R2
+        STR [R1 + 0x4 << 0x2] F3
+        ";
+
+        assemble(input);
     }
 }
