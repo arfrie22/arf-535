@@ -17,7 +17,6 @@ with open('instructions.json') as f:
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
             name = opcode_data["name"].replace(" ", "").replace("-", "") + ""
             enum = name
-            opcode_pneumonic = opcode_data["pneumonic"]
             bits = opcode_data["bits"]
             parses += "            0x{:02x} => Self::{}".format((type_i << 5) | opcode_i, name)
             intos += "            Self::{}".format(name)

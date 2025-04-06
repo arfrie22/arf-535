@@ -1530,6 +1530,7 @@ dependencies = [
 name = "gui"
 version = "0.1.0"
 dependencies = [
+ "assembler",
  "eframe",
  "egui_extras",
  "env_logger",

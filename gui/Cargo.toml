@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 simulator = { workspace = true }
+assembler = { workspace = true }
 
 eframe = { version = "0.31", features = [
     "default",

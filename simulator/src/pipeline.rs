@@ -460,8 +460,8 @@ impl Instruction {
             Instruction::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, fy, ro, s } => {
                 todo!()
             }
-            Instruction::FloatingPointLoadData { rx, label } => todo!(),
-            Instruction::FloatingPointStoreData { rx, label } => todo!(),
+            Instruction::FloatingPointLoadData { fx, label } => todo!(),
+            Instruction::FloatingPointStoreData { fx, label } => todo!(),
             Instruction::IntegerCompare { rx, ry } => todo!(),
             Instruction::IntegerCompareSingleAgainstZero { rx } => todo!(),
             Instruction::AddUnsignedInteger { rx, ry, rz } => {
@@ -524,7 +524,7 @@ impl Instruction {
             Instruction::ModuloSignedInteger { rx, ry, rz } => todo!(),
             Instruction::BitwiseAND { rx, ry, rz } => todo!(),
             Instruction::BitwiseOR { rx, ry, rz } => todo!(),
-            Instruction::BitwiseNOT { rx, ry, rz } => todo!(),
+            Instruction::BitwiseNOT { rx, ry } => todo!(),
             Instruction::BitwiseXOR { rx, ry, rz } => todo!(),
             Instruction::LogicalShiftLeft { rx, ry, value } => todo!(),
             Instruction::LogicalShiftRight { rx, ry, value } => todo!(),

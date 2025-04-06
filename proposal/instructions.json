@@ -166,7 +166,10 @@
                 "name": "Register Jump",
                 "assembly": {
                     "pneumonic": "B",
-                    "arguments": [{ "type": "register", "argument": "Rx" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "register", "argument": "Rx" }
+                    ]
                 },
                 "description": "Sets the program counter to Rx.",
                 "bits": [
@@ -196,6 +199,7 @@
                 "assembly": {
                     "pneumonic": "B",
                     "arguments": [
+                        { "type": "condition", "argument": "Condition" },
                         { "type": "data_shift_imm", "argument": "Rx" }
                     ]
                 },
@@ -229,6 +233,7 @@
                 "assembly": {
                     "pneumonic": "B",
                     "arguments": [
+                        { "type": "condition", "argument": "Condition" },
                         { "type": "data_shift_register", "argument": "Rx" }
                     ]
                 },
@@ -267,7 +272,10 @@
                 "name": "Relative Jump",
                 "assembly": {
                     "pneumonic": "BR",
-                    "arguments": [{ "type": "register", "argument": "Rx" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "register", "argument": "Rx" }
+                    ]
                 },
                 "description": "Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.",
                 "bits": [
@@ -296,7 +304,10 @@
                 "name": "Immediate Jump",
                 "assembly": {
                     "pneumonic": "B",
-                    "arguments": [{ "type": "p_address", "argument": "_label_" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "p_address", "argument": "_label_" }
+                    ]
                 },
                 "description": "Sets the program counter to the address of the label.",
                 "bits": [
@@ -323,7 +334,10 @@
                 "name": "Immediate Relative Jump",
                 "assembly": {
                     "pneumonic": "BO",
-                    "arguments": [{ "type": "number", "argument": "_offset_" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "number", "argument": "_offset_" }
+                    ]
                 },
                 "description": "Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number).",
                 "bits": [
@@ -350,7 +364,10 @@
                 "name": "Register Jump with Link",
                 "assembly": {
                     "pneumonic": "BL",
-                    "arguments": [{ "type": "register", "argument": "Rx" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "register", "argument": "Rx" }
+                    ]
                 },
                 "description": "Sets the link register to (PC + 1). Sets the program counter to Rx.",
                 "bits": [
@@ -380,6 +397,7 @@
                 "assembly": {
                     "pneumonic": "BL",
                     "arguments": [
+                        { "type": "condition", "argument": "Condition" },
                         { "type": "data_shift_imm", "argument": "Rx" }
                     ]
                 },
@@ -413,6 +431,7 @@
                 "assembly": {
                     "pneumonic": "BL",
                     "arguments": [
+                        { "type": "condition", "argument": "Condition" },
                         { "type": "data_shift_register", "argument": "Rx" }
                     ]
                 },
@@ -451,7 +470,10 @@
                 "name": "Relative Jump with Link",
                 "assembly": {
                     "pneumonic": "BRL",
-                    "arguments": [{ "type": "register", "argument": "Rx" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "register", "argument": "Rx" }
+                    ]
                 },
                 "description": "Sets the link register to (PC + 1). Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.",
                 "bits": [
@@ -480,7 +502,10 @@
                 "name": "Immediate Jump with Link",
                 "assembly": {
                     "pneumonic": "BL",
-                    "arguments": [{ "type": "p_address", "argument": "_label_" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "p_address", "argument": "_label_" }
+                    ]
                 },
                 "description": "Sets the link register to (PC + 1). Sets the program counter to label.",
                 "bits": [
@@ -507,7 +532,10 @@
                 "name": "Immediate Relative Jump with Link",
                 "assembly": {
                     "pneumonic": "BOL",
-                    "arguments": [{ "type": "number", "argument": "_offset_" }]
+                    "arguments": [
+                        { "type": "condition", "argument": "Condition" },
+                        { "type": "number", "argument": "_offset_" }
+                    ]
                 },
                 "description": "Sets the link register to (PC + 1). Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number that is sign extended).",
                 "bits": [
@@ -1434,7 +1462,7 @@
                 "description": "Loads the value at data memory address label into the register Fx.",
                 "bits": [
                     {
-                        "short": "Rx",
+                        "short": "Fx",
                         "long": "Destination Register",
                         "count": 5,
                         "read": false,
@@ -1464,7 +1492,7 @@
                 "description": "Stores the value in Fx into the data memory address label.",
                 "bits": [
                     {
-                        "short": "Rx",
+                        "short": "Fx",
                         "long": "Source Register",
                         "count": 5,
                         "read": true,
@@ -2046,14 +2074,7 @@
                     },
                     {
                         "short": "Ry",
-                        "long": "Source Register 1",
-                        "count": 5,
-                        "read": true,
-                        "write": false
-                    },
-                    {
-                        "short": "Rz",
-                        "long": "Source Register 2",
+                        "long": "Source Register",
                         "count": 5,
                         "read": true,
                         "write": false

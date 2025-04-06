@@ -2,8 +2,26 @@
 
 use eframe::egui;
 
+fn it_works() {
+    let input = "
+    test_2: 
+    SWP pc r3
+    SWP R1 f1
+    test_3: 
+    STR [R1 ] R2
+    STR [R1  + 0x4] R2
+    STR [R1 + r1 << 0x2] F3
+    B test_3
+    ";
+
+    let a = assembler::assemble(input).unwrap();
+    println!("{:?}", a);
+}
+
 fn main() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
+    
+    it_works();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),
         ..Default::default()
