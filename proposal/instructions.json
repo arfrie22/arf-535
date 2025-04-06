@@ -186,7 +186,7 @@
             {
                 "name": "Indirect Jump",
                 "assembly": {
-                    "full": "B [Rx + I << S]"
+                    "full": "B [Rx+I<<S]"
                 },
                 "description": "Sets the program counter to the value stored at the memory location in Rx offset by I shifted by S.",
                 "bits": [
@@ -216,7 +216,7 @@
             {
                 "name": "Indirect with Register Offset Jump",
                 "assembly": {
-                    "full": "B [Rx + Ro << S]"
+                    "full": "B [Rx+Ro<<S]"
                 },
                 "description": "Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.",
                 "bits": [
@@ -360,7 +360,7 @@
             {
                 "name": "Indirect Jump with Link",
                 "assembly": {
-                    "full": "BL [Rx + I << S]"
+                    "full": "BL [Rx+I<<S]"
                 },
                 "description": "Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the I shifted by S.",
                 "bits": [
@@ -390,7 +390,7 @@
             {
                 "name": "Indirect with Register Offset Jump with Link",
                 "assembly": {
-                    "full": "BL [Rx + Ro << S]"
+                    "full": "BL [Rx+Ro<<S]"
                 },
                 "description": "Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.",
                 "bits": [
@@ -620,7 +620,7 @@
             {
                 "name": "Load Integer Register Indirect",
                 "assembly": {
-                    "full": "LDR Rx [Ry + I << S]"
+                    "full": "LDR Rx [Ry+I<<S]"
                 },
                 "description": "Sets the value of Rx to the value of stored at the data memory location at Ry offset by I shifted by S.",
                 "bits": [
@@ -650,7 +650,7 @@
             {
                 "name": "Load Integer Register Indirect with Register Offset",
                 "assembly": {
-                    "full": "LDR Rx [Ry + Ro << S]"
+                    "full": "LDR Rx [Ry+Ro<<S]"
                 },
                 "description": "Sets the value of Rx to the value of stored at the data memory location at Ry offset by the value of Ro shifted by S.",
                 "bits": [
@@ -686,7 +686,7 @@
             {
                 "name": "Load Integer Register Indirect Program",
                 "assembly": {
-                    "full": "LDR Rx P[Ry + I << S]"
+                    "full": "LDR Rx P[Ry+I<<S]"
                 },
                 "description": "Sets the value of Rx to the value of stored at the program memory location at Ry offset by I shifted by S.",
                 "bits": [
@@ -716,7 +716,7 @@
             {
                 "name": "Load Integer Register Indirect with Register Offset Program",
                 "assembly": {
-                    "full": "LDR Rx P[Ry + Ro << S]"
+                    "full": "LDR Rx P[Ry+Ro<<S]"
                 },
                 "description": "Sets the value of Rx to the value of stored at the program memory location at Ry offset by the value of Ro shifted by S.",
                 "bits": [
@@ -752,7 +752,7 @@
             {
                 "name": "Store Integer Register Indirect",
                 "assembly": {
-                    "full": "STR [Rx + I << S] Ry"
+                    "full": "STR [Rx+I<<S] Ry"
                 },
                 "description": "Stores the value of Ry into the data memory location at Rx offset by I shifted by S.",
                 "bits": [
@@ -782,7 +782,7 @@
             {
                 "name": "Store Integer Register Indirect with Register Offset Indirect",
                 "assembly": {
-                    "full": "STR [Rx + Ro << S] Ry"
+                    "full": "STR [Rx+Ro<<S] Ry"
                 },
                 "description": "Stores the value of Ry into the data memory location at Rx offset by the value of Ro shifted by S.",
                 "bits": [
@@ -818,7 +818,7 @@
             {
                 "name": "Store Integer Register Indirect Program",
                 "assembly": {
-                    "full": "STR P[Rx + I << S] Ry"
+                    "full": "STR P[Rx+I<<S] Ry"
                 },
                 "description": "Stores the value of Ry into the program memory location at Rx offset by I shifted by S.",
                 "bits": [
@@ -848,7 +848,7 @@
             {
                 "name": "Store Integer Register Indirect with Register Offset Program",
                 "assembly": {
-                    "full": "STR P[Rx + Ro << S] Ry"
+                    "full": "STR P[Rx+Ro<<S] Ry"
                 },
                 "description": "Stores the value of Ry into the program memory location at Rx offset by the value of Ro shifted by S.",
                 "bits": [
@@ -1160,7 +1160,7 @@
             {
                 "name": "Load Floating-Point Register Indirect",
                 "assembly": {
-                    "full": "LDR Fx [Ry + I << S]"
+                    "full": "LDR Fx [Ry+I<<S]"
                 },
                 "description": "Sets the value of Fx to the value of stored at the data memory location at Ry offset by I shifted by S.",
                 "bits": [
@@ -1190,7 +1190,7 @@
             {
                 "name": "Load Floating-Point Register Indirect with Register Offset",
                 "assembly": {
-                    "full": "LDR Fx [Ry + Ro << S]"
+                    "full": "LDR Fx [Ry+Ro<<S]"
                 },
                 "description": "Sets the value of Fx to the value of stored at the data memory location at Ry offset by the value of Ro shifted by S.",
                 "bits": [
@@ -1226,7 +1226,7 @@
             {
                 "name": "Store Floating-Point Register Indirect",
                 "assembly": {
-                    "full": "STR [Rx + I << S] Fy"
+                    "full": "STR [Rx+I<<S] Fy"
                 },
                 "description": "Stores the value of Fy into the data memory location at Rx offset by I shifted by S.",
                 "bits": [
@@ -1256,7 +1256,7 @@
             {
                 "name": "Store Floating-Point Register Indirect with Register Offset",
                 "assembly": {
-                    "full": "STR [Rx + Ro << S] Fy"
+                    "full": "STR [Rx+Ro<<S] Fy"
                 },
                 "description": "Stores the value of Fy into the data memory location at Rx offset by the value of Ro shifted by S.",
                 "bits": [
