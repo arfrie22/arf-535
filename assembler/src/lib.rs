@@ -45,9 +45,8 @@ fn parse_number(input: &str) -> Result<u32, AssemblerError> {
     }
 }
 
-fn parse_signed_number(input: &str) -> Result<u32, AssemblerError> {
-    let i = 
-    if input.is_empty() {
+fn parse_signed_number(input: &str) -> Result<i32, AssemblerError> {
+    Ok(if input.is_empty() {
         0
     } else if input.starts_with("0b") {
         i32::from_str_radix(&input[2..], 2)?
@@ -63,9 +62,7 @@ fn parse_signed_number(input: &str) -> Result<u32, AssemblerError> {
         i32::from_str_radix(&str, 16)?
     } else {
         i32::from_str_radix(input, 10)?
-    };
-
-    Ok(u32::from_ne_bytes(i.to_ne_bytes()))
+    })
 }
 
 fn parse_label(input: &str, labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {

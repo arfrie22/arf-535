@@ -350,7 +350,7 @@ pub fn assemble(input: &str) -> Result<Vec<Instruction>, AssemblerError> {
             }
             Rule::instruction_ADD_82 => {
                 let mut iter = p.into_inner();
-                let c = if iter.next().unwrap().as_str().len() > 0 {1} else {0};
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;

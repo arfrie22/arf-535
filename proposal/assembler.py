@@ -59,7 +59,7 @@ with open('instructions.json') as f:
                         parse += "                let ro = iter.next().unwrap().as_str().parse()?;\n"
                         parse += "                let s = parse_number(iter.next().unwrap().as_str())?;\n"
                     elif arg["type"] == "condition_bit":
-                        parse += "if iter.next().unwrap().as_str().len() > 0 {1} else {0};\n"
+                        parse += "iter.next().unwrap().as_str().len() > 0;\n"
                     else:
                         raise Exception("Unknown arg type " + arg["type"])
                 instruction += " }"

@@ -88,6 +88,10 @@ with open('instructions.json') as f:
                     elif re.match("Condition", bit_data["short"]):
                         #condition code
                         arg_type = "Condition"
+                    elif re.match("c", bit_data["short"]):
+                        arg_type = "bool"
+                    elif re.match("_offset_", bit_data["short"]):
+                        arg_type = "i32"
                     
                     enum += arg_name + ": " + arg_type
                     intos += arg_name
@@ -102,13 +106,19 @@ with open('instructions.json') as f:
                     else:
                         write_unused = True
 
-                    if arg_type != "u32":
+                    if arg_type == "i32":
+                       into_value = f"(u32::from_ne_bytes(({into_value}).to_ne_bytes()))"
+                    elif arg_type != "u32":
                        parse_value = "(value as usize)"
                        into_value = f"({into_value} as u32)"
                     
                     parse = f"({parse_value} >> {opcode_bit_remaining}) & 0x{(1 << bit_data["count"]) - 1:x}"
                     shifts += f"| ({into_value} << {opcode_bit_remaining})"
-                    if arg_type != "u32":
+                    if arg_type == "bool":
+                        parse = "(" + parse + " > 0)"
+                    elif arg_type == "i32":
+                        parse = f"(i32::from_ne_bytes(({parse}).to_ne_bytes()))"
+                    elif arg_type != "u32":
                         parse = arg_type + "::try_from(" + parse + ").unwrap()"
 
                     parses += arg_name + f": " + parse
