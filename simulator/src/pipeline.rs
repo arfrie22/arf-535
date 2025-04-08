@@ -464,7 +464,7 @@ impl Instruction {
             Instruction::FloatingPointStoreData { fx, label } => todo!(),
             Instruction::IntegerCompare { rx, ry } => todo!(),
             Instruction::IntegerCompareSingleAgainstZero { rx } => todo!(),
-            Instruction::AddUnsignedInteger { rx, ry, rz } => {
+            Instruction::AddUnsignedInteger { c, rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
                 // TODO: Overflow bit

@@ -53,7 +53,10 @@ with open('instructions.json') as f:
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
             opcode_hex = "0x{:02x}".format(opcode_i)
             opcode_name = opcode_data["name"]
-            opcode_pneumonic = opcode_data["pneumonic"]
+            opcode_pneumonic = opcode_data["assembly"]["pneumonic"]
+            for arg in opcode_data["assembly"]["arguments"]:
+                
+                opcode_pneumonic += arg["argument"]
             opcode_description = opcode_data["description"]
             opcode_bits = opcode_data["bits"]
             opcode_bit_remaining = 32-8

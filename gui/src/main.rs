@@ -7,10 +7,12 @@ fn it_works() {
     test_2: 
     SWP pc r3
     SWP R1 f1
+    B test_4
     test_3: 
     STR [R1 ] R2
     STR [R1  + 0x4] R2
     STR [R1 + r1 << 0x2] F3
+    test_4:
     B test_3
     ";
 

@@ -31,6 +31,8 @@ impl From<pest::error::Error<Rule>> for AssemblerError {
     }
 }
 
+// TODO: signed number for _offset_
+
 fn parse_number(input: &str) -> Result<u32, AssemblerError> {
     if input.is_empty() {
         Ok(0)
@@ -41,6 +43,29 @@ fn parse_number(input: &str) -> Result<u32, AssemblerError> {
     } else {
         Ok(u32::from_str_radix(input, 10)?)
     }
+}
+
+fn parse_signed_number(input: &str) -> Result<u32, AssemblerError> {
+    let i = 
+    if input.is_empty() {
+        0
+    } else if input.starts_with("0b") {
+        i32::from_str_radix(&input[2..], 2)?
+    } else if input.starts_with("0x") {
+        i32::from_str_radix(&input[2..], 16)?
+    } else if input[1..].starts_with("0b") {
+        let mut str = input[3..].to_owned();
+        str.insert(0, input.chars().next().unwrap());
+        i32::from_str_radix(&str, 2)?
+    } else if input[1..].starts_with("0x") {
+        let mut str = input[3..].to_owned();
+        str.insert(0, input.chars().next().unwrap());
+        i32::from_str_radix(&str, 16)?
+    } else {
+        i32::from_str_radix(input, 10)?
+    };
+
+    Ok(u32::from_ne_bytes(i.to_ne_bytes()))
 }
 
 fn parse_label(input: &str, labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {
@@ -56,7 +81,7 @@ fn parse_label(input: &str, labels: &HashMap<String, u32>) -> Result<u32, Assemb
 }
 
 #[derive(Parser)]
-#[grammar = "assembler.pest"]
+#[grammar = "assembler.pest"] 
 pub struct AssemblerParser;
 
 mod gen_functions;

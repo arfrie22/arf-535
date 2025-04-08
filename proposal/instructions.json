@@ -336,7 +336,7 @@
                     "pneumonic": "BO",
                     "arguments": [
                         { "type": "condition", "argument": "Condition" },
-                        { "type": "number", "argument": "_offset_" }
+                        { "type": "signed_number", "argument": "_offset_" }
                     ]
                 },
                 "description": "Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number).",
@@ -534,7 +534,7 @@
                     "pneumonic": "BOL",
                     "arguments": [
                         { "type": "condition", "argument": "Condition" },
-                        { "type": "number", "argument": "_offset_" }
+                        { "type": "signed_number", "argument": "_offset_" }
                     ]
                 },
                 "description": "Sets the link register to (PC + 1). Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number that is sign extended).",
@@ -1579,6 +1579,7 @@
                 "assembly": {
                     "pneumonic": "ADD",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1586,6 +1587,13 @@
                 },
                 "description": "Sets Rx := Ry + Rz.\\\nSets overflow bit if $\"Ry\" + \"Rz\" >= 2^32$",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
