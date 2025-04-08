@@ -4,7 +4,7 @@ import re
 output_file = open("../simulator/src/instruction.rs", "w+")
 
 with open('instructions.json') as f:
-    output_file.write("use crate::{enums::{Condition, FPRegister, Register, Timer}, RegisterSet};\n\n")
+    output_file.write("use crate::{enums::{Condition, FPRegister, Register, Timer}, raw_cast_from_i32, raw_cast_to_i32, RegisterSet};\n\n")
     output_file.write("#[derive(Debug, Clone, Copy, PartialEq, Eq)]\n")
     output_file.write("pub enum Instruction {\n")
     output_file.write("    Invalid(u32),\n")
@@ -26,6 +26,7 @@ with open('instructions.json') as f:
             
             read_data = {"registers": [], "f_registers": [], "timers": []}
             write_data = {"registers": [], "f_registers": [], "timers": []}
+            write_extra = ""
 
 
             if len(bits) > 0:
@@ -90,6 +91,16 @@ with open('instructions.json') as f:
                         arg_type = "Condition"
                     elif re.match("c", bit_data["short"]):
                         arg_type = "bool"
+                        write = True
+                        write_extra += "                if *c {\n"
+                        write_extra += "                    registers.push(Register::ST);\n"
+                        write_extra += "                }\n"
+                    elif re.match("l", bit_data["short"]):
+                        arg_type = "bool"
+                        write = True
+                        write_extra += "                if *l {\n"
+                        write_extra += "                    registers.push(Register::LR);\n"
+                        write_extra += "                }\n"
                     elif re.match("_offset_", bit_data["short"]):
                         arg_type = "i32"
                     
@@ -107,7 +118,7 @@ with open('instructions.json') as f:
                         write_unused = True
 
                     if arg_type == "i32":
-                       into_value = f"(u32::from_ne_bytes(({into_value}).to_ne_bytes()))"
+                       into_value = f"raw_cast_from_i32({into_value})"
                     elif arg_type != "u32":
                        parse_value = "(value as usize)"
                        into_value = f"({into_value} as u32)"
@@ -117,7 +128,7 @@ with open('instructions.json') as f:
                     if arg_type == "bool":
                         parse = "(" + parse + " > 0)"
                     elif arg_type == "i32":
-                        parse = f"(i32::from_ne_bytes(({parse}).to_ne_bytes()))"
+                        parse = f"raw_cast_to_i32({parse})"
                     elif arg_type != "u32":
                         parse = arg_type + "::try_from(" + parse + ").unwrap()"
 
@@ -166,8 +177,11 @@ with open('instructions.json') as f:
             intos += ",\n"
             read_regs += " => " + f"RegisterSet{{ registers: vec![{", ".join(read_data["registers"])}], f_registers: vec![{", ".join(read_data["f_registers"])}], timers: vec![{", ".join(read_data["timers"])}]  }}"
             read_regs += ",\n"
-            write_regs += " => " + f"RegisterSet{{ registers: vec![{", ".join(write_data["registers"])}], f_registers: vec![{", ".join(write_data["f_registers"])}], timers: vec![{", ".join(write_data["timers"])}]  }}"
-            write_regs += ",\n"
+            write_regs += " => {\n"
+            write_regs += f"                let {"mut " if len(write_extra) > 0 else "" }registers = vec![{", ".join(write_data["registers"])}];\n"
+            write_regs += write_extra
+            write_regs += f"                RegisterSet{{ registers, f_registers: vec![{", ".join(write_data["f_registers"])}], timers: vec![{", ".join(write_data["timers"])}] }}\n"
+            write_regs += "            },\n"
 
             output_file.write("    " + enum + ",\n")
     output_file.write("}\n\n")

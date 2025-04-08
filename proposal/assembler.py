@@ -27,10 +27,8 @@ with open('instructions.json') as f:
                 parse += "                let mut iter = p.into_inner();\n"
                 instruction += " { "
                 for i, arg in enumerate(args):
-                    if arg["type"] == "condition":
-                        rule += " ~ condition"
-                    elif arg["type"] == "condition_bit":
-                        rule += " ~ condition_bit"
+                    if arg["type"] == "condition" or arg["type"] == "condition_bit" or arg["type"] == "link_bit":
+                        rule += " ~ " + arg["type"]
                     else:
                         rule += " ~ WHITESPACE+ ~ " + arg["type"]
 
@@ -58,7 +56,7 @@ with open('instructions.json') as f:
                         parse += "iter.next().unwrap().as_str().parse()?;\n"
                         parse += "                let ro = iter.next().unwrap().as_str().parse()?;\n"
                         parse += "                let s = parse_number(iter.next().unwrap().as_str())?;\n"
-                    elif arg["type"] == "condition_bit":
+                    elif arg["type"] == "condition_bit" or arg["type"] == "link_bit":
                         parse += "iter.next().unwrap().as_str().len() > 0;\n"
                     else:
                         raise Exception("Unknown arg type " + arg["type"])
@@ -94,7 +92,8 @@ with open('instructions.json') as f:
     output_file.write("prog_shift_imm = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
     
     output_file.write("condition = ${ (^\"NVR\" | ^\"EQ\" | ^\"GT\" | ^\"LT\" | ^\"GE\" | ^\"LE\" | ^\"OVRF\" | ^\"UNDF\" | ^\"DIVZ\" | ^\"EVEN\" | ^\"FINF\" | ^\"FZ\" | ^\"FNAN\")? }\n")
-    output_file.write("condition_bit = ${ (^\".C\")? }\n")
+    output_file.write("condition_bit = ${ (^\"C\")? }\n")
+    output_file.write("link_bit = ${ (^\"L\")? }\n")
 
     output_file.write(rules)
 

@@ -1,4 +1,4 @@
-use std::{str::FromStr};
+use std::str::FromStr;
 
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
@@ -31,29 +31,29 @@ pub enum Register {
     R17,
     R18,
     R19,
-    // (R20)
+    // ADC Channel 1 (R20)
     A1,
-    // (R21)
+    // ADC Channel 2 (R21)
     A2,
-    // (R22)
+    // ADC Channel 3 (R22)
     A3,
-    // (R23)
+    // ADC Channel 4 (R23)
     A4,
-    // (R24)
+    // DAC Channel 1 (R24)
     D1,
-    // (R25)
+    // DAC Channel 2 (R25)
     D2,
-    // (R26)
+    // DAC Channel 3 (R26)
     D3,
-    // (R27)
+    // DAC Channel 4 (R27)
     D4,
-    // (R28)
+    // Program Counter (R28)
     PC,
-    // (R29)
+    // Link Register (R29)
     LR,
-    // (R30)
+    // Status Register (R30)
     ST,
-    // (R31)
+    // Stack Pointer (R31)
     SP,
 }
 
@@ -329,5 +329,11 @@ impl FromStr for Condition {
             "fnan" => Ok(Self::FloatingPointNotANumber),
             _ => Err(ParseError::InvalidInput)
         }
+    }
+}
+
+impl Condition {
+    pub fn check(&self, st: u32) -> bool {
+        todo!()
     }
 }

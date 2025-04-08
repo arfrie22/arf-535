@@ -1,10 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
 use enums::{FPRegister, Register, Timer};
-use instruction::Instruction;
 use memory::{FrontMemory, InnerMemory};
 use pipeline::{
-    DecodeStage, DecodeState, ExecuteResult, ExecuteStage, ExecuteState, FetchResult, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackRegister, WritebackStage, WritebackState
+    DecodeStage, DecodeState, ExecuteStage, ExecuteState, FetchResult, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackStage, WritebackState
 };
 
 pub mod enums;
@@ -72,6 +71,26 @@ pub struct SimulatorState {
     pub writeback_state: Option<WritebackState>,
     pub hold_fetch: bool,
     pub single_instruction_pipeline: bool,
+}
+
+#[inline]
+pub fn raw_cast_from_f32(input: f32) -> u32 {
+    u32::from_ne_bytes(input.to_ne_bytes())
+}
+
+#[inline]
+pub fn raw_cast_to_f32(input: u32) -> f32 {
+    f32::from_ne_bytes(input.to_ne_bytes())
+}
+
+#[inline]
+pub fn raw_cast_from_i32(input: i32) -> u32 {
+    u32::from_ne_bytes(input.to_ne_bytes())
+}
+
+#[inline]
+pub fn raw_cast_to_i32(input: u32) -> i32 {
+    i32::from_ne_bytes(input.to_ne_bytes())
 }
 
 impl SimulatorState {
@@ -163,14 +182,18 @@ pub struct Simulator {
     state: SimulatorStateCell,
     raw_program_memory: RawMemoryCell,
     raw_data_memory: RawMemoryCell,
+    raw_program_cache: RawMemoryCell,
+    raw_data_cache: RawMemoryCell,
 }
 
 impl Simulator {
-    pub fn new(raw_program_memory: RawMemoryCell, raw_data_memory: RawMemoryCell, program_memory: MemoryCell, data_memory: MemoryCell) -> Self {
+    pub fn new(raw_program_memory: RawMemoryCell, raw_data_memory: RawMemoryCell, raw_program_cache: RawMemoryCell, raw_data_cache: RawMemoryCell, program_memory: MemoryCell, data_memory: MemoryCell) -> Self {
         Self {
             state: SimulatorState::new(program_memory, data_memory),
             raw_program_memory,
             raw_data_memory,
+            raw_program_cache,
+            raw_data_cache,
         }
     }
 
@@ -181,6 +204,22 @@ impl Simulator {
 
     pub fn get_state(&self) -> SimulatorStateCell {
         self.state.clone()
+    }
+
+    pub fn get_data_memory(&self) -> RawMemoryCell {
+        self.raw_data_memory.clone()
+    }
+
+    pub fn get_program_memory(&self) -> RawMemoryCell {
+        self.raw_program_memory.clone()
+    }
+
+    pub fn get_data_cache(&self) -> RawMemoryCell {
+        self.raw_data_cache.clone()
+    }
+
+    pub fn get_program_cache(&self) -> RawMemoryCell {
+        self.raw_program_cache.clone()
     }
 }
 

@@ -1,10 +1,7 @@
 use std::{cell::RefCell, fmt, marker::PhantomData, rc::Rc};
 
 use crate::{
-    enums::{FPRegister, Register, Timer},
-    instruction::Instruction,
-    memory::line_offset,
-    InFlightRegisters, RegisterSet, SimulatorState, SimulatorStateCell,
+    enums::{FPRegister, Register, Timer}, instruction::Instruction, memory::line_offset, raw_cast_from_f32, raw_cast_from_i32, raw_cast_to_f32, InFlightRegisters, RegisterSet, SimulatorState, SimulatorStateCell
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -302,6 +299,7 @@ pub struct ExecuteResult {
 
 impl Instruction {
     pub fn cycle_count(&self, state: &mut SimulatorState) -> usize {
+        // TODO: Do
         match self {
             _ => 2,
         }
@@ -312,60 +310,203 @@ impl Instruction {
             Instruction::Trap => {
                 state.running = false;
                 Default::default()
-            }
-            Instruction::PushIntegerRegister { rx } => todo!(),
-            Instruction::PushFloatingPointRegister { fx } => todo!(),
-            Instruction::PopIntegerRegister { rx } => todo!(),
-            Instruction::PopFloatingPointRegister { fx } => todo!(),
-            Instruction::SwapRegister { rx, fy } => todo!(),
-            Instruction::Stall { rx } => todo!(),
-            Instruction::RegisterJump { condition, rx } => todo!(),
-            Instruction::IndirectJump {
-                condition,
-                rx,
-                i,
-                s,
-            } => todo!(),
-            Instruction::IndirectwithRegisterOffsetJump {
-                condition,
-                rx,
-                ro,
-                s,
-            } => todo!(),
-            Instruction::RelativeJump { condition, rx } => {
-                let pc = state.registers[Register::PC as usize];
+            },
+            Instruction::PushIntegerRegister { rx } => {
+                let sp = state.registers[Register::SP as usize];
                 let val_rx = state.registers[*rx as usize];
-                // TODO: Overflow bit
-                // TODO: Check condition
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, sp, val_rx),
+                    writeback: vec![
+                        WritebackRegister::Standard(Register::SP, Some(sp + 1)),
+                    ],
+                }
+            },
+            Instruction::PushFloatingPointRegister { fx } => {
+                let sp = state.registers[Register::SP as usize];
+                let val_fx = state.f_registers[*fx as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, sp, raw_cast_from_f32(val_fx)),
+                    writeback: vec![
+                        WritebackRegister::Standard(Register::SP, Some(sp + 1)),
+                    ],
+                }
+            },
+            Instruction::PopIntegerRegister { rx } => {
+                let sp = state.registers[Register::SP as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, sp),
+                    writeback: vec![
+                        WritebackRegister::Standard(*rx, None),
+                        WritebackRegister::Standard(Register::SP, Some(sp - 1)),
+                    ],
+                }
+            },
+            Instruction::PopFloatingPointRegister { fx } => {
+                let sp = state.registers[Register::SP as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, sp),
+                    writeback: vec![
+                        WritebackRegister::FloatingPoint(*fx, None),
+                        WritebackRegister::Standard(Register::SP, Some(sp - 1)),
+                    ],
+                }
+            },
+            Instruction::SwapRegister { rx, fy } => {
+                let val_rx = state.registers[*rx as usize];
+                let val_fy = state.f_registers[*fy as usize];
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(Register::PC, Some(pc + val_rx))],
+                    writeback: vec![
+                        WritebackRegister::Standard(*rx, Some(raw_cast_from_f32(val_fy))),
+                        WritebackRegister::FloatingPoint(*fy, Some(val_rx)),
+                    ],
                 }
-            }
-            Instruction::ImmediateJump { condition, label } => {
-                // TODO: Check condition
-                ExecuteResult {
-                    memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(Register::PC, Some(*label))],
+            },
+            Instruction::Stall { .. } => Default::default(),
+            Instruction::RegisterJump { l, condition, rx } => {
+                let st: u32 = state.registers[Register::ST as usize];
+                if condition.check(st) {
+                    let val_rx = state.registers[*rx as usize];
+                    let mut writeback = vec![
+                        WritebackRegister::Standard(Register::PC, Some(val_rx)),
+                    ];
+
+                    if *l {
+                        let pc = state.registers[Register::PC as usize];
+                        writeback.push(WritebackRegister::Standard(Register::LR, Some(pc)));
+                    };
+
+                    ExecuteResult {
+                        memory: MemoryAction::None,
+                        writeback,
+                    }
+                } else {
+                    Default::default()
                 }
-            }
-            Instruction::ImmediateRelativeJump { condition, offset } => todo!(),
-            Instruction::RegisterJumpwithLink { condition, rx } => todo!(),
-            Instruction::IndirectJumpwithLink {
+            },
+            Instruction::IndirectJump {
+                l,
                 condition,
                 rx,
                 i,
                 s,
-            } => todo!(),
-            Instruction::IndirectwithRegisterOffsetJumpwithLink {
+            } => {
+                let st: u32 = state.registers[Register::ST as usize];
+                if condition.check(st) {
+                    let val_rx = state.registers[*rx as usize];
+                    let mut writeback = vec![
+                        WritebackRegister::Standard(Register::PC, None),
+                    ];
+
+                    if *l {
+                        let pc = state.registers[Register::PC as usize];
+                        writeback.push(WritebackRegister::Standard(Register::LR, Some(pc)));
+                    };
+
+                    ExecuteResult {
+                        memory: MemoryAction::Read(MemoryBank::Program, val_rx + (*i << *s)),
+                        writeback,
+                    }
+                } else {
+                    Default::default()
+                }
+            },
+            Instruction::IndirectwithRegisterOffsetJump {
+                l,
                 condition,
                 rx,
                 ro,
                 s,
-            } => todo!(),
-            Instruction::RelativeJumpwithLink { condition, rx } => todo!(),
-            Instruction::ImmediateJumpwithLink { condition, label } => todo!(),
-            Instruction::ImmediateRelativeJumpwithLink { condition, offset } => todo!(),
+            } => {
+                let st: u32 = state.registers[Register::ST as usize];
+                if condition.check(st) {
+                    let val_rx = state.registers[*rx as usize];
+                    let val_ro = state.registers[*ro as usize];
+                    let mut writeback = vec![
+                        WritebackRegister::Standard(Register::PC, None),
+                    ];
+
+                    if *l {
+                        let pc = state.registers[Register::PC as usize];
+                        writeback.push(WritebackRegister::Standard(Register::LR, Some(pc)));
+                    };
+
+                    ExecuteResult {
+                        memory: MemoryAction::Read(MemoryBank::Program, val_rx + (val_ro << *s)),
+                        writeback,
+                    }
+                } else {
+                    Default::default()
+                }
+            },
+            Instruction::RelativeJump { l, condition, rx } => {
+                let st: u32 = state.registers[Register::ST as usize];
+                if condition.check(st) {
+                    let pc = state.registers[Register::PC as usize];
+                    let val_rx = state.registers[*rx as usize];
+                    let mut writeback = vec![
+                        WritebackRegister::Standard(Register::PC, Some(pc + val_rx)),
+                    ];
+
+                    if *l {
+                        let pc = state.registers[Register::PC as usize];
+                        writeback.push(WritebackRegister::Standard(Register::LR, Some(pc)));
+                    };
+
+                    ExecuteResult {
+                        memory: MemoryAction::None,
+                        writeback,
+                    }
+                } else {
+                    Default::default()
+                }
+            },
+            Instruction::ImmediateJump { l, condition, label } => {
+                let st: u32 = state.registers[Register::ST as usize];
+                if condition.check(st) {
+                    let mut writeback = vec![
+                        WritebackRegister::Standard(Register::PC, Some(*label)),
+                    ];
+
+                    if *l {
+                        let pc = state.registers[Register::PC as usize];
+                        writeback.push(WritebackRegister::Standard(Register::LR, Some(pc)));
+                    };
+
+                    ExecuteResult {
+                        memory: MemoryAction::None,
+                        writeback,
+                    }
+                } else {
+                    Default::default()
+                }
+            },
+            Instruction::ImmediateRelativeJump { l, condition, offset } => {
+                let st: u32 = state.registers[Register::ST as usize];
+                if condition.check(st) {
+                    let pc = state.registers[Register::PC as usize];
+
+                    let mut writeback = Vec::new();
+
+                    if *offset < 0 {
+                        writeback.push(WritebackRegister::Standard(Register::PC, Some(pc - raw_cast_from_i32(-(*offset)))));
+                    } else {
+                        writeback.push(WritebackRegister::Standard(Register::PC, Some(pc + raw_cast_from_i32(*offset))));
+                    }
+
+                    if *l {
+                        let pc = state.registers[Register::PC as usize];
+                        writeback.push(WritebackRegister::Standard(Register::LR, Some(pc)));
+                    };
+
+                    ExecuteResult {
+                        memory: MemoryAction::None,
+                        writeback,
+                    }
+                } else {
+                    Default::default()
+                }
+            },
             Instruction::IntegerLoadLow { rx, value } => {
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
@@ -375,7 +516,7 @@ impl Instruction {
                         Some((val_rx & 0xFFFF0000) | *value),
                     )],
                 }
-            }
+            },
             Instruction::IntegerLoadHigh { rx, value } => {
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
@@ -385,7 +526,7 @@ impl Instruction {
                         Some((val_rx & 0x0000FFFF) | *value),
                     )],
                 }
-            }
+            },
             Instruction::SwapIntegerRegisters { rx, ry } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_ry = state.registers[*ry as usize];
@@ -396,41 +537,99 @@ impl Instruction {
                         WritebackRegister::Standard(*ry, Some(val_rx)),
                     ],
                 }
-            }
+            },
             Instruction::CopyIntegerRegister { rx, ry } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry))],
                 }
-            }
-            Instruction::LoadIntegerRegisterIndirect { rx, ry, i, s } => todo!(),
-            Instruction::LoadIntegerRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => todo!(),
-            Instruction::LoadIntegerRegisterIndirectProgram { rx, ry, i, s } => todo!(),
+            },
+            Instruction::LoadIntegerRegisterIndirect { rx, ry, i, s } => {
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, val_ry + (*i << *s)),
+                    writeback: vec![WritebackRegister::Standard(*rx, None)],
+                }
+            },
+            Instruction::LoadIntegerRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => {
+                let val_ry = state.registers[*ry as usize];
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, val_ry + (val_ro << *s)),
+                    writeback: vec![WritebackRegister::Standard(*rx, None)],
+                }
+            },
+            Instruction::LoadIntegerRegisterIndirectProgram { rx, ry, i, s } => {
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Program, val_ry + (*i << *s)),
+                    writeback: vec![WritebackRegister::Standard(*rx, None)],
+                }
+            },
             Instruction::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, ry, ro, s } => {
-                todo!()
-            }
-            Instruction::StoreIntegerRegisterIndirect { rx, ry, i, s } => todo!(),
+                let val_ry = state.registers[*ry as usize];
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Program, val_ry + (val_ro << *s)),
+                    writeback: vec![WritebackRegister::Standard(*rx, None)],
+                }
+            },
+            Instruction::StoreIntegerRegisterIndirect { rx, ry, i, s } => {
+                let val_rx = state.registers[*rx as usize];
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, val_rx + (*i << *s), val_ry),
+                    writeback: Vec::new(),
+                }
+            },
             Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect {
                 rx,
                 ry,
                 ro,
                 s,
-            } => todo!(),
-            Instruction::StoreIntegerRegisterIndirectProgram { rx, ry, i, s } => todo!(),
+            } => {
+                let val_rx = state.registers[*rx as usize];
+                let val_ry = state.registers[*ry as usize];
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, val_rx + (val_ro << *s), val_ry),
+                    writeback: Vec::new(),
+                }
+            },
+            Instruction::StoreIntegerRegisterIndirectProgram { rx, ry, i, s } => {
+                let val_rx = state.registers[*rx as usize];
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Program, val_rx + (*i << *s), val_ry),
+                    writeback: Vec::new(),
+                }
+            },
             Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetProgram {
                 rx,
                 ry,
                 ro,
                 s,
-            } => todo!(),
-            Instruction::IntegerLoadData { rx, label } => ExecuteResult {
-                memory: MemoryAction::Read(MemoryBank::Data, *label),
-                writeback: vec![WritebackRegister::Standard(*rx, None)],
+            } => {
+                let val_rx = state.registers[*rx as usize];
+                let val_ry = state.registers[*ry as usize];
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Program, val_rx + (val_ro << *s), val_ry),
+                    writeback: Vec::new(),
+                }
             },
-            Instruction::IntegerLoadProgram { rx, label } => ExecuteResult {
-                memory: MemoryAction::Read(MemoryBank::Program, *label),
-                writeback: vec![WritebackRegister::Standard(*rx, None)],
+            Instruction::IntegerLoadData { rx, label } => {
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, *label),
+                    writeback: vec![WritebackRegister::Standard(*rx, None)],
+                }
+            },
+            Instruction::IntegerLoadProgram { rx, label } => {
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Program, *label),
+                    writeback: vec![WritebackRegister::Standard(*rx, None)],
+                }
             },
             Instruction::IntegerStoreData { rx, label } => {
                 let val_rx = state.registers[*rx as usize];
@@ -438,30 +637,116 @@ impl Instruction {
                     memory: MemoryAction::Write(MemoryBank::Data, *label, val_rx),
                     writeback: Vec::new(),
                 }
-            }
+            },
             Instruction::IntegerStoreProgram { rx, label } => {
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Program, *label, val_rx),
                     writeback: Vec::new(),
                 }
-            }
-            Instruction::UnsignedZeroExtend { rx, ry, count } => todo!(),
-            Instruction::SignExtend { rx, ry, count } => todo!(),
-            Instruction::FloatingPointLoadLow { fx, value } => todo!(),
-            Instruction::FloatingPointLoadHigh { fx, value } => todo!(),
-            Instruction::SwapFloatingPointRegisters { fx, fy } => todo!(),
-            Instruction::CopyFloatingPointRegister { fx, fy } => todo!(),
-            Instruction::LoadFloatingPointRegisterIndirect { fx, ry, i, s } => todo!(),
+            },
+            Instruction::UnsignedZeroExtend { rx, ry, count } => {
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry & (0xFFFFFFFF >> *count)))],
+                }
+            },
+            Instruction::SignExtend { rx, ry, count } => {
+                let val_ry = state.registers[*ry as usize];
+                let mut val = val_ry & (0xFFFFFFFF >> *count);
+                if (31 - *count) & 1 == 1 {
+                    val |= !(0xFFFFFFFF >> *count);
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val))],
+                }
+            },
+            Instruction::FloatingPointLoadLow { fx, value } => {
+                let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::FloatingPoint(
+                        *fx,
+                        Some((val_fx & 0xFFFF0000) | *value),
+                    )],
+                }
+            },
+            Instruction::FloatingPointLoadHigh { fx, value } => {
+                let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::FloatingPoint(
+                        *fx,
+                        Some((val_fx & 0x0000FFFF) | *value),
+                    )],
+                }
+            },
+            Instruction::SwapFloatingPointRegisters { fx, fy } => {
+                let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
+                let val_fy = raw_cast_from_f32(state.f_registers[*fy as usize]);
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![
+                        WritebackRegister::FloatingPoint(*fx, Some(val_fy)),
+                        WritebackRegister::FloatingPoint(*fy, Some(val_fx)),
+                    ],
+                }
+            },
+            Instruction::CopyFloatingPointRegister { fx, fy } => {
+                let val_fy = raw_cast_from_f32(state.f_registers[*fy as usize]);
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::FloatingPoint(*fx, Some(val_fy))],
+                }
+            },
+            Instruction::LoadFloatingPointRegisterIndirect { fx, ry, i, s } => {
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, val_ry + (*i << *s)),
+                    writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                }
+            },
             Instruction::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, ry, ro, s } => {
-                todo!()
+                let val_ry = state.registers[*ry as usize];
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, val_ry + (val_ro << *s)),
+                    writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                }
             }
-            Instruction::StoreFloatingPointRegisterIndirect { rx, fy, i, s } => todo!(),
+            Instruction::StoreFloatingPointRegisterIndirect { rx, fy, i, s } => {
+                let val_rx = state.registers[*rx as usize];
+                let val_fy = raw_cast_from_f32(state.f_registers[*fy as usize]);
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, val_rx + (*i << *s), val_fy),
+                    writeback: Vec::new(),
+                }
+            },
             Instruction::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, fy, ro, s } => {
-                todo!()
+                let val_rx = state.registers[*rx as usize];
+                let val_fy = raw_cast_from_f32(state.f_registers[*fy as usize]);
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, val_rx + (val_ro << *s), val_fy),
+                    writeback: Vec::new(),
+                }
             }
-            Instruction::FloatingPointLoadData { fx, label } => todo!(),
-            Instruction::FloatingPointStoreData { fx, label } => todo!(),
+            Instruction::FloatingPointLoadData { fx, label } => {
+                ExecuteResult {
+                    memory: MemoryAction::Read(MemoryBank::Data, *label),
+                    writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                }
+            },
+            Instruction::FloatingPointStoreData { fx, label } => {
+                let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
+                ExecuteResult {
+                    memory: MemoryAction::Write(MemoryBank::Data, *label, val_fx),
+                    writeback: Vec::new(),
+                }
+            },
             Instruction::IntegerCompare { rx, ry } => todo!(),
             Instruction::IntegerCompareSingleAgainstZero { rx } => todo!(),
             Instruction::AddUnsignedInteger { c, rx, ry, rz } => {
@@ -789,7 +1074,7 @@ impl PipelineInner for WritebackStage {
                         }
                         WritebackRegister::FloatingPoint(f_register, value) => {
                             state_ref.f_registers[f_register as usize] =
-                                f32::from_ne_bytes(value.unwrap().to_ne_bytes());
+                                raw_cast_to_f32(value.unwrap());
                         }
                         WritebackRegister::Timer(timer, value) => {
                             state_ref.timers[timer as usize].previous_set = value.unwrap();

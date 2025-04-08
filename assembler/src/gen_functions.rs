@@ -18,7 +18,7 @@ pub fn assemble(input: &str) -> Result<Vec<Instruction>, AssemblerError> {
                 labels.insert(p.as_str().to_owned(), first_pass_index);
                 first_pass_index += 1;
             },
-            Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_BL_26 | Rule::instruction_BL_27 | Rule::instruction_BL_28 | Rule::instruction_BRL_29 | Rule::instruction_BL_2a | Rule::instruction_BOL_2b | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_ADD_82 | Rule::instruction_SUB_83 | Rule::instruction_MUL_84 | Rule::instruction_DIV_85 | Rule::instruction_MOD_86 | Rule::instruction_ADDS_87 | Rule::instruction_SUBS_88 | Rule::instruction_MULS_89 | Rule::instruction_DIVS_8a | Rule::instruction_MODS_8b | Rule::instruction_AND_8c | Rule::instruction_OR_8d | Rule::instruction_NOT_8e | Rule::instruction_XOR_8f | Rule::instruction_LSL_90 | Rule::instruction_LSR_91 | Rule::instruction_ASL_92 | Rule::instruction_ASR_93 | Rule::instruction_RTR_94 | Rule::instruction_LSL_95 | Rule::instruction_LSR_96 | Rule::instruction_ASL_97 | Rule::instruction_ASR_98 | Rule::instruction_RTR_99 | Rule::instruction_MUS_9a | Rule::instruction_MSU_9b | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {
+            Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_ADD_82 | Rule::instruction_SUB_83 | Rule::instruction_MUL_84 | Rule::instruction_DIV_85 | Rule::instruction_MOD_86 | Rule::instruction_ADDS_87 | Rule::instruction_SUBS_88 | Rule::instruction_MULS_89 | Rule::instruction_DIVS_8a | Rule::instruction_MODS_8b | Rule::instruction_AND_8c | Rule::instruction_OR_8d | Rule::instruction_NOT_8e | Rule::instruction_XOR_8f | Rule::instruction_LSL_90 | Rule::instruction_LSR_91 | Rule::instruction_ASL_92 | Rule::instruction_ASR_93 | Rule::instruction_RTR_94 | Rule::instruction_LSL_95 | Rule::instruction_LSR_96 | Rule::instruction_ASL_97 | Rule::instruction_ASR_98 | Rule::instruction_RTR_99 | Rule::instruction_MUS_9a | Rule::instruction_MSU_9b | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {
                 first_pass_index += 1;
             },
             _ => unreachable!(),
@@ -65,83 +65,49 @@ pub fn assemble(input: &str) -> Result<Vec<Instruction>, AssemblerError> {
             }
             Rule::instruction_B_20 => {
                 let mut iter = p.into_inner();
+                let l = iter.next().unwrap().as_str().len() > 0;
                 let condition = iter.next().unwrap().as_str().parse()?;
                 let rx = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::RegisterJump { condition, rx });
+                instructions.push(Instruction::RegisterJump { l, condition, rx });
             }
             Rule::instruction_B_21 => {
                 let mut iter = p.into_inner();
+                let l = iter.next().unwrap().as_str().len() > 0;
                 let condition = iter.next().unwrap().as_str().parse()?;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let i = parse_number(iter.next().unwrap().as_str())?;
                 let s = parse_number(iter.next().unwrap().as_str())?;
-                instructions.push(Instruction::IndirectJump { condition, rx, i, s });
+                instructions.push(Instruction::IndirectJump { l, condition, rx, i, s });
             }
             Rule::instruction_B_22 => {
                 let mut iter = p.into_inner();
+                let l = iter.next().unwrap().as_str().len() > 0;
                 let condition = iter.next().unwrap().as_str().parse()?;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ro = iter.next().unwrap().as_str().parse()?;
                 let s = parse_number(iter.next().unwrap().as_str())?;
-                instructions.push(Instruction::IndirectwithRegisterOffsetJump { condition, rx, ro, s });
+                instructions.push(Instruction::IndirectwithRegisterOffsetJump { l, condition, rx, ro, s });
             }
             Rule::instruction_BR_23 => {
                 let mut iter = p.into_inner();
+                let l = iter.next().unwrap().as_str().len() > 0;
                 let condition = iter.next().unwrap().as_str().parse()?;
                 let rx = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::RelativeJump { condition, rx });
+                instructions.push(Instruction::RelativeJump { l, condition, rx });
             }
             Rule::instruction_B_24 => {
                 let mut iter = p.into_inner();
+                let l = iter.next().unwrap().as_str().len() > 0;
                 let condition = iter.next().unwrap().as_str().parse()?;
                 let label = parse_label(iter.next().unwrap().as_str(), &labels)?;
-                instructions.push(Instruction::ImmediateJump { condition, label });
+                instructions.push(Instruction::ImmediateJump { l, condition, label });
             }
             Rule::instruction_BO_25 => {
                 let mut iter = p.into_inner();
+                let l = iter.next().unwrap().as_str().len() > 0;
                 let condition = iter.next().unwrap().as_str().parse()?;
                 let offset = parse_signed_number(iter.next().unwrap().as_str())?;
-                instructions.push(Instruction::ImmediateRelativeJump { condition, offset });
-            }
-            Rule::instruction_BL_26 => {
-                let mut iter = p.into_inner();
-                let condition = iter.next().unwrap().as_str().parse()?;
-                let rx = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::RegisterJumpwithLink { condition, rx });
-            }
-            Rule::instruction_BL_27 => {
-                let mut iter = p.into_inner();
-                let condition = iter.next().unwrap().as_str().parse()?;
-                let rx = iter.next().unwrap().as_str().parse()?;
-                let i = parse_number(iter.next().unwrap().as_str())?;
-                let s = parse_number(iter.next().unwrap().as_str())?;
-                instructions.push(Instruction::IndirectJumpwithLink { condition, rx, i, s });
-            }
-            Rule::instruction_BL_28 => {
-                let mut iter = p.into_inner();
-                let condition = iter.next().unwrap().as_str().parse()?;
-                let rx = iter.next().unwrap().as_str().parse()?;
-                let ro = iter.next().unwrap().as_str().parse()?;
-                let s = parse_number(iter.next().unwrap().as_str())?;
-                instructions.push(Instruction::IndirectwithRegisterOffsetJumpwithLink { condition, rx, ro, s });
-            }
-            Rule::instruction_BRL_29 => {
-                let mut iter = p.into_inner();
-                let condition = iter.next().unwrap().as_str().parse()?;
-                let rx = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::RelativeJumpwithLink { condition, rx });
-            }
-            Rule::instruction_BL_2a => {
-                let mut iter = p.into_inner();
-                let condition = iter.next().unwrap().as_str().parse()?;
-                let label = parse_label(iter.next().unwrap().as_str(), &labels)?;
-                instructions.push(Instruction::ImmediateJumpwithLink { condition, label });
-            }
-            Rule::instruction_BOL_2b => {
-                let mut iter = p.into_inner();
-                let condition = iter.next().unwrap().as_str().parse()?;
-                let offset = parse_signed_number(iter.next().unwrap().as_str())?;
-                instructions.push(Instruction::ImmediateRelativeJumpwithLink { condition, offset });
+                instructions.push(Instruction::ImmediateRelativeJump { l, condition, offset });
             }
             Rule::instruction_LDL_40 => {
                 let mut iter = p.into_inner();

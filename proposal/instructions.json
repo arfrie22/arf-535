@@ -167,12 +167,20 @@
                 "assembly": {
                     "pneumonic": "B",
                     "arguments": [
+                        { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
                         { "type": "register", "argument": "Rx" }
                     ]
                 },
                 "description": "Sets the program counter to Rx.",
                 "bits": [
+                    {
+                        "short": "l",
+                        "long": "Link Register Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Condition",
                         "long": "Condition code bit",
@@ -188,7 +196,8 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": true, "write": false }
+                        { "number": 28, "read": false, "write": true },
+                        { "number": 30, "read": true, "write": false }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -199,12 +208,20 @@
                 "assembly": {
                     "pneumonic": "B",
                     "arguments": [
+                        { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
                         { "type": "data_shift_imm", "argument": "Rx" }
                     ]
                 },
                 "description": "Sets the program counter to the value stored at the memory location in Rx offset by I shifted by S.",
                 "bits": [
+                    {
+                        "short": "l",
+                        "long": "Link Register Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Condition",
                         "long": "Condition code bit",
@@ -222,7 +239,8 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": true, "write": false }
+                        { "number": 28, "read": false, "write": true },
+                        { "number": 30, "read": true, "write": false }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -233,12 +251,20 @@
                 "assembly": {
                     "pneumonic": "B",
                     "arguments": [
+                        { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
                         { "type": "data_shift_register", "argument": "Rx" }
                     ]
                 },
                 "description": "Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.",
                 "bits": [
+                    {
+                        "short": "l",
+                        "long": "Link Register Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Condition",
                         "long": "Condition code bit",
@@ -262,7 +288,8 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": true, "write": false }
+                        { "number": 28, "read": false, "write": true },
+                        { "number": 30, "read": true, "write": false }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -273,12 +300,20 @@
                 "assembly": {
                     "pneumonic": "BR",
                     "arguments": [
+                        { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
                         { "type": "register", "argument": "Rx" }
                     ]
                 },
                 "description": "Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.",
                 "bits": [
+                    {
+                        "short": "l",
+                        "long": "Link Register Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Condition",
                         "long": "Condition code bit",
@@ -294,7 +329,8 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": true, "write": false }
+                        { "number": 28, "read": true, "write": true },
+                        { "number": 30, "read": true, "write": false }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -305,12 +341,20 @@
                 "assembly": {
                     "pneumonic": "B",
                     "arguments": [
+                        { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
                         { "type": "p_address", "argument": "_label_" }
                     ]
                 },
                 "description": "Sets the program counter to the address of the label.",
                 "bits": [
+                    {
+                        "short": "l",
+                        "long": "Link Register Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Condition",
                         "long": "Condition code bit",
@@ -324,7 +368,8 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": true, "write": false }
+                        { "number": 28, "read": false, "write": true },
+                        { "number": 30, "read": true, "write": false }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -335,6 +380,7 @@
                 "assembly": {
                     "pneumonic": "BO",
                     "arguments": [
+                        { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
                         { "type": "signed_number", "argument": "_offset_" }
                     ]
@@ -342,203 +388,12 @@
                 "description": "Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number).",
                 "bits": [
                     {
-                        "short": "Condition",
-                        "long": "Condition code bit",
-                        "count": 5
+                        "short": "l",
+                        "long": "Link Register Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
                     },
-                    {
-                        "short": "_offset_",
-                        "long": "Signed Offset",
-                        "count": 16
-                    }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
-            },
-            {
-                "name": "Register Jump with Link",
-                "assembly": {
-                    "pneumonic": "BL",
-                    "arguments": [
-                        { "type": "condition", "argument": "Condition" },
-                        { "type": "register", "argument": "Rx" }
-                    ]
-                },
-                "description": "Sets the link register to (PC + 1). Sets the program counter to Rx.",
-                "bits": [
-                    {
-                        "short": "Condition",
-                        "long": "Condition code bit",
-                        "count": 5
-                    },
-                    {
-                        "short": "Rx",
-                        "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
-                    }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
-            },
-            {
-                "name": "Indirect Jump with Link",
-                "assembly": {
-                    "pneumonic": "BL",
-                    "arguments": [
-                        { "type": "condition", "argument": "Condition" },
-                        { "type": "data_shift_imm", "argument": "Rx" }
-                    ]
-                },
-                "description": "Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the I shifted by S.",
-                "bits": [
-                    {
-                        "short": "Condition",
-                        "long": "Condition code bit",
-                        "count": 5
-                    },
-                    {
-                        "short": "Rx",
-                        "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
-                    },
-                    { "short": "I", "long": "Offset", "count": 5 },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
-            },
-            {
-                "name": "Indirect with Register Offset Jump with Link",
-                "assembly": {
-                    "pneumonic": "BL",
-                    "arguments": [
-                        { "type": "condition", "argument": "Condition" },
-                        { "type": "data_shift_register", "argument": "Rx" }
-                    ]
-                },
-                "description": "Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.",
-                "bits": [
-                    {
-                        "short": "Condition",
-                        "long": "Condition code bit",
-                        "count": 5
-                    },
-                    {
-                        "short": "Rx",
-                        "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
-                    },
-                    {
-                        "short": "Ro",
-                        "long": "Offset Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
-                    },
-                    { "short": "S", "long": "Shift", "count": 4 }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
-            },
-            {
-                "name": "Relative Jump with Link",
-                "assembly": {
-                    "pneumonic": "BRL",
-                    "arguments": [
-                        { "type": "condition", "argument": "Condition" },
-                        { "type": "register", "argument": "Rx" }
-                    ]
-                },
-                "description": "Sets the link register to (PC + 1). Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.",
-                "bits": [
-                    {
-                        "short": "Condition",
-                        "long": "Condition code bit",
-                        "count": 5
-                    },
-                    {
-                        "short": "Rx",
-                        "long": "Source Register",
-                        "count": 5,
-                        "read": true,
-                        "write": false
-                    }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
-            },
-            {
-                "name": "Immediate Jump with Link",
-                "assembly": {
-                    "pneumonic": "BL",
-                    "arguments": [
-                        { "type": "condition", "argument": "Condition" },
-                        { "type": "p_address", "argument": "_label_" }
-                    ]
-                },
-                "description": "Sets the link register to (PC + 1). Sets the program counter to label.",
-                "bits": [
-                    {
-                        "short": "Condition",
-                        "long": "Condition code bit",
-                        "count": 5
-                    },
-                    {
-                        "short": "_label_",
-                        "long": "Destination Address",
-                        "count": 16
-                    }
-                ],
-                "extra_reg": {
-                    "registers": [
-                        { "number": 28, "read": true, "write": false }
-                    ],
-                    "f_registers": [],
-                    "timers": []
-                }
-            },
-            {
-                "name": "Immediate Relative Jump with Link",
-                "assembly": {
-                    "pneumonic": "BOL",
-                    "arguments": [
-                        { "type": "condition", "argument": "Condition" },
-                        { "type": "signed_number", "argument": "_offset_" }
-                    ]
-                },
-                "description": "Sets the link register to (PC + 1). Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number that is sign extended).",
-                "bits": [
                     {
                         "short": "Condition",
                         "long": "Condition code bit",
@@ -552,7 +407,8 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": true, "write": false }
+                        { "number": 28, "read": true, "write": true },
+                        { "number": 30, "read": true, "write": false }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -1114,7 +970,7 @@
                         { "type": "number", "argument": "_count_" }
                     ]
                 },
-                "description": "Stores the value of Ry into Rx where the top 31 - _count_ bits are zero.",
+                "description": "Stores the value of Ry into Rx where the top _count_ bits are zero.",
                 "bits": [
                     {
                         "short": "Rx",
@@ -1148,7 +1004,7 @@
                         { "type": "number", "argument": "_count_" }
                     ]
                 },
-                "description": "Stores the value of Ry into Rx where the top 31 - _count_ bits are sign extended.",
+                "description": "Stores the value of Ry into Rx where the top _count_ bits are sign extended.",
                 "bits": [
                     {
                         "short": "Rx",

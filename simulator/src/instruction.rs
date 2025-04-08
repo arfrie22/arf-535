@@ -1,4 +1,4 @@
-use crate::{enums::{Condition, FPRegister, Register, Timer}, RegisterSet};
+use crate::{enums::{Condition, FPRegister, Register, Timer}, raw_cast_from_i32, raw_cast_to_i32, RegisterSet};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Instruction {
@@ -10,18 +10,12 @@ pub enum Instruction {
     PopFloatingPointRegister { fx: FPRegister },
     SwapRegister { rx: Register, fy: FPRegister },
     Stall { rx: Register },
-    RegisterJump { condition: Condition, rx: Register },
-    IndirectJump { condition: Condition, rx: Register, i: u32, s: u32 },
-    IndirectwithRegisterOffsetJump { condition: Condition, rx: Register, ro: Register, s: u32 },
-    RelativeJump { condition: Condition, rx: Register },
-    ImmediateJump { condition: Condition, label: u32 },
-    ImmediateRelativeJump { condition: Condition, offset: i32 },
-    RegisterJumpwithLink { condition: Condition, rx: Register },
-    IndirectJumpwithLink { condition: Condition, rx: Register, i: u32, s: u32 },
-    IndirectwithRegisterOffsetJumpwithLink { condition: Condition, rx: Register, ro: Register, s: u32 },
-    RelativeJumpwithLink { condition: Condition, rx: Register },
-    ImmediateJumpwithLink { condition: Condition, label: u32 },
-    ImmediateRelativeJumpwithLink { condition: Condition, offset: i32 },
+    RegisterJump { l: bool, condition: Condition, rx: Register },
+    IndirectJump { l: bool, condition: Condition, rx: Register, i: u32, s: u32 },
+    IndirectwithRegisterOffsetJump { l: bool, condition: Condition, rx: Register, ro: Register, s: u32 },
+    RelativeJump { l: bool, condition: Condition, rx: Register },
+    ImmediateJump { l: bool, condition: Condition, label: u32 },
+    ImmediateRelativeJump { l: bool, condition: Condition, offset: i32 },
     IntegerLoadLow { rx: Register, value: u32 },
     IntegerLoadHigh { rx: Register, value: u32 },
     SwapIntegerRegisters { rx: Register, ry: Register },
@@ -102,18 +96,12 @@ impl From<u32> for Instruction {
             0x04 => Self::PopFloatingPointRegister { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0x05 => Self::SwapRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0x06 => Self::Stall { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
-            0x20 => Self::RegisterJump { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x21 => Self::IndirectJump { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), i: (value >> 9) & 0x1f, s: (value >> 5) & 0xf },
-            0x22 => Self::IndirectwithRegisterOffsetJump { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), ro: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap(), s: (value >> 5) & 0xf },
-            0x23 => Self::RelativeJump { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x24 => Self::ImmediateJump { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), label: (value >> 3) & 0xffff },
-            0x25 => Self::ImmediateRelativeJump { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), offset: (i32::from_ne_bytes(((value >> 3) & 0xffff).to_ne_bytes())) },
-            0x26 => Self::RegisterJumpwithLink { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x27 => Self::IndirectJumpwithLink { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), i: (value >> 9) & 0x1f, s: (value >> 5) & 0xf },
-            0x28 => Self::IndirectwithRegisterOffsetJumpwithLink { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), ro: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap(), s: (value >> 5) & 0xf },
-            0x29 => Self::RelativeJumpwithLink { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x2a => Self::ImmediateJumpwithLink { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), label: (value >> 3) & 0xffff },
-            0x2b => Self::ImmediateRelativeJumpwithLink { condition: Condition::try_from(((value as usize) >> 19) & 0x1f).unwrap(), offset: (i32::from_ne_bytes(((value >> 3) & 0xffff).to_ne_bytes())) },
+            0x20 => Self::RegisterJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0x21 => Self::IndirectJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), i: (value >> 8) & 0x1f, s: (value >> 4) & 0xf },
+            0x22 => Self::IndirectwithRegisterOffsetJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), ro: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap(), s: (value >> 4) & 0xf },
+            0x23 => Self::RelativeJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0x24 => Self::ImmediateJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), label: (value >> 2) & 0xffff },
+            0x25 => Self::ImmediateRelativeJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), offset: raw_cast_to_i32((value >> 2) & 0xffff) },
             0x40 => Self::IntegerLoadLow { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), value: (value >> 3) & 0xffff },
             0x41 => Self::IntegerLoadHigh { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), value: (value >> 3) & 0xffff },
             0x42 => Self::SwapIntegerRegisters { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
@@ -197,18 +185,12 @@ impl Into<u32> for Instruction {
             Self::PopFloatingPointRegister { fx } => (0x04 << 24)| ((fx as u32) << 19),
             Self::SwapRegister { rx, fy } => (0x05 << 24)| ((rx as u32) << 19)| ((fy as u32) << 14),
             Self::Stall { rx } => (0x06 << 24)| ((rx as u32) << 19),
-            Self::RegisterJump { condition, rx } => (0x20 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14),
-            Self::IndirectJump { condition, rx, i, s } => (0x21 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14)| (i << 9)| (s << 5),
-            Self::IndirectwithRegisterOffsetJump { condition, rx, ro, s } => (0x22 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14)| ((ro as u32) << 9)| (s << 5),
-            Self::RelativeJump { condition, rx } => (0x23 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14),
-            Self::ImmediateJump { condition, label } => (0x24 << 24)| ((condition as u32) << 19)| (label << 3),
-            Self::ImmediateRelativeJump { condition, offset } => (0x25 << 24)| ((condition as u32) << 19)| ((u32::from_ne_bytes((offset).to_ne_bytes())) << 3),
-            Self::RegisterJumpwithLink { condition, rx } => (0x26 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14),
-            Self::IndirectJumpwithLink { condition, rx, i, s } => (0x27 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14)| (i << 9)| (s << 5),
-            Self::IndirectwithRegisterOffsetJumpwithLink { condition, rx, ro, s } => (0x28 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14)| ((ro as u32) << 9)| (s << 5),
-            Self::RelativeJumpwithLink { condition, rx } => (0x29 << 24)| ((condition as u32) << 19)| ((rx as u32) << 14),
-            Self::ImmediateJumpwithLink { condition, label } => (0x2a << 24)| ((condition as u32) << 19)| (label << 3),
-            Self::ImmediateRelativeJumpwithLink { condition, offset } => (0x2b << 24)| ((condition as u32) << 19)| ((u32::from_ne_bytes((offset).to_ne_bytes())) << 3),
+            Self::RegisterJump { l, condition, rx } => (0x20 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13),
+            Self::IndirectJump { l, condition, rx, i, s } => (0x21 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13)| (i << 8)| (s << 4),
+            Self::IndirectwithRegisterOffsetJump { l, condition, rx, ro, s } => (0x22 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13)| ((ro as u32) << 8)| (s << 4),
+            Self::RelativeJump { l, condition, rx } => (0x23 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13),
+            Self::ImmediateJump { l, condition, label } => (0x24 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| (label << 2),
+            Self::ImmediateRelativeJump { l, condition, offset } => (0x25 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| (raw_cast_from_i32(offset) << 2),
             Self::IntegerLoadLow { rx, value } => (0x40 << 24)| ((rx as u32) << 19)| (value << 3),
             Self::IntegerLoadHigh { rx, value } => (0x41 << 24)| ((rx as u32) << 19)| (value << 3),
             Self::SwapIntegerRegisters { rx, ry } => (0x42 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
@@ -292,18 +274,12 @@ impl Instruction {
             Self::PopFloatingPointRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::SwapRegister { rx, fy } => RegisterSet{ registers: vec![*rx], f_registers: vec![*fy], timers: vec![]  },
             Self::Stall { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::RegisterJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::IndirectJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::IndirectwithRegisterOffsetJump { rx, ro, .. } => RegisterSet{ registers: vec![*rx, *ro, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::RelativeJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateJump { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateRelativeJump { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::RegisterJumpwithLink { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::IndirectJumpwithLink { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::IndirectwithRegisterOffsetJumpwithLink { rx, ro, .. } => RegisterSet{ registers: vec![*rx, *ro, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::RelativeJumpwithLink { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateJumpwithLink { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateRelativeJumpwithLink { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::RegisterJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::IndirectJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::IndirectwithRegisterOffsetJump { rx, ro, .. } => RegisterSet{ registers: vec![*rx, *ro, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::RelativeJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(28).unwrap(), Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::ImmediateJump { .. } => RegisterSet{ registers: vec![Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::ImmediateRelativeJump { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap(), Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::IntegerLoadLow { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::IntegerLoadHigh { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::SwapIntegerRegisters { rx, ry } => RegisterSet{ registers: vec![*rx, *ry], f_registers: vec![], timers: vec![]  },
@@ -377,93 +353,351 @@ impl Instruction {
     }
     pub fn write_registers(&self) -> RegisterSet {
         match self {
-            Self::Trap => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::PushIntegerRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::PushFloatingPointRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::PopIntegerRegister { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::PopFloatingPointRegister { fx } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::SwapRegister { rx, fy } => RegisterSet{ registers: vec![*rx], f_registers: vec![*fy], timers: vec![]  },
-            Self::Stall { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::RegisterJump { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IndirectJump { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IndirectwithRegisterOffsetJump { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::RelativeJump { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateJump { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateRelativeJump { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::RegisterJumpwithLink { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IndirectJumpwithLink { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IndirectwithRegisterOffsetJumpwithLink { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::RelativeJumpwithLink { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateJumpwithLink { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::ImmediateRelativeJumpwithLink { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IntegerLoadLow { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::IntegerLoadHigh { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::SwapIntegerRegisters { rx, ry } => RegisterSet{ registers: vec![*rx, *ry], f_registers: vec![], timers: vec![]  },
-            Self::CopyIntegerRegister { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LoadIntegerRegisterIndirect { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LoadIntegerRegisterIndirectwithRegisterOffset { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LoadIntegerRegisterIndirectProgram { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::StoreIntegerRegisterIndirect { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::StoreIntegerRegisterIndirectProgram { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::StoreIntegerRegisterIndirectwithRegisterOffsetProgram { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::IntegerLoadData { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::IntegerLoadProgram { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::IntegerStoreData { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IntegerStoreProgram { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::UnsignedZeroExtend { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::SignExtend { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::FloatingPointLoadLow { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::FloatingPointLoadHigh { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::SwapFloatingPointRegisters { fx, fy } => RegisterSet{ registers: vec![], f_registers: vec![*fx, *fy], timers: vec![]  },
-            Self::CopyFloatingPointRegister { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::LoadFloatingPointRegisterIndirect { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::StoreFloatingPointRegisterIndirect { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::FloatingPointLoadData { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::FloatingPointStoreData { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::IntegerCompare { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::IntegerCompareSingleAgainstZero { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::AddUnsignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::SubtractUnsignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::MultiplyUnsignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::DivideUnsignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::ModuloUnsignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::AddSignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::SubtractSignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::MultiplySignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::DivideSignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::ModuloSignedInteger { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::BitwiseAND { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::BitwiseOR { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::BitwiseNOT { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::BitwiseXOR { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LogicalShiftLeft { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LogicalShiftRight { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::ArithmeticShiftLeft { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::ArithmeticShiftRight { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::RotateRight { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LogicalShiftLeftRegister { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::LogicalShiftRightRegister { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::ArithmeticShiftLeftRegister { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::ArithmeticShiftRightRegister { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::RotateRightRegister { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::MapUnsignedToSigned { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::MapSignedToUnsigned { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::FloatingPointCompare { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::FloatingPointCompareSingleAgainstZero { .. } => RegisterSet{ registers: vec![Register::try_from(28).unwrap()], f_registers: vec![], timers: vec![]  },
-            Self::AddFloatingPoint { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::SubtractFloatingPoint { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::MultiplyFloatingPoint { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::DivideFloatingPoint { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::CasttoFloat { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::CastfromFloat { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::SetTimer { tx, .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*tx]  },
-            Self::GetCurrentTimer { rx, .. } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::CheckTimer { tx } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*tx]  },
-            Self::ClearTimer { tx } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*tx]  },
+            Self::Trap => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::PushIntegerRegister { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::PushFloatingPointRegister { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::PopIntegerRegister { rx } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::PopFloatingPointRegister { fx } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::SwapRegister { rx, fy } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![*fy], timers: vec![] }
+            },
+            Self::Stall { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::RegisterJump { l, .. } => {
+                let mut registers = vec![Register::try_from(28).unwrap()];
+                if *l {
+                    registers.push(Register::LR);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IndirectJump { l, .. } => {
+                let mut registers = vec![Register::try_from(28).unwrap()];
+                if *l {
+                    registers.push(Register::LR);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IndirectwithRegisterOffsetJump { l, .. } => {
+                let mut registers = vec![Register::try_from(28).unwrap()];
+                if *l {
+                    registers.push(Register::LR);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::RelativeJump { l, .. } => {
+                let mut registers = vec![Register::try_from(28).unwrap()];
+                if *l {
+                    registers.push(Register::LR);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ImmediateJump { l, .. } => {
+                let mut registers = vec![Register::try_from(28).unwrap()];
+                if *l {
+                    registers.push(Register::LR);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ImmediateRelativeJump { l, .. } => {
+                let mut registers = vec![Register::try_from(28).unwrap()];
+                if *l {
+                    registers.push(Register::LR);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerLoadLow { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerLoadHigh { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::SwapIntegerRegisters { rx, ry } => {
+                let registers = vec![*rx, *ry];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::CopyIntegerRegister { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LoadIntegerRegisterIndirect { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LoadIntegerRegisterIndirectwithRegisterOffset { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LoadIntegerRegisterIndirectProgram { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::StoreIntegerRegisterIndirect { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::StoreIntegerRegisterIndirectProgram { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::StoreIntegerRegisterIndirectwithRegisterOffsetProgram { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerLoadData { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerLoadProgram { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerStoreData { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerStoreProgram { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::UnsignedZeroExtend { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::SignExtend { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::FloatingPointLoadLow { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::FloatingPointLoadHigh { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::SwapFloatingPointRegisters { fx, fy } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx, *fy], timers: vec![] }
+            },
+            Self::CopyFloatingPointRegister { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::LoadFloatingPointRegisterIndirect { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::StoreFloatingPointRegisterIndirect { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::FloatingPointLoadData { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::FloatingPointStoreData { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerCompare { .. } => {
+                let registers = vec![Register::try_from(28).unwrap()];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IntegerCompareSingleAgainstZero { .. } => {
+                let registers = vec![Register::try_from(28).unwrap()];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::AddUnsignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::SubtractUnsignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::MultiplyUnsignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::DivideUnsignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ModuloUnsignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::AddSignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::SubtractSignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::MultiplySignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::DivideSignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ModuloSignedInteger { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::BitwiseAND { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::BitwiseOR { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::BitwiseNOT { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::BitwiseXOR { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LogicalShiftLeft { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LogicalShiftRight { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ArithmeticShiftLeft { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ArithmeticShiftRight { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::RotateRight { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LogicalShiftLeftRegister { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::LogicalShiftRightRegister { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ArithmeticShiftLeftRegister { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::ArithmeticShiftRightRegister { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::RotateRightRegister { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::MapUnsignedToSigned { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::MapSignedToUnsigned { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::FloatingPointCompare { .. } => {
+                let registers = vec![Register::try_from(28).unwrap()];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::FloatingPointCompareSingleAgainstZero { .. } => {
+                let registers = vec![Register::try_from(28).unwrap()];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::AddFloatingPoint { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::SubtractFloatingPoint { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::MultiplyFloatingPoint { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::DivideFloatingPoint { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::CasttoFloat { fx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::CastfromFloat { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::SetTimer { tx, .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
+            },
+            Self::GetCurrentTimer { rx, .. } => {
+                let registers = vec![*rx];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::CheckTimer { tx } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
+            },
+            Self::ClearTimer { tx } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
+            },
             Self::Invalid(_value) => Default::default(),
         }
     }
