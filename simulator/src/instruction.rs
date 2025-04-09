@@ -47,15 +47,15 @@ pub enum Instruction {
     IntegerCompare { rx: Register, ry: Register },
     IntegerCompareSingleAgainstZero { rx: Register },
     AddUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
-    SubtractUnsignedInteger { rx: Register, ry: Register, rz: Register },
-    MultiplyUnsignedInteger { rx: Register, ry: Register, rz: Register },
-    DivideUnsignedInteger { rx: Register, ry: Register, rz: Register },
-    ModuloUnsignedInteger { rx: Register, ry: Register, rz: Register },
-    AddSignedInteger { rx: Register, ry: Register, rz: Register },
-    SubtractSignedInteger { rx: Register, ry: Register, rz: Register },
-    MultiplySignedInteger { rx: Register, ry: Register, rz: Register },
-    DivideSignedInteger { rx: Register, ry: Register, rz: Register },
-    ModuloSignedInteger { rx: Register, ry: Register, rz: Register },
+    SubtractUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    MultiplyUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    DivideUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    ModuloUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    AddSignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    SubtractSignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    MultiplySignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    DivideSignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
+    ModuloSignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
     BitwiseAND { rx: Register, ry: Register, rz: Register },
     BitwiseOR { rx: Register, ry: Register, rz: Register },
     BitwiseNOT { rx: Register, ry: Register },
@@ -74,12 +74,12 @@ pub enum Instruction {
     MapSignedToUnsigned { rx: Register, ry: Register },
     FloatingPointCompare { fx: FPRegister, fy: FPRegister },
     FloatingPointCompareSingleAgainstZero { fx: FPRegister },
-    AddFloatingPoint { fx: FPRegister, fy: FPRegister, fz: FPRegister },
-    SubtractFloatingPoint { fx: FPRegister, fy: FPRegister, fz: FPRegister },
-    MultiplyFloatingPoint { fx: FPRegister, fy: FPRegister, fz: FPRegister },
-    DivideFloatingPoint { fx: FPRegister, fy: FPRegister, fz: FPRegister },
-    CasttoFloat { fx: FPRegister, ry: Register },
-    CastfromFloat { rx: Register, fy: FPRegister },
+    AddFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister, fz: FPRegister },
+    SubtractFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister, fz: FPRegister },
+    MultiplyFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister, fz: FPRegister },
+    DivideFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister, fz: FPRegister },
+    CastToFloat { c: bool, fx: FPRegister, ry: Register },
+    CastFromFloat { c: bool, rx: Register, fy: FPRegister },
     SetTimer { tx: Timer, ry: Register },
     GetCurrentTimer { rx: Register, ty: Timer },
     CheckTimer { tx: Timer },
@@ -133,15 +133,15 @@ impl From<u32> for Instruction {
             0x80 => Self::IntegerCompare { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0x81 => Self::IntegerCompareSingleAgainstZero { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0x82 => Self::AddUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x83 => Self::SubtractUnsignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x84 => Self::MultiplyUnsignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x85 => Self::DivideUnsignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x86 => Self::ModuloUnsignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x87 => Self::AddSignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x88 => Self::SubtractSignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x89 => Self::MultiplySignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x8a => Self::DivideSignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x8b => Self::ModuloSignedInteger { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x83 => Self::SubtractUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x84 => Self::MultiplyUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x85 => Self::DivideUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x86 => Self::ModuloUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x87 => Self::AddSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x88 => Self::SubtractSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x89 => Self::MultiplySignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8a => Self::DivideSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8b => Self::ModuloSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
             0x8c => Self::BitwiseAND { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
             0x8d => Self::BitwiseOR { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
             0x8e => Self::BitwiseNOT { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
@@ -160,12 +160,12 @@ impl From<u32> for Instruction {
             0x9b => Self::MapSignedToUnsigned { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xa0 => Self::FloatingPointCompare { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xa1 => Self::FloatingPointCompareSingleAgainstZero { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
-            0xa2 => Self::AddFloatingPoint { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0xa3 => Self::SubtractFloatingPoint { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0xa4 => Self::MultiplyFloatingPoint { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0xa5 => Self::DivideFloatingPoint { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0xa6 => Self::CasttoFloat { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0xa7 => Self::CastfromFloat { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
+            0xa2 => Self::AddFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0xa3 => Self::SubtractFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0xa4 => Self::MultiplyFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0xa5 => Self::DivideFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0xa6 => Self::CastToFloat { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xa7 => Self::CastFromFloat { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
             0xc0 => Self::SetTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xc1 => Self::GetCurrentTimer { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ty: Timer::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xc2 => Self::CheckTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
@@ -222,15 +222,15 @@ impl Into<u32> for Instruction {
             Self::IntegerCompare { rx, ry } => (0x80 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
             Self::IntegerCompareSingleAgainstZero { rx } => (0x81 << 24)| ((rx as u32) << 19),
             Self::AddUnsignedInteger { c, rx, ry, rz } => (0x82 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::SubtractUnsignedInteger { rx, ry, rz } => (0x83 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::MultiplyUnsignedInteger { rx, ry, rz } => (0x84 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::DivideUnsignedInteger { rx, ry, rz } => (0x85 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::ModuloUnsignedInteger { rx, ry, rz } => (0x86 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::AddSignedInteger { rx, ry, rz } => (0x87 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::SubtractSignedInteger { rx, ry, rz } => (0x88 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::MultiplySignedInteger { rx, ry, rz } => (0x89 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::DivideSignedInteger { rx, ry, rz } => (0x8a << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::ModuloSignedInteger { rx, ry, rz } => (0x8b << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::SubtractUnsignedInteger { c, rx, ry, rz } => (0x83 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::MultiplyUnsignedInteger { c, rx, ry, rz } => (0x84 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::DivideUnsignedInteger { c, rx, ry, rz } => (0x85 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::ModuloUnsignedInteger { c, rx, ry, rz } => (0x86 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::AddSignedInteger { c, rx, ry, rz } => (0x87 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::SubtractSignedInteger { c, rx, ry, rz } => (0x88 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::MultiplySignedInteger { c, rx, ry, rz } => (0x89 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::DivideSignedInteger { c, rx, ry, rz } => (0x8a << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::ModuloSignedInteger { c, rx, ry, rz } => (0x8b << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
             Self::BitwiseAND { rx, ry, rz } => (0x8c << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
             Self::BitwiseOR { rx, ry, rz } => (0x8d << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
             Self::BitwiseNOT { rx, ry } => (0x8e << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
@@ -249,12 +249,12 @@ impl Into<u32> for Instruction {
             Self::MapSignedToUnsigned { rx, ry } => (0x9b << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
             Self::FloatingPointCompare { fx, fy } => (0xa0 << 24)| ((fx as u32) << 19)| ((fy as u32) << 14),
             Self::FloatingPointCompareSingleAgainstZero { fx } => (0xa1 << 24)| ((fx as u32) << 19),
-            Self::AddFloatingPoint { fx, fy, fz } => (0xa2 << 24)| ((fx as u32) << 19)| ((fy as u32) << 14)| ((fz as u32) << 9),
-            Self::SubtractFloatingPoint { fx, fy, fz } => (0xa3 << 24)| ((fx as u32) << 19)| ((fy as u32) << 14)| ((fz as u32) << 9),
-            Self::MultiplyFloatingPoint { fx, fy, fz } => (0xa4 << 24)| ((fx as u32) << 19)| ((fy as u32) << 14)| ((fz as u32) << 9),
-            Self::DivideFloatingPoint { fx, fy, fz } => (0xa5 << 24)| ((fx as u32) << 19)| ((fy as u32) << 14)| ((fz as u32) << 9),
-            Self::CasttoFloat { fx, ry } => (0xa6 << 24)| ((fx as u32) << 19)| ((ry as u32) << 14),
-            Self::CastfromFloat { rx, fy } => (0xa7 << 24)| ((rx as u32) << 19)| ((fy as u32) << 14),
+            Self::AddFloatingPoint { c, fx, fy, fz } => (0xa2 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13)| ((fz as u32) << 8),
+            Self::SubtractFloatingPoint { c, fx, fy, fz } => (0xa3 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13)| ((fz as u32) << 8),
+            Self::MultiplyFloatingPoint { c, fx, fy, fz } => (0xa4 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13)| ((fz as u32) << 8),
+            Self::DivideFloatingPoint { c, fx, fy, fz } => (0xa5 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13)| ((fz as u32) << 8),
+            Self::CastToFloat { c, fx, ry } => (0xa6 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((ry as u32) << 13),
+            Self::CastFromFloat { c, rx, fy } => (0xa7 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((fy as u32) << 13),
             Self::SetTimer { tx, ry } => (0xc0 << 24)| ((tx as u32) << 19)| ((ry as u32) << 14),
             Self::GetCurrentTimer { rx, ty } => (0xc1 << 24)| ((rx as u32) << 19)| ((ty as u32) << 14),
             Self::CheckTimer { tx } => (0xc2 << 24)| ((tx as u32) << 19),
@@ -308,8 +308,8 @@ impl Instruction {
             Self::StoreFloatingPointRegisterIndirectwithRegisterOffset { fy, ro, .. } => RegisterSet{ registers: vec![*ro], f_registers: vec![*fy], timers: vec![]  },
             Self::FloatingPointLoadData { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::FloatingPointStoreData { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::IntegerCompare { rx, ry } => RegisterSet{ registers: vec![*rx, *ry], f_registers: vec![], timers: vec![]  },
-            Self::IntegerCompareSingleAgainstZero { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
+            Self::IntegerCompare { rx, ry } => RegisterSet{ registers: vec![*rx, *ry, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::IntegerCompareSingleAgainstZero { rx } => RegisterSet{ registers: vec![*rx, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::AddUnsignedInteger { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
             Self::SubtractUnsignedInteger { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
             Self::MultiplyUnsignedInteger { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
@@ -336,14 +336,14 @@ impl Instruction {
             Self::RotateRightRegister { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
             Self::MapUnsignedToSigned { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
             Self::MapSignedToUnsigned { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
-            Self::FloatingPointCompare { fx, fy } => RegisterSet{ registers: vec![], f_registers: vec![*fx, *fy], timers: vec![]  },
-            Self::FloatingPointCompareSingleAgainstZero { fx } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
+            Self::FloatingPointCompare { fx, fy } => RegisterSet{ registers: vec![Register::try_from(30).unwrap()], f_registers: vec![*fx, *fy], timers: vec![]  },
+            Self::FloatingPointCompareSingleAgainstZero { fx } => RegisterSet{ registers: vec![Register::try_from(30).unwrap()], f_registers: vec![*fx], timers: vec![]  },
             Self::AddFloatingPoint { fy, fz, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy, *fz], timers: vec![]  },
             Self::SubtractFloatingPoint { fy, fz, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy, *fz], timers: vec![]  },
             Self::MultiplyFloatingPoint { fy, fz, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy, *fz], timers: vec![]  },
             Self::DivideFloatingPoint { fy, fz, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy, *fz], timers: vec![]  },
-            Self::CasttoFloat { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
-            Self::CastfromFloat { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::CastToFloat { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
+            Self::CastFromFloat { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
             Self::SetTimer { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
             Self::GetCurrentTimer { ty, .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*ty]  },
             Self::CheckTimer { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
@@ -536,11 +536,11 @@ impl Instruction {
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::IntegerCompare { .. } => {
-                let registers = vec![Register::try_from(28).unwrap()];
+                let registers = vec![Register::try_from(30).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::IntegerCompareSingleAgainstZero { .. } => {
-                let registers = vec![Register::try_from(28).unwrap()];
+                let registers = vec![Register::try_from(30).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::AddUnsignedInteger { c, rx, .. } => {
@@ -550,40 +550,67 @@ impl Instruction {
                 }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::SubtractUnsignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::SubtractUnsignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::MultiplyUnsignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::MultiplyUnsignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::DivideUnsignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::DivideUnsignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::ModuloUnsignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::ModuloUnsignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::AddSignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::AddSignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::SubtractSignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::SubtractSignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::MultiplySignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::MultiplySignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::DivideSignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::DivideSignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::ModuloSignedInteger { rx, .. } => {
-                let registers = vec![*rx];
+            Self::ModuloSignedInteger { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::BitwiseAND { rx, .. } => {
@@ -651,35 +678,53 @@ impl Instruction {
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::FloatingPointCompare { .. } => {
-                let registers = vec![Register::try_from(28).unwrap()];
+                let registers = vec![Register::try_from(30).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::FloatingPointCompareSingleAgainstZero { .. } => {
-                let registers = vec![Register::try_from(28).unwrap()];
+                let registers = vec![Register::try_from(30).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
-            Self::AddFloatingPoint { fx, .. } => {
-                let registers = vec![];
+            Self::AddFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
             },
-            Self::SubtractFloatingPoint { fx, .. } => {
-                let registers = vec![];
+            Self::SubtractFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
             },
-            Self::MultiplyFloatingPoint { fx, .. } => {
-                let registers = vec![];
+            Self::MultiplyFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
             },
-            Self::DivideFloatingPoint { fx, .. } => {
-                let registers = vec![];
+            Self::DivideFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
             },
-            Self::CasttoFloat { fx, .. } => {
-                let registers = vec![];
+            Self::CastToFloat { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
             },
-            Self::CastfromFloat { rx, .. } => {
-                let registers = vec![*rx];
+            Self::CastFromFloat { c, rx, .. } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::SetTimer { tx, .. } => {

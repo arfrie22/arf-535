@@ -1400,7 +1400,7 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": false, "write": true }
+                        { "number": 30, "read": true, "write": true }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -1424,7 +1424,7 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": false, "write": true }
+                        { "number": 30, "read": true, "write": true }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -1483,6 +1483,7 @@
                 "assembly": {
                     "pneumonic": "SUB",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1490,6 +1491,13 @@
                 },
                 "description": "Sets Rx := Ry - Rz.\\\nSets underflow bit if $\"Ry\" - \"Rz\" < 0$",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1523,6 +1531,7 @@
                 "assembly": {
                     "pneumonic": "MUL",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1530,6 +1539,13 @@
                 },
                 "description": "Sets Rx := Ry \\* Rz.\\\nSets overflow bit if $\"Ry\" times \"Rz\" >= 2^32$",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1563,6 +1579,7 @@
                 "assembly": {
                     "pneumonic": "DIV",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1570,6 +1587,13 @@
                 },
                 "description": "Sets Rx := Ry / Rz.\\\nSets divide by zero bit if $\"Rz\" = 0$",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1603,6 +1627,7 @@
                 "assembly": {
                     "pneumonic": "MOD",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1610,6 +1635,13 @@
                 },
                 "description": "Sets Rx := Ry % Rz.\\\nSets divide by zero bit if $\"Rz\" = 0$",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1643,6 +1675,7 @@
                 "assembly": {
                     "pneumonic": "ADDS",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1650,6 +1683,13 @@
                 },
                 "description": "Sets Rx := Ry + Rz (treats all registers as signed).\\\nSets overflow bit if $\"Ry\" + \"Rz\" >= 2^31 - 1$. Sets underflow bit if $\"Ry\" + \"Rz\" < -2^31$.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1683,6 +1723,7 @@
                 "assembly": {
                     "pneumonic": "SUBS",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1690,6 +1731,13 @@
                 },
                 "description": "Sets Rx := Ry - Rz (treats all registers as signed).\\\nSets overflow bit if $\"Ry\" - \"Rz\" >= 2^31 - 1$. Sets underflow bit if $\"Ry\" - \"Rz\" < -2^31$.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1723,6 +1771,7 @@
                 "assembly": {
                     "pneumonic": "MULS",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1730,6 +1779,13 @@
                 },
                 "description": "Sets Rx := Ry \\* Rz (treats all registers as signed).\\\nSets overflow bit if $\"Ry\" times \"Rz\" >= 2^31 - 1$. Sets underflow bit if $\"Ry\" times \"Rz\" < -2^31$.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1763,6 +1819,7 @@
                 "assembly": {
                     "pneumonic": "DIVS",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1770,6 +1827,13 @@
                 },
                 "description": "Sets Rx := Ry / Rz (treats all registers as signed).\\\nSets divide by zero bit if $\"Rz\" = 0$",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -1803,6 +1867,7 @@
                 "assembly": {
                     "pneumonic": "MODS",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
                         { "type": "register", "argument": "Rz" }
@@ -1810,6 +1875,13 @@
                 },
                 "description": "Sets Rx := Ry % Rz (treats all registers as signed).\\\nSets divide by zero bit if $\"Rz\" = 0$.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",
@@ -2458,7 +2530,7 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": false, "write": true }
+                        { "number": 30, "read": true, "write": true }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -2482,7 +2554,7 @@
                 ],
                 "extra_reg": {
                     "registers": [
-                        { "number": 28, "read": false, "write": true }
+                        { "number": 30, "read": true, "write": true }
                     ],
                     "f_registers": [],
                     "timers": []
@@ -2493,6 +2565,7 @@
                 "assembly": {
                     "pneumonic": "ADD",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" },
                         { "type": "f_register", "argument": "Fz" }
@@ -2500,6 +2573,13 @@
                 },
                 "description": "Sets Fx := Fy + Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Fx",
                         "long": "Destination Register",
@@ -2533,6 +2613,7 @@
                 "assembly": {
                     "pneumonic": "SUB",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" },
                         { "type": "f_register", "argument": "Fz" }
@@ -2540,6 +2621,13 @@
                 },
                 "description": "Sets Fx := Fy - Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Fx",
                         "long": "Destination Register",
@@ -2573,6 +2661,7 @@
                 "assembly": {
                     "pneumonic": "MUL",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" },
                         { "type": "f_register", "argument": "Fz" }
@@ -2580,6 +2669,13 @@
                 },
                 "description": "Sets Fx := Fy \\* Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Fx",
                         "long": "Destination Register",
@@ -2613,6 +2709,7 @@
                 "assembly": {
                     "pneumonic": "DIV",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" },
                         { "type": "f_register", "argument": "Fz" }
@@ -2620,6 +2717,13 @@
                 },
                 "description": "Sets Fx := Fy / Fz.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Fx",
                         "long": "Destination Register",
@@ -2649,16 +2753,24 @@
                 }
             },
             {
-                "name": "Cast to Float",
+                "name": "Cast To Float",
                 "assembly": {
                     "pneumonic": "CST",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "register", "argument": "Ry" }
                     ]
                 },
                 "description": "Converts the value of Ry into a float and stores it in Fx.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Fx",
                         "long": "Destination Register",
@@ -2681,16 +2793,24 @@
                 }
             },
             {
-                "name": "Cast from Float",
+                "name": "Cast From Float",
                 "assembly": {
                     "pneumonic": "CST",
                     "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
                         { "type": "f_register", "argument": "Fy" }
                     ]
                 },
                 "description": "Converts the value of Fy into a signed integer (rounded towards zero) and stores it in Rx.\\\nSets OVRF if $\"Fy\" > 2^31 - 1$. Sets UNDF if $\"Fy\" < -2^31$.",
                 "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
                     {
                         "short": "Rx",
                         "long": "Destination Register",

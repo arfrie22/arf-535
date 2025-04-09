@@ -14,6 +14,8 @@ fn it_works() {
     STR [R1 + r1 << 0x2] F3
     test_4:
     B test_3
+    BO -1
+    BO 10
     ";
 
     let a = assembler::assemble(input).unwrap();

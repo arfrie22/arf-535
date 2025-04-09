@@ -324,66 +324,75 @@ pub fn assemble(input: &str) -> Result<Vec<Instruction>, AssemblerError> {
             }
             Rule::instruction_SUB_83 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::SubtractUnsignedInteger { rx, ry, rz });
+                instructions.push(Instruction::SubtractUnsignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_MUL_84 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::MultiplyUnsignedInteger { rx, ry, rz });
+                instructions.push(Instruction::MultiplyUnsignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_DIV_85 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::DivideUnsignedInteger { rx, ry, rz });
+                instructions.push(Instruction::DivideUnsignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_MOD_86 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::ModuloUnsignedInteger { rx, ry, rz });
+                instructions.push(Instruction::ModuloUnsignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_ADDS_87 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::AddSignedInteger { rx, ry, rz });
+                instructions.push(Instruction::AddSignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_SUBS_88 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::SubtractSignedInteger { rx, ry, rz });
+                instructions.push(Instruction::SubtractSignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_MULS_89 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::MultiplySignedInteger { rx, ry, rz });
+                instructions.push(Instruction::MultiplySignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_DIVS_8a => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::DivideSignedInteger { rx, ry, rz });
+                instructions.push(Instruction::DivideSignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_MODS_8b => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
                 let rz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::ModuloSignedInteger { rx, ry, rz });
+                instructions.push(Instruction::ModuloSignedInteger { c, rx, ry, rz });
             }
             Rule::instruction_AND_8c => {
                 let mut iter = p.into_inner();
@@ -507,43 +516,49 @@ pub fn assemble(input: &str) -> Result<Vec<Instruction>, AssemblerError> {
             }
             Rule::instruction_ADD_a2 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let fx = iter.next().unwrap().as_str().parse()?;
                 let fy = iter.next().unwrap().as_str().parse()?;
                 let fz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::AddFloatingPoint { fx, fy, fz });
+                instructions.push(Instruction::AddFloatingPoint { c, fx, fy, fz });
             }
             Rule::instruction_SUB_a3 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let fx = iter.next().unwrap().as_str().parse()?;
                 let fy = iter.next().unwrap().as_str().parse()?;
                 let fz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::SubtractFloatingPoint { fx, fy, fz });
+                instructions.push(Instruction::SubtractFloatingPoint { c, fx, fy, fz });
             }
             Rule::instruction_MUL_a4 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let fx = iter.next().unwrap().as_str().parse()?;
                 let fy = iter.next().unwrap().as_str().parse()?;
                 let fz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::MultiplyFloatingPoint { fx, fy, fz });
+                instructions.push(Instruction::MultiplyFloatingPoint { c, fx, fy, fz });
             }
             Rule::instruction_DIV_a5 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let fx = iter.next().unwrap().as_str().parse()?;
                 let fy = iter.next().unwrap().as_str().parse()?;
                 let fz = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::DivideFloatingPoint { fx, fy, fz });
+                instructions.push(Instruction::DivideFloatingPoint { c, fx, fy, fz });
             }
             Rule::instruction_CST_a6 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let fx = iter.next().unwrap().as_str().parse()?;
                 let ry = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::CasttoFloat { fx, ry });
+                instructions.push(Instruction::CastToFloat { c, fx, ry });
             }
             Rule::instruction_CST_a7 => {
                 let mut iter = p.into_inner();
+                let c = iter.next().unwrap().as_str().len() > 0;
                 let rx = iter.next().unwrap().as_str().parse()?;
                 let fy = iter.next().unwrap().as_str().parse()?;
-                instructions.push(Instruction::CastfromFloat { rx, fy });
+                instructions.push(Instruction::CastFromFloat { c, rx, fy });
             }
             Rule::instruction_SETT_c0 => {
                 let mut iter = p.into_inner();

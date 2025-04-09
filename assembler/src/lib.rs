@@ -20,7 +20,7 @@ impl From<ParseError> for AssemblerError {
 }
 
 impl From<ParseIntError> for AssemblerError {
-    fn from(value: ParseIntError) -> Self {
+    fn from(_value: ParseIntError) -> Self {
         AssemblerError::ParseError(ParseError::InvalidInput)
     }
 }
@@ -31,7 +31,7 @@ impl From<pest::error::Error<Rule>> for AssemblerError {
     }
 }
 
-// TODO: signed number for _offset_
+// TODO: Assembler should have a validate function to make sure all numbers are in range
 
 fn parse_number(input: &str) -> Result<u32, AssemblerError> {
     if input.is_empty() {

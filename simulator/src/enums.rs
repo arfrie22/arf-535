@@ -336,4 +336,8 @@ impl Condition {
     pub fn check(&self, st: u32) -> bool {
         todo!()
     }
+
+    pub fn set(&self, st: u32, value: bool) -> u32 {
+        todo!()
+    }
 }
