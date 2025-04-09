@@ -75,7 +75,7 @@ with open('instructions.json') as f:
     output_file.write("hex_number = ${ \"0x\" ~ ASCII_HEX_DIGIT+ }\n")
     output_file.write("binary_number = ${ \"0b\" ~ ASCII_BIN_DIGIT+ }\n")
     output_file.write("number = ${ hex_number | binary_number | digit_number }\n")
-    output_file.write("signed_number = ${ (\"+\" | \"-\" )? ~ WHITESPACE* ~ number }\n")
+    output_file.write("signed_number = ${ (\"+\" | \"-\" )? ~ number }\n")
 
     numbers = " | ".join([f"\"{i}\"" for i in range(32)])
     output_file.write("register = ${ ^\"R\" ~ (" + numbers + ") | (^\"A\" | ^\"D\") ~ ('1'..'4') | ^\"PC\" | ^\"LR\" | ^\"ST\" | ^\"SP\" }\n")
@@ -84,8 +84,8 @@ with open('instructions.json') as f:
     
     output_file.write("empty = { \"\" }\n")
     
-    output_file.write("p_address = ${ \"p\" ~ number | label_arg }\n")
-    output_file.write("d_address = ${ \"d\"? ~ number }\n")
+    output_file.write("p_address = ${ \"p\" ~ number | \"p:\" ~ label_arg }\n")
+    output_file.write("d_address = ${ \"d\"? ~ number | \"d:\" ~ label_arg }\n")
     output_file.write("data_shift_register = _{ \"d\"? ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("data_shift_imm = _{ \"d\"? ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("prog_shift_register = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
@@ -102,8 +102,12 @@ with open('instructions.json') as f:
     output_file.write("instruction = _{ " + " | ".join(rule_names) + " }\n")
 
     output_file.write("value = _{ instruction | label | comment }\n")
-    output_file.write("line = _{ WHITESPACE* ~ value ~ WHITESPACE* }\n")
-    output_file.write("file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ line ~ (NEWLINE+ ~ line)* ~ (WHITESPACE | NEWLINE)* ~ EOI }\n")
+    output_file.write("prog_line = _{ WHITESPACE* ~ value ~ WHITESPACE* }\n")
+    output_file.write("prog = ${ \".prog\" ~ WHITESPACE* ~ NEWLINE+ ~ prog_line ~ ((WHITESPACE* ~ NEWLINE) ~ prog_line)* }\n")
+    output_file.write("data_line = ${label_arg ~ (WHITESPACE+ ~ (number | signed_number))+ ~ WHITESPACE*}\n")
+    output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE) ~ data_line)* }\n")
+    output_file.write("file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ prog ~ (WHITESPACE | NEWLINE)* ~ data? ~ (WHITESPACE | NEWLINE)* ~ EOI }\n")
+    
 
     output_file.write("WHITESPACE = _{\" \" | \"\\t\"}\n")
 

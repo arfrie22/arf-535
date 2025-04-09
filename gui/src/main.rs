@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
 use eframe::egui;
+use egui_extras::{Column, TableBuilder};
 
 fn it_works() {
     let input = "
@@ -74,6 +75,28 @@ impl eframe::App for MyApp {
             // ui.image(egui::include_image!(
             //     "../../../crates/egui/assets/ferris.png"
             // ));
+
+            TableBuilder::new(ui)
+            .column(Column::auto().resizable(false))
+            .column(Column::remainder())
+            .header(20.0, |mut header| {
+                header.col(|ui| {
+                    ui.heading("First column");
+                });
+                header.col(|ui| {
+                    ui.heading("Second column");
+                });
+            })
+            .body(|mut body| {
+                body.row(30.0, |mut row| {
+                    row.col(|ui| {
+                        ui.label("Hello");
+                    });
+                    row.col(|ui| {
+                        ui.button("world!");
+                    });
+                });
+            });
         });
     }
 }
