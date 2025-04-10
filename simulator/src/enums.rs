@@ -288,7 +288,8 @@ pub enum Condition {
     FloatingPointZero,
     // C13
     FloatingPointNotANumber,
-    C14,
+    // C14
+    FloatingPointPositive,
     C15,
     C16,
     C17,
@@ -327,6 +328,7 @@ impl FromStr for Condition {
             "finf" => Ok(Self::FloatingPointInfinity),
             "fz" => Ok(Self::FloatingPointZero),
             "fnan" => Ok(Self::FloatingPointNotANumber),
+            "fpos" => Ok(Self::FloatingPointPositive),
             _ => Err(ParseError::InvalidInput)
         }
     }
@@ -334,10 +336,14 @@ impl FromStr for Condition {
 
 impl Condition {
     pub fn check(&self, st: u32) -> bool {
-        todo!()
+        st & (1 << (*self as u32)) == 1
     }
 
     pub fn set(&self, st: u32, value: bool) -> u32 {
-        todo!()
+        if value {
+            st | (1 << (*self as u32))
+        } else {
+            st & (!(1 << (*self as u32)))
+        }
     }
 }

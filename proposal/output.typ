@@ -54,6 +54,7 @@ Bits of Status Register and Short Condition Code
 + Floating Point Infinity (FINF)
 + Floating Point Zero (FZ)
 + Floating Point Not-A-Number (FNAN)
++ Floating Point Positive (FPOS)
 The rest of the bits are reserved for future use.
 
 

@@ -91,7 +91,7 @@ with open('instructions.json') as f:
     output_file.write("prog_shift_register = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("prog_shift_imm = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
     
-    output_file.write("condition = ${ (^\"NVR\" | ^\"EQ\" | ^\"GT\" | ^\"LT\" | ^\"GE\" | ^\"LE\" | ^\"OVRF\" | ^\"UNDF\" | ^\"DIVZ\" | ^\"EVEN\" | ^\"FINF\" | ^\"FZ\" | ^\"FNAN\")? }\n")
+    output_file.write("condition = ${ (^\"NVR\" | ^\"EQ\" | ^\"GT\" | ^\"LT\" | ^\"GE\" | ^\"LE\" | ^\"OVRF\" | ^\"UNDF\" | ^\"DIVZ\" | ^\"EVEN\" | ^\"FINF\" | ^\"FZ\" | ^\"FNAN\" | ^\"FPOS\")? }\n")
     output_file.write("condition_bit = ${ (^\"C\")? }\n")
     output_file.write("link_bit = ${ (^\"L\")? }\n")
 

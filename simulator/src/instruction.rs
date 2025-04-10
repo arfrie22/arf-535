@@ -9,7 +9,8 @@ pub enum Instruction {
     PopIntegerRegister { rx: Register },
     PopFloatingPointRegister { fx: FPRegister },
     SwapRegister { rx: Register, fy: FPRegister },
-    Stall { rx: Register },
+    StallImmediate { value: u32 },
+    StallRegister { rx: Register },
     RegisterJump { l: bool, condition: Condition, rx: Register },
     IndirectJump { l: bool, condition: Condition, rx: Register, i: u32, s: u32 },
     IndirectwithRegisterOffsetJump { l: bool, condition: Condition, rx: Register, ro: Register, s: u32 },
@@ -95,7 +96,8 @@ impl From<u32> for Instruction {
             0x03 => Self::PopIntegerRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0x04 => Self::PopFloatingPointRegister { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0x05 => Self::SwapRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x06 => Self::Stall { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
+            0x06 => Self::StallImmediate { value: (value >> 8) & 0xffff },
+            0x07 => Self::StallRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0x20 => Self::RegisterJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
             0x21 => Self::IndirectJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), i: (value >> 8) & 0x1f, s: (value >> 4) & 0xf },
             0x22 => Self::IndirectwithRegisterOffsetJump { l: (((value as usize) >> 23) & 0x1 > 0), condition: Condition::try_from(((value as usize) >> 18) & 0x1f).unwrap(), rx: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), ro: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap(), s: (value >> 4) & 0xf },
@@ -184,7 +186,8 @@ impl Into<u32> for Instruction {
             Self::PopIntegerRegister { rx } => (0x03 << 24)| ((rx as u32) << 19),
             Self::PopFloatingPointRegister { fx } => (0x04 << 24)| ((fx as u32) << 19),
             Self::SwapRegister { rx, fy } => (0x05 << 24)| ((rx as u32) << 19)| ((fy as u32) << 14),
-            Self::Stall { rx } => (0x06 << 24)| ((rx as u32) << 19),
+            Self::StallImmediate { value } => (0x06 << 24)| (value << 8),
+            Self::StallRegister { rx } => (0x07 << 24)| ((rx as u32) << 19),
             Self::RegisterJump { l, condition, rx } => (0x20 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13),
             Self::IndirectJump { l, condition, rx, i, s } => (0x21 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13)| (i << 8)| (s << 4),
             Self::IndirectwithRegisterOffsetJump { l, condition, rx, ro, s } => (0x22 << 24)| ((l as u32) << 23)| ((condition as u32) << 18)| ((rx as u32) << 13)| ((ro as u32) << 8)| (s << 4),
@@ -273,7 +276,8 @@ impl Instruction {
             Self::PopIntegerRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::PopFloatingPointRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::SwapRegister { rx, fy } => RegisterSet{ registers: vec![*rx], f_registers: vec![*fy], timers: vec![]  },
-            Self::Stall { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
+            Self::StallImmediate { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
+            Self::StallRegister { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
             Self::RegisterJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::IndirectJump { rx, .. } => RegisterSet{ registers: vec![*rx, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::IndirectwithRegisterOffsetJump { rx, ro, .. } => RegisterSet{ registers: vec![*rx, *ro, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
@@ -377,7 +381,11 @@ impl Instruction {
                 let registers = vec![*rx];
                 RegisterSet{ registers, f_registers: vec![*fy], timers: vec![] }
             },
-            Self::Stall { .. } => {
+            Self::StallImmediate { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::StallRegister { .. } => {
                 let registers = vec![];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },

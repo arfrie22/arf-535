@@ -135,7 +135,27 @@
                 }
             },
             {
-                "name": "Stall",
+                "name": "Stall Immediate",
+                "assembly": {
+                    "pneumonic": "STALL",
+                    "arguments": [{ "type": "number", "argument": "_value_" }]
+                },
+                "description": "Stalls the pipeline at execute for _value_ clock cycles.",
+                "bits": [
+                    {
+                        "short": "_value_",
+                        "long": "Cycle Count",
+                        "count": 16
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Stall Register",
                 "assembly": {
                     "pneumonic": "STALL",
                     "arguments": [{ "type": "register", "argument": "Rx" }]
