@@ -64,20 +64,20 @@ fn main() {
     
     raw_program_memory.borrow_mut().write(0, Instruction::IntegerLoadData { rx: Register::R1, label: 0 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(1, Instruction::IntegerStoreData { rx: Register::R1, label: 1 }.into()).unwrap();
-    raw_program_memory.borrow_mut().write(2, Instruction::AddUnsignedInteger { rx: Register::R1, ry: Register::R1, rz: Register::R1 }.into()).unwrap();
+    raw_program_memory.borrow_mut().write(2, Instruction::AddUnsignedInteger { c: false, rx: Register::R1, ry: Register::R1, rz: Register::R1 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(3, Instruction::IntegerLoadLow { rx: Register::R3, value: 1 }.into()).unwrap();
 
     raw_program_memory.borrow_mut().write(4, Instruction::IntegerLoadHigh { rx: Register::R3, value: 0 }.into()).unwrap();
 
 
     raw_program_memory.borrow_mut().write(5, Instruction::IntegerLoadData { rx: Register::R2, label: 0 }.into()).unwrap();
-    raw_program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
+    raw_program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { c: false, rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(7, Instruction::IntegerStoreData { rx: Register::R2, label: 0 }.into()).unwrap();
     
-    raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
+    raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
 
-    let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_cache, data_cache);
+    let simulator = Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, program_cache, data_cache);
     // let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_memory, data_memory);
     
     let state = simulator.get_state();

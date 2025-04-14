@@ -1,32 +1,20 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
+use std::{cell::RefCell, rc::Rc};
+
 use eframe::egui;
 use egui_extras::{Column, TableBuilder};
+use simulator::{memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, Simulator};
 
-fn it_works() {
-    let input = "
-    test_2: 
-    SWP pc r3
-    SWP R1 f1
-    B test_4
-    test_3: 
-    STR [R1 ] R2
-    STR [R1  + 0x4] R2
-    STR [R1 + r1 << 0x2] F3
-    test_4:
-    B test_3
-    BO -1
-    BO 10
-    ";
+const DATA_M_CYCLES: usize = 2;
+const PROG_M_CYCLES: usize = 2;
 
-    let a = assembler::assemble(input).unwrap();
-    println!("{:?}", a);
-}
+const DATA_C_CYCLES: usize = 1;
+const PROG_C_CYCLES: usize = 1;
 
 fn main() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     
-    it_works();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),
         ..Default::default()
@@ -38,39 +26,56 @@ fn main() -> eframe::Result {
             // This gives us image support:
             egui_extras::install_image_loaders(&cc.egui_ctx);
 
-            Ok(Box::<MyApp>::default())
+            Ok(Box::<SimulatorGUI>::default())
         }),
     )
 }
 
-struct MyApp {
-    name: String,
-    age: u32,
+fn create_simulator(use_cache: bool) -> Simulator {
+    let raw_program_memory = Rc::new(RefCell::new(Memory::new()));
+    let program_memory = Rc::new(RefCell::new(ClockedMemory::<PROG_M_CYCLES, _>::new(raw_program_memory.clone(), None)));
+
+    let raw_program_cache = Rc::new(RefCell::new(DirectCache::<1>::new()));
+    let program_cache = Rc::new(RefCell::new(ClockedMemory::<PROG_C_CYCLES, _>::new(raw_program_cache.clone(), Some(program_memory.clone()))));
+
+    let raw_data_memory = Rc::new(RefCell::new(Memory::new()));
+    let data_memory = Rc::new(RefCell::new(ClockedMemory::<DATA_M_CYCLES, _>::new(raw_data_memory.clone(), None)));
+
+    let raw_data_cache = Rc::new(RefCell::new(DirectCache::<2>::new()));
+    let data_cache = Rc::new(RefCell::new(ClockedMemory::<DATA_C_CYCLES, _>::new(raw_data_cache.clone(), Some(data_memory.clone()))));
+
+    let used_prog: Rc<RefCell<dyn FrontMemory>> = if use_cache {program_cache} else {program_memory};
+    let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache {data_cache} else {data_memory};
+
+    Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, used_prog, used_data)
 }
 
-impl Default for MyApp {
+struct SimulatorGUI {
+    simulator: Rc<RefCell<Simulator>>,
+}
+
+impl Default for SimulatorGUI {
     fn default() -> Self {
         Self {
-            name: "Arthur".to_owned(),
-            age: 42,
+            simulator: Rc::new(RefCell::new(create_simulator(true)))
         }
     }
 }
 
-impl eframe::App for MyApp {
+impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("My egui Application");
-            ui.horizontal(|ui| {
-                let name_label = ui.label("Your name: ");
-                ui.text_edit_singleline(&mut self.name)
-                    .labelled_by(name_label.id);
-            });
-            ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
-            if ui.button("Increment").clicked() {
-                self.age += 1;
-            }
-            ui.label(format!("Hello '{}', age {}", self.name, self.age));
+            // ui.horizontal(|ui| {
+            //     let name_label = ui.label("Your name: ");
+            //     ui.text_edit_singleline(&mut self.name)
+            //         .labelled_by(name_label.id);
+            // });
+            // ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
+            // if ui.button("Increment").clicked() {
+            //     self.age += 1;
+            // }
+            // ui.label(format!("Hello '{}', age {}", self.name, self.age));
 
             // ui.image(egui::include_image!(
             //     "../../../crates/egui/assets/ferris.png"

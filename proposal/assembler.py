@@ -18,13 +18,13 @@ with open('instructions.json') as f:
             all_rules.append("Rule::" + rule_name)
 
             rule = rule_name + " = ${ ^\"" + pneumonic + "\""
-            parse = "            Rule::" + rule_name + " => {\n"
+            parse = "                Rule::" + rule_name + " => {\n"
 
-            instruction = "                instructions.push(Instruction::" + opcode_data["name"].replace(" ", "").replace("-", "")
+            instruction = "                    instructions.push(Instruction::" + opcode_data["name"].replace(" ", "").replace("-", "")
 
             args = opcode_data["assembly"]["arguments"]
             if len(args) > 0:
-                parse += "                let mut iter = p.into_inner();\n"
+                parse += "                    let mut iter = t.into_inner();\n"
                 instruction += " { "
                 for i, arg in enumerate(args):
                     if arg["type"] == "condition" or arg["type"] == "condition_bit" or arg["type"] == "link_bit":
@@ -37,9 +37,11 @@ with open('instructions.json') as f:
                     arg_name: str = arg["argument"].replace("_", "").lower()
                     instruction += arg_name
                     
-                    parse += "                let " + arg_name + " = "
-                    if arg["type"] == "p_address" or arg["type"] == "d_address":
-                        parse += "parse_label(iter.next().unwrap().as_str(), &labels)?;\n"
+                    parse += "                    let " + arg_name + " = "
+                    if arg["type"] == "p_address":
+                        parse += "parse_prog_label(iter.next().unwrap().as_str(), &prog_labels)?;\n"
+                    elif arg["type"] == "d_address":
+                        parse += "parse_data_label(iter.next().unwrap().as_str(), &data_labels)?;\n"
                     elif arg["type"] == "register" or arg["type"] == "f_register" or arg["type"] == "timer" or arg["type"] == "condition" or arg["type"] == "condition":
                         parse += "iter.next().unwrap().as_str().parse()?;\n"
                     elif arg["type"] == "number":
@@ -67,7 +69,7 @@ with open('instructions.json') as f:
             rules += rule + "\n"
             
             
-            parse += "            }\n"
+            parse += "                }\n"
             parses += parse
     output_file.write("label_arg = ${ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | \"_\" )*  }\n")
 
@@ -85,7 +87,10 @@ with open('instructions.json') as f:
     output_file.write("empty = { \"\" }\n")
     
     output_file.write("p_address = ${ \"p\" ~ number | \"p:\" ~ label_arg }\n")
-    output_file.write("d_address = ${ \"d\"? ~ number | \"d:\" ~ label_arg }\n")
+    output_file.write("p_address_implicit = ${ \"p\"? ~ number | \"p:\"? ~ label_arg }\n")
+    output_file.write("d_address = ${ \"d\" ~ number | \"d:\" ~ label_arg }\n")
+    output_file.write("d_address_implicit = ${ \"d\"? ~ number | \"d:\"? ~ label_arg }\n")
+    
     output_file.write("data_shift_register = _{ \"d\"? ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("data_shift_imm = _{ \"d\"? ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("prog_shift_register = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
@@ -111,7 +116,7 @@ with open('instructions.json') as f:
 
     output_file.write("WHITESPACE = _{\" \" | \"\\t\"}\n")
 
-    parses += "            _ => unreachable!(),\n"
+    parses += "                _ => unreachable!(),\n"
 
 
     
@@ -120,33 +125,66 @@ with open('instructions.json') as f:
     output_file_rs.write("use pest::Parser;\n")
     output_file_rs.write("use simulator::instruction::Instruction;\n\n")
 
-    output_file_rs.write("use crate::{parse_label, parse_number, parse_signed_number, AssemblerError, AssemblerParser, Rule};\n\n")
+    output_file_rs.write("use crate::{parse_prog_label, parse_data_label, parse_number, parse_signed_number, AssemblerError, AssemblerParser, Rule};\n\n")
 
     output_file_rs.write("pub fn assemble(input: &str) -> Result<Vec<Instruction>, AssemblerError> {\n")
     output_file_rs.write("    let parsed = AssemblerParser::parse(Rule::file, input)?;\n\n")
 
     output_file_rs.write("    let mut instructions = Vec::new();\n")
-    output_file_rs.write("    let mut labels = HashMap::new();\n")
+    output_file_rs.write("    let mut prog_labels = HashMap::new();\n")
+    output_file_rs.write("    let mut data_labels = HashMap::new();\n")
     output_file_rs.write("    let mut first_pass_index = 0;\n")
+
+    
     
     output_file_rs.write("    for p in parsed {\n")
+    output_file_rs.write("        let labels;\n")
+    output_file_rs.write("        let beginning;\n")
     output_file_rs.write("        match p.as_rule() {\n")
     output_file_rs.write("            Rule::EOI => continue,\n")
-    output_file_rs.write("            Rule::label_arg => {\n")
-    output_file_rs.write("                labels.insert(p.as_str().to_owned(), first_pass_index);\n")
-    output_file_rs.write("                first_pass_index += 1;\n")
+    output_file_rs.write("            Rule::prog => {\n")
+    output_file_rs.write("                labels = &mut prog_labels;\n")
+    output_file_rs.write("                beginning = \"p:\".to_owned();\n")
+    output_file_rs.write("                first_pass_index = 0;\n")
     output_file_rs.write("            },\n")
-    output_file_rs.write("            " + " | ".join(all_rules) + " => {\n")
-    output_file_rs.write("                first_pass_index += 1;\n")
+    output_file_rs.write("            Rule::data => {\n")
+    output_file_rs.write("                labels = &mut data_labels;\n")
+    output_file_rs.write("                beginning = \"d:\".to_owned();\n")
+    output_file_rs.write("                first_pass_index = 0;\n")
     output_file_rs.write("            },\n")
     output_file_rs.write("            _ => unreachable!(),\n")
+    output_file_rs.write("        }\n\n")
+
+    output_file_rs.write("        for t in p.into_inner() {\n")
+    output_file_rs.write("            match t.as_rule() {\n")
+    output_file_rs.write("                Rule::EOI => continue,\n")
+    output_file_rs.write("                Rule::label_arg => {\n")
+    output_file_rs.write("                    let label = beginning.clone() + t.as_str();\n")
+    output_file_rs.write("                    labels.insert(label, first_pass_index);\n")
+    output_file_rs.write("                    first_pass_index += 1;\n")
+    output_file_rs.write("                },\n")
+    output_file_rs.write("                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_ADD_82 | Rule::instruction_SUB_83 | Rule::instruction_MUL_84 | Rule::instruction_DIV_85 | Rule::instruction_MOD_86 | Rule::instruction_ADDS_87 | Rule::instruction_SUBS_88 | Rule::instruction_MULS_89 | Rule::instruction_DIVS_8a | Rule::instruction_MODS_8b | Rule::instruction_AND_8c | Rule::instruction_OR_8d | Rule::instruction_NOT_8e | Rule::instruction_XOR_8f | Rule::instruction_LSL_90 | Rule::instruction_LSR_91 | Rule::instruction_ASL_92 | Rule::instruction_ASR_93 | Rule::instruction_RTR_94 | Rule::instruction_LSL_95 | Rule::instruction_LSR_96 | Rule::instruction_ASL_97 | Rule::instruction_ASR_98 | Rule::instruction_RTR_99 | Rule::instruction_MUS_9a | Rule::instruction_MSU_9b | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {\n")
+    output_file_rs.write("                    first_pass_index += 1;\n")
+    output_file_rs.write("                },\n")
+    output_file_rs.write("                _ => unreachable!(),\n")
+    output_file_rs.write("            }\n")
     output_file_rs.write("        }\n")
-    output_file_rs.write("    }\n\n")
+    output_file_rs.write("    }\n")
+
     output_file_rs.write("    let parsed = AssemblerParser::parse(Rule::file, input)?;\n")
 
     output_file_rs.write("    for p in parsed {\n")
-    output_file_rs.write("        match p.as_rule() {\n")
+    output_file_rs.write("    match p.as_rule() {\n")
+    output_file_rs.write("        Rule::EOI => continue,\n")
+    output_file_rs.write("        Rule::prog => {},\n")
+    output_file_rs.write("        Rule::data => continue,\n")
+    output_file_rs.write("        _ => unreachable!(),\n")
+    output_file_rs.write("    }\n\n")
+
+    output_file_rs.write("    for t in p.into_inner() {\n")
+    output_file_rs.write("        match t.as_rule() {\n")
     output_file_rs.write(parses)
+    output_file_rs.write("            }\n")
     output_file_rs.write("        }\n")
     output_file_rs.write("    }\n")
     output_file_rs.write("    Ok(instructions)\n")

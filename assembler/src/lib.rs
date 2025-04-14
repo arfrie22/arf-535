@@ -1,11 +1,7 @@
 use std::{collections::HashMap, num::ParseIntError};
 
-use pest::Parser;
 use pest_derive::Parser;
-use simulator::{
-    enums::{ParseError, Register},
-    instruction::Instruction,
-};
+use simulator::enums::ParseError;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AssemblerError {
@@ -65,11 +61,23 @@ fn parse_signed_number(input: &str) -> Result<i32, AssemblerError> {
     })
 }
 
-fn parse_label(input: &str, labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {
-    if let Some(v) = labels.get(input) {
+fn parse_prog_label(input: &str, prog_labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {
+    if let Some(v) = prog_labels.get(input) {
         Ok(*v)
     } else {
-        if input.starts_with("p") || input.starts_with("d") {
+        if input.starts_with("p") {
+            parse_number(&input[1..])
+        } else {
+            parse_number(input)
+        }
+    }
+}
+
+fn parse_data_label(input: &str, data_labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {
+    if let Some(v) = data_labels.get(input) {
+        Ok(*v)
+    } else {
+        if input.starts_with("d") {
             parse_number(&input[1..])
         } else {
             parse_number(input)
@@ -98,6 +106,6 @@ mod tests {
         STR [R1 + 0x4 << 0x2] F3
         ";
 
-        assemble(input);
+        assemble(input).unwrap();
     }
 }
