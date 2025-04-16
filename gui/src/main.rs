@@ -2,7 +2,7 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-use displays::{cache::CacheDisplay, memory::MemoryDisplay};
+use displays::{cache::CacheDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay};
 use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
 use egui_extras::{Column, TableBuilder};
 use simulator::{
@@ -107,6 +107,7 @@ fn create_simulator(use_cache: bool) -> Simulator {
 
 struct SimulatorGUI {
     simulator: Rc<RefCell<Simulator>>,
+    pipeline_display: PipelineDisplay,
     program_memory_display: MemoryDisplay,
     data_memory_display: MemoryDisplay,
     program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
@@ -116,6 +117,7 @@ struct SimulatorGUI {
 impl Default for SimulatorGUI {
     fn default() -> Self {
         let simulator = Rc::new(RefCell::new(create_simulator(true)));
+        let simulator_state = simulator.borrow().get_state();
         let program_memory = simulator.borrow().get_program_memory();
         let data_memory = simulator.borrow().get_data_memory();
         let program_cache = simulator.borrow().get_program_cache();
@@ -142,6 +144,7 @@ impl Default for SimulatorGUI {
 
         Self {
             simulator,
+            pipeline_display: PipelineDisplay::new(simulator_state, "pipeline"),
             program_memory_display: MemoryDisplay::new(program_memory, "program_memory"),
             data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
             program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
@@ -164,6 +167,8 @@ impl eframe::App for SimulatorGUI {
             if ui.button("Single Step").clicked() {
                 self.cycle();
             }
+
+            self.pipeline_display.ui(ui);
             ui.horizontal_top(|ui| {
                 self.program_memory_display.ui(ui);
                 self.program_cache_display.ui(ui);

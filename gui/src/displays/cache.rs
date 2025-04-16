@@ -89,15 +89,7 @@ impl<const C: usize> egui_table::TableDelegate for CacheDisplay<C> {
             .inner_margin(Margin::symmetric(margin, 0))
             .show(ui, |ui| {
                 if col_range.start == 0 {
-                    egui::Sides::new().height(ui.available_height()).show(
-                        ui,
-                        |ui| {
-                            ui.heading("Line");
-                        },
-                        |ui| {
-                            ui.label("⬇");
-                        },
-                    );
+                    ui.heading("Line");
                 } else if col_range.start == 1 {
                     ui.heading("Valid");
                 } else if col_range.start == 2 {

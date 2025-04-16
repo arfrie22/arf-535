@@ -108,15 +108,7 @@ impl egui_table::TableDelegate for MemoryDisplay {
             .inner_margin(Margin::symmetric(margin, 0))
             .show(ui, |ui| {
                 if col_range.start == 0 {
-                    egui::Sides::new().height(ui.available_height()).show(
-                        ui,
-                        |ui| {
-                            ui.heading("Address");
-                        },
-                        |ui| {
-                            ui.label("⬇");
-                        },
-                    );
+                    ui.heading("Address");
                 } else {
                     ui.label(format!("{:#03x}", group_index - 1));
                 }

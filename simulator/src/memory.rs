@@ -244,7 +244,9 @@ impl InnerMemory for Memory {
     }
     
     fn update_line(&mut self, address: u32, line: &[u32; LINE_SIZE]) -> Result<(), MemoryError> {
-        todo!()
+        let base = raw_address(address) & (!0b11);
+        self.inner[base..base+LINE_SIZE].copy_from_slice(line);
+        Ok(())
     }
     
     fn read_line(&self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError> {
