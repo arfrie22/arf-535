@@ -173,6 +173,9 @@ impl SimulatorGUI {
     }
 }
 
+// TODO: Simple program, more sophisticated (no pipe/cache, pipe only, cache only, both)
+// TODO: See memory access information
+
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {

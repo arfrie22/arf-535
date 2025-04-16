@@ -167,6 +167,30 @@ impl PipelineDisplay {
                 });
             } else if col_nr == 3 {
                 ui.horizontal(|ui| {
+                    let state = self.state.borrow();
+                    let is_squashed = match row_nr {
+                        0 => {
+                            state.squashes.fetch
+                        },
+                        1 => {
+                            
+                            state.squashes.decode
+                        },
+                        2 => {
+                            state.squashes.execute
+                        },
+                        3 => {
+                            state.squashes.memory
+                        },
+                        4 => {
+                            state.squashes.writeback
+                        },
+                        _ => unreachable!()
+                    };
+                    ui.label(format!("{}", is_squashed));
+                });
+            } else if col_nr == 4 {
+                ui.horizontal(|ui| {
                     egui::ScrollArea::horizontal().show(ui, |ui| {
                         ui.label(match row_nr {
                             0 => {
@@ -199,7 +223,7 @@ impl PipelineDisplay {
                                     format!("Timer: {}, Registers: {:?}", v.timer, v.registers)
                                 } else {
                                     if let Some(v) = state.execute_result.as_ref() {
-                                        format!("{:?}", v.memory)
+                                        format!("Memory Action: {:?}", v.memory)
                                     } else {
                                         "N/A".to_owned()
                                     }
@@ -208,7 +232,7 @@ impl PipelineDisplay {
                             3 => {
                                 let state = self.state.borrow();
                                 if let Some(v) = state.memory_state.as_ref() {
-                                    format!("{:?}", v.memory)
+                                    format!("Memory Action: {:?}", v.memory)
                                 } else {
                                     if let Some(v) = state.memory_result.as_ref() {
                                         format!("Holds: {:?}, Registers: {:?}", v.holds, v.registers)
@@ -265,6 +289,8 @@ impl egui_table::TableDelegate for PipelineDisplay {
                 } else if col_range.start == 2 {
                     ui.heading("Finished");
                 } else if col_range.start == 3 {
+                    ui.heading("Squashed");
+                } else if col_range.start == 4 {
                     ui.heading("Info");
                 } else {
                     unreachable!()
@@ -297,7 +323,7 @@ impl PipelineDisplay {
         let id_salt = Id::new(&self.salt);
         ui.push_id(id_salt, |ui| {
             let estimated_height = 5.0 * ROW_HEIGHT + TOP_ROW_HEIGHT;
-            let estimated_width = 600.0;
+            let estimated_width = 700.0;
 
             let (_id, rect) = ui.allocate_space(
                 Vec2::new(estimated_width, estimated_height),
@@ -306,6 +332,7 @@ impl PipelineDisplay {
             let columns = vec![
                 egui_table::Column::new(100.0).resizable(false),
                 egui_table::Column::new(200.0).resizable(false),
+                egui_table::Column::new(100.0).resizable(false),
                 egui_table::Column::new(100.0).resizable(false),
                 egui_table::Column::new(200.0).resizable(false),
             ];

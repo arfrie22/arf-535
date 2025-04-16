@@ -233,6 +233,14 @@ impl PipelineInner for DecodeStage {
         if blocked {
             Err(PipelineError::Stalled)
         } else if state_ref.squashes.decode {
+            if let Some(state) = state_ref.decode_state.take() {
+                state_ref.decode_result = Some(ExecuteState {
+                    pc: state.pc,
+                    instruction: state.instruction,
+                    registers: Default::default(),
+                    timer: 1,
+                });
+            }
             Ok(())
         } else if check_inflight(
             &state_ref.inflight,
@@ -264,6 +272,10 @@ impl PipelineInner for DecodeStage {
                 timer: 1,
             });
         }
+
+        if state_ref.decode_result.is_some() {
+            state_ref.squashes.decode = true;
+        }
         Ok(())
     }
 }
@@ -288,8 +300,6 @@ pub enum WritebackRegister {
     FloatingPoint(FPRegister, Option<f32>),
     Timer(Timer, Option<u32>),
 }
-
-// TODO: Test is running
 
 #[derive(Debug, Clone, Default)]
 pub struct ExecuteResult {
@@ -1502,6 +1512,19 @@ impl PipelineInner for ExecuteStage {
         }
 
         if state_ref.squashes.execute {
+            if let Some(state) = state_ref.execute_state.take() {
+                state_ref.execute_result = Some(MemoryState {
+                    memory: MemoryAction::None,
+                    writeback: WritebackState {
+                        pc: state.pc,
+                        instruction: state.instruction,
+                        registers: Vec::new(),
+                        holds: Default::default(),
+                        end_running: false,
+                    },
+                });
+            }
+
             return if blocked {
                 Err(PipelineError::Stalled)
             } else {
@@ -1549,6 +1572,10 @@ impl PipelineInner for ExecuteStage {
                 },
             });
         }
+
+        if state_ref.execute_result.is_some() {
+            state_ref.squashes.execute = true;
+        }
         Ok(())
     }
 }
@@ -1578,6 +1605,16 @@ impl PipelineInner for MemoryStage {
         }
 
         if state_ref.squashes.memory {
+            if let Some(state) = state_ref.memory_state.take() {
+                state_ref.memory_result = Some(WritebackState {
+                    pc: state.writeback.pc,
+                    instruction: state.writeback.instruction,
+                    registers: Vec::new(),
+                    holds: Default::default(),
+                    end_running: false,
+                });
+            }
+
             return if blocked {
                 Err(PipelineError::Stalled)
             } else {
@@ -1685,6 +1722,10 @@ impl PipelineInner for MemoryStage {
                 end_running: false,
             });
         }
+
+        if state_ref.memory_result.is_some() {
+            state_ref.squashes.memory = true;
+        }
         Ok(())
     }
 }
@@ -1717,6 +1758,8 @@ impl PipelineInner for WritebackStage {
             let res = if blocked {
                 Err(PipelineError::Stalled)
             } else if state_ref.squashes.writeback {
+                state_ref.writeback_state = None;
+                state_ref.hold_fetch = false;
                 Ok(())
             } else {
                 let wb_state = state_ref.writeback_state.take().unwrap();
@@ -1743,6 +1786,7 @@ impl PipelineInner for WritebackStage {
                 state_ref.hold_fetch = false;
 
                 if wb_state.end_running {
+                    println!("Cancel");
                     state_ref.running = false;
                 }
                 Ok(())

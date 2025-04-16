@@ -1,12 +1,13 @@
 use std::{collections::HashMap, num::ParseIntError};
 
 use pest_derive::Parser;
-use simulator::enums::ParseError;
+use simulator::{enums::ParseError, instruction::Instruction};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AssemblerError {
     ParseError(ParseError),
     PestError(pest::error::Error<Rule>),
+    InvalidInstruction(Instruction),
 }
 
 impl From<ParseError> for AssemblerError {
@@ -26,6 +27,19 @@ impl From<pest::error::Error<Rule>> for AssemblerError {
         AssemblerError::PestError(value)
     }
 }
+
+#[derive(Debug)]
+pub struct AssembledData {
+    instructions: Vec<Instruction>,
+    data: [u32; 0xFFFF],
+}
+
+impl Default for AssembledData {
+    fn default() -> Self {
+        Self { instructions: Default::default(), data: [0; 0xFFFF] }
+    }
+}
+
 
 // TODO: Assembler should have a validate function to make sure all numbers are in range
 

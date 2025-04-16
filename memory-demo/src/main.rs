@@ -1,6 +1,6 @@
 use std::{cell::{RefCell, RefMut}, io::{self, Write}, rc::Rc};
 
-use simulator::memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory};
+use simulator::memory::{Cache, ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory};
 
 fn main() {
     println!("535 Memory Test");
