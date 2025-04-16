@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use enums::{FPRegister, Register, Timer};
-use memory::{FrontMemory, InnerMemory};
+use memory::{Cache, FrontMemory, InnerMemory};
 use pipeline::{
     DecodeStage, DecodeState, ExecuteStage, ExecuteState, FetchResult, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackStage, WritebackState
 };
@@ -182,13 +182,13 @@ pub struct Simulator {
     state: SimulatorStateCell,
     raw_program_memory: RawMemoryCell,
     raw_data_memory: RawMemoryCell,
-    raw_program_cache: RawMemoryCell,
-    raw_data_cache: RawMemoryCell,
+    raw_program_cache: RawCacheCell,
+    raw_data_cache: RawCacheCell,
     clock_rate: usize,
 }
 
 impl Simulator {
-    pub fn new(raw_program_memory: RawMemoryCell, raw_data_memory: RawMemoryCell, raw_program_cache: RawMemoryCell, raw_data_cache: RawMemoryCell, program_memory: MemoryCell, data_memory: MemoryCell) -> Self {
+    pub fn new(raw_program_memory: RawMemoryCell, raw_data_memory: RawMemoryCell, raw_program_cache: RawCacheCell, raw_data_cache: RawCacheCell, program_memory: MemoryCell, data_memory: MemoryCell) -> Self {
         Self {
             state: SimulatorState::new(program_memory, data_memory),
             raw_program_memory,
@@ -225,11 +225,11 @@ impl Simulator {
         self.raw_program_memory.clone()
     }
 
-    pub fn get_data_cache(&self) -> RawMemoryCell {
+    pub fn get_data_cache(&self) -> RawCacheCell {
         self.raw_data_cache.clone()
     }
 
-    pub fn get_program_cache(&self) -> RawMemoryCell {
+    pub fn get_program_cache(&self) -> RawCacheCell {
         self.raw_program_cache.clone()
     }
 }
@@ -237,6 +237,7 @@ impl Simulator {
 type SimulatorStateCell = Rc<RefCell<SimulatorState>>;
 type MemoryCell = Rc<RefCell<dyn FrontMemory>>;
 type RawMemoryCell = Rc<RefCell<dyn InnerMemory>>;
+type RawCacheCell = Rc<RefCell<dyn Cache>>;
 type PipelineCell<T> = Rc<RefCell<PipelineStage<T>>>;
 
 #[cfg(test)]

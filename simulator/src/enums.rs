@@ -336,7 +336,11 @@ impl FromStr for Condition {
 
 impl Condition {
     pub fn check(&self, st: u32) -> bool {
-        st & (1 << (*self as u32)) == 1
+        match self {
+            Condition::AlwaysTrue => true,
+            Condition::NeverTrue => false,
+            _ => st & (1 << (*self as u32)) == 1,
+        }
     }
 
     pub fn set(&self, st: u32, value: bool) -> u32 {

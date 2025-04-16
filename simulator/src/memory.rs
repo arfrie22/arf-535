@@ -44,12 +44,17 @@ pub trait FrontMemory: fmt::Debug {
 }
 
 pub trait InnerMemory: fmt::Debug {
-    fn read(&mut self, address: u32) -> Result<u32, MemoryError>;
-    fn read_line(&mut self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError>;
+    fn read(&self, address: u32) -> Result<u32, MemoryError>;
+    fn read_line(&self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError>;
     fn write(&mut self, address: u32, value: u32) -> Result<(), MemoryError>;
     fn has(&mut self, address: u32) -> Result<bool, MemoryError>;
     fn update_line(&mut self, address: u32, line: &[u32; LINE_SIZE]) -> Result<(), MemoryError>;
     fn is_terminal(&self) -> bool;
+}
+
+pub trait Cache: fmt::Debug {
+    fn raw_line(&self, line: usize) -> [u32; LINE_SIZE];
+    fn line_metadata(&self, line: usize) -> CacheStruct;
 }
 
 #[derive(Debug)]
@@ -226,7 +231,7 @@ impl Memory {
 }
 
 impl InnerMemory for Memory {
-    fn read(&mut self, address: u32) -> Result<u32, MemoryError> {
+    fn read(&self, address: u32) -> Result<u32, MemoryError> {
         Ok(self.inner[raw_address(address)])
     }
 
@@ -243,7 +248,7 @@ impl InnerMemory for Memory {
         todo!()
     }
     
-    fn read_line(&mut self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError> {
+    fn read_line(&self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError> {
         let base = raw_address(address) & (!0b11);
         let mut res = [0; LINE_SIZE];
         res.clone_from_slice(&self.inner[base..base+LINE_SIZE]);
@@ -257,9 +262,9 @@ impl InnerMemory for Memory {
 
 #[derive(Debug, Default, Clone)]
 pub struct CacheStruct {
-    tag: usize,
-    dirty: bool,
-    valid: bool,
+    pub tag: usize,
+    pub dirty: bool,
+    pub valid: bool,
 }
 
 #[derive(Debug)]
@@ -274,16 +279,6 @@ impl<const C: usize> DirectCache<C> {
             cache: [[0; LINE_SIZE]; C],
             data: core::array::from_fn(|_| CacheStruct::default()),
         }
-    }
-
-    pub fn raw_line(&self, line: usize) -> [u32; LINE_SIZE] {
-        assert!(line < C);
-        self.cache[line]
-    }
-
-    pub fn line_metadata(&self, line: usize) -> CacheStruct {
-        assert!(line < C);
-        self.data[line].clone()
     }
 
     fn decompose_address(&self, address: u32) -> (usize, usize, usize) {
@@ -301,7 +296,7 @@ impl<const C: usize> DirectCache<C> {
 }
 
 impl<const C: usize> InnerMemory for DirectCache<C> {
-    fn read(&mut self, address: u32) -> Result<u32, MemoryError> {
+    fn read(&self, address: u32) -> Result<u32, MemoryError> {
         let (tag, line, offset) = self.decompose_address(address);
 
         if self.cache_has(line, tag) {
@@ -338,7 +333,7 @@ impl<const C: usize> InnerMemory for DirectCache<C> {
         Ok(())
     }
     
-    fn read_line(&mut self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError> {
+    fn read_line(&self, address: u32) -> Result<[u32; LINE_SIZE], MemoryError> {
         let (tag, line, _offset) = self.decompose_address(address);
 
         if self.cache_has(line, tag) {
@@ -350,5 +345,17 @@ impl<const C: usize> InnerMemory for DirectCache<C> {
     
     fn is_terminal(&self) -> bool {
         false
+    }
+}
+
+impl<const C: usize> Cache for DirectCache<C> {
+    fn raw_line(&self, line: usize) -> [u32; LINE_SIZE] {
+        assert!(line < C);
+        self.cache[line]
+    }
+
+    fn line_metadata(&self, line: usize) -> CacheStruct {
+        assert!(line < C);
+        self.data[line].clone()
     }
 }

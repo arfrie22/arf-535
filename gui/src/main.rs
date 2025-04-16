@@ -2,9 +2,12 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-use eframe::egui;
+use displays::{cache::CacheDisplay, memory::MemoryDisplay};
+use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
 use egui_extras::{Column, TableBuilder};
-use simulator::{memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, Simulator};
+use simulator::{
+    enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, Simulator
+};
 
 const DATA_M_CYCLES: usize = 2;
 const PROG_M_CYCLES: usize = 2;
@@ -12,19 +15,48 @@ const PROG_M_CYCLES: usize = 2;
 const DATA_C_CYCLES: usize = 1;
 const PROG_C_CYCLES: usize = 1;
 
+const PROGRAM_CACHE_LINES: usize = 4;
+const DATA_CACHE_LINES: usize = 4;
+
+pub mod displays;
+
 fn main() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
-    
+
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),
+        viewport: egui::ViewportBuilder::default().with_maximized(true),
         ..Default::default()
     };
     eframe::run_native(
-        "My egui App",
+        "Analog/RF ISA Simulator",
         options,
         Box::new(|cc| {
-            // This gives us image support:
             egui_extras::install_image_loaders(&cc.egui_ctx);
+
+            let mut fonts = FontDefinitions::default();
+
+            fonts.font_data.insert(
+                "monaspace".to_owned(),
+                std::sync::Arc::new(
+                    // .ttf and .otf supported
+                    FontData::from_static(include_bytes!("MonaspaceNeon-Light.otf")),
+                ),
+            );
+
+            fonts
+                .families
+                .get_mut(&FontFamily::Proportional)
+                .unwrap()
+                .insert(0, "monaspace".to_owned());
+
+            // Put my font as last fallback for monospace:
+            fonts
+                .families
+                .get_mut(&FontFamily::Monospace)
+                .unwrap()
+                .push("monaspace".to_owned());
+
+            cc.egui_ctx.set_fonts(fonts);
 
             Ok(Box::<SimulatorGUI>::default())
         }),
@@ -33,31 +65,87 @@ fn main() -> eframe::Result {
 
 fn create_simulator(use_cache: bool) -> Simulator {
     let raw_program_memory = Rc::new(RefCell::new(Memory::new()));
-    let program_memory = Rc::new(RefCell::new(ClockedMemory::<PROG_M_CYCLES, _>::new(raw_program_memory.clone(), None)));
+    let program_memory = Rc::new(RefCell::new(ClockedMemory::<PROG_M_CYCLES, _>::new(
+        raw_program_memory.clone(),
+        None,
+    )));
 
-    let raw_program_cache = Rc::new(RefCell::new(DirectCache::<1>::new()));
-    let program_cache = Rc::new(RefCell::new(ClockedMemory::<PROG_C_CYCLES, _>::new(raw_program_cache.clone(), Some(program_memory.clone()))));
+    let raw_program_cache = Rc::new(RefCell::new(DirectCache::<PROGRAM_CACHE_LINES>::new()));
+    let program_cache = Rc::new(RefCell::new(ClockedMemory::<PROG_C_CYCLES, _>::new(
+        raw_program_cache.clone(),
+        Some(program_memory.clone()),
+    )));
 
     let raw_data_memory = Rc::new(RefCell::new(Memory::new()));
-    let data_memory = Rc::new(RefCell::new(ClockedMemory::<DATA_M_CYCLES, _>::new(raw_data_memory.clone(), None)));
+    let data_memory = Rc::new(RefCell::new(ClockedMemory::<DATA_M_CYCLES, _>::new(
+        raw_data_memory.clone(),
+        None,
+    )));
 
-    let raw_data_cache = Rc::new(RefCell::new(DirectCache::<2>::new()));
-    let data_cache = Rc::new(RefCell::new(ClockedMemory::<DATA_C_CYCLES, _>::new(raw_data_cache.clone(), Some(data_memory.clone()))));
+    let raw_data_cache = Rc::new(RefCell::new(DirectCache::<DATA_CACHE_LINES>::new()));
+    let data_cache = Rc::new(RefCell::new(ClockedMemory::<DATA_C_CYCLES, _>::new(
+        raw_data_cache.clone(),
+        Some(data_memory.clone()),
+    )));
 
-    let used_prog: Rc<RefCell<dyn FrontMemory>> = if use_cache {program_cache} else {program_memory};
-    let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache {data_cache} else {data_memory};
+    let used_prog: Rc<RefCell<dyn FrontMemory>> = if use_cache {
+        program_cache
+    } else {
+        program_memory
+    };
+    let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache { data_cache } else { data_memory };
 
-    Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, used_prog, used_data)
+    Simulator::new(
+        raw_program_memory,
+        raw_data_memory,
+        raw_program_cache,
+        raw_data_cache,
+        used_prog,
+        used_data,
+    )
 }
 
 struct SimulatorGUI {
     simulator: Rc<RefCell<Simulator>>,
+    program_memory_display: MemoryDisplay,
+    data_memory_display: MemoryDisplay,
+    program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
+    data_cache_display: CacheDisplay<DATA_CACHE_LINES>,
 }
 
 impl Default for SimulatorGUI {
     fn default() -> Self {
+        let simulator = Rc::new(RefCell::new(create_simulator(true)));
+        let program_memory = simulator.borrow().get_program_memory();
+        let data_memory = simulator.borrow().get_data_memory();
+        let program_cache = simulator.borrow().get_program_cache();
+        let data_cache = simulator.borrow().get_data_cache();
+
+
+            data_memory.borrow_mut().write(0, 42).unwrap();
+        
+            program_memory.borrow_mut().write(0, Instruction::IntegerLoadData { rx: Register::R1, label: 0 }.into()).unwrap();
+            program_memory.borrow_mut().write(1, Instruction::IntegerStoreData { rx: Register::R1, label: 1 }.into()).unwrap();
+            program_memory.borrow_mut().write(2, Instruction::AddUnsignedInteger { c: false, rx: Register::R1, ry: Register::R1, rz: Register::R1 }.into()).unwrap();
+            program_memory.borrow_mut().write(3, Instruction::IntegerLoadLow { rx: Register::R3, value: 1 }.into()).unwrap();
+
+            program_memory.borrow_mut().write(4, Instruction::IntegerLoadHigh { rx: Register::R3, value: 0 }.into()).unwrap();
+
+
+            program_memory.borrow_mut().write(5, Instruction::IntegerLoadData { rx: Register::R2, label: 0 }.into()).unwrap();
+            program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { c: false, rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
+            program_memory.borrow_mut().write(7, Instruction::IntegerStoreData { rx: Register::R2, label: 0 }.into()).unwrap();
+            
+            program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
+            program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
+
+
         Self {
-            simulator: Rc::new(RefCell::new(create_simulator(true)))
+            simulator,
+            program_memory_display: MemoryDisplay::new(program_memory, "program_memory"),
+            data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
+            program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
+            data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
         }
     }
 }
@@ -65,42 +153,16 @@ impl Default for SimulatorGUI {
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("My egui Application");
-            // ui.horizontal(|ui| {
-            //     let name_label = ui.label("Your name: ");
-            //     ui.text_edit_singleline(&mut self.name)
-            //         .labelled_by(name_label.id);
-            // });
-            // ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
-            // if ui.button("Increment").clicked() {
-            //     self.age += 1;
-            // }
-            // ui.label(format!("Hello '{}', age {}", self.name, self.age));
-
-            // ui.image(egui::include_image!(
-            //     "../../../crates/egui/assets/ferris.png"
-            // ));
-
-            TableBuilder::new(ui)
-            .column(Column::auto().resizable(false))
-            .column(Column::remainder())
-            .header(20.0, |mut header| {
-                header.col(|ui| {
-                    ui.heading("First column");
-                });
-                header.col(|ui| {
-                    ui.heading("Second column");
-                });
-            })
-            .body(|mut body| {
-                body.row(30.0, |mut row| {
-                    row.col(|ui| {
-                        ui.label("Hello");
-                    });
-                    row.col(|ui| {
-                        ui.button("world!");
-                    });
-                });
+            if ui.button("Single Step").clicked() {
+                self.simulator.borrow().cycle();
+            }
+            ui.horizontal(|ui| {
+                self.program_memory_display.ui(ui);
+                self.program_cache_display.ui(ui);
+            });
+            ui.horizontal(|ui| {
+                self.data_memory_display.ui(ui);
+                self.data_cache_display.ui(ui);
             });
         });
     }
