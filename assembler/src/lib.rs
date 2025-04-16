@@ -60,7 +60,8 @@ fn parse_signed_number(input: &str) -> Result<i32, AssemblerError> {
         i32::from_str_radix(input, 10)?
     })
 }
-
+//TODO: Add data section parsing
+// TODO: Add load/export to binary file
 fn parse_prog_label(input: &str, prog_labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {
     if let Some(v) = prog_labels.get(input) {
         Ok(*v)

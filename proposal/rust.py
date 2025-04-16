@@ -13,6 +13,7 @@ with open('instructions.json') as f:
     intos = ""
     read_regs = ""
     write_regs = ""
+    validities = ""
     for type_i, type_data in enumerate(data):
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
             name = opcode_data["name"].replace(" ", "").replace("-", "") + ""
@@ -21,8 +22,10 @@ with open('instructions.json') as f:
             parses += "            0x{:02x} => Self::{}".format((type_i << 5) | opcode_i, name)
             intos += "            Self::{}".format(name)
             shifts = "0x{:02x} << 24".format((type_i << 5) | opcode_i)
+            valid_check = ""
             read_regs += "            Self::{}".format(name)
             write_regs += "            Self::{}".format(name)
+            validities += "            Self::{}".format(name)
             
             read_data = {"registers": [], "f_registers": [], "timers": []}
             write_data = {"registers": [], "f_registers": [], "timers": []}
@@ -36,6 +39,7 @@ with open('instructions.json') as f:
                 shifts = f"({shifts})"
                 read_regs += " { "
                 write_regs += " { "
+                validities += " { "
                 opcode_bit_remaining = 32-8
                 read = False
                 write = False
@@ -47,6 +51,7 @@ with open('instructions.json') as f:
                         enum += ", "
                         parses += ", "
                         intos += ", "
+                        validities += ", "
                     
                     if read:
                         read_regs += ", "
@@ -58,6 +63,7 @@ with open('instructions.json') as f:
                     arg_type = "u32"
                     parse_value = "value"
                     into_value = arg_name
+                    check = ""
 
                     if re.match("R[a-z]", bit_data["short"]):
                         #int reg
@@ -103,9 +109,18 @@ with open('instructions.json') as f:
                         write_extra += "                }\n"
                     elif re.match("_offset_", bit_data["short"]):
                         arg_type = "i32"
+                        check = f"((*{arg_name} as u32) & (0xFFFFFF << {bit_data["count"]}) == 0)"
+                    else:
+                        check = f"({arg_name} & (0xFFFFFF << {bit_data["count"]}) == 0)"
+
+                    if check != "":
+                        if valid_check != "":
+                            valid_check += " && "
+                        valid_check += check
                     
                     enum += arg_name + ": " + arg_type
                     intos += arg_name
+                    validities += arg_name
 
                     if read:
                         read_regs += arg_name
@@ -136,6 +151,7 @@ with open('instructions.json') as f:
                 enum += " }"
                 parses += " }"
                 intos += " }"
+                validities += " }"
 
                 if read_unused:
                     if read:
@@ -171,10 +187,17 @@ with open('instructions.json') as f:
                     read_data["timers"].append(name)
                 if reg["write"]:
                     write_data["timers"].append(name)
-                
+
             parses += ",\n"
             intos += " => " + shifts
             intos += ",\n"
+
+            if valid_check == "":
+                valid_check = "true"
+
+            validities += " => " + valid_check
+            validities += ",\n"
+
             read_regs += " => " + f"RegisterSet{{ registers: vec![{", ".join(read_data["registers"])}], f_registers: vec![{", ".join(read_data["f_registers"])}], timers: vec![{", ".join(read_data["timers"])}]  }}"
             read_regs += ",\n"
             write_regs += " => {\n"
@@ -182,6 +205,8 @@ with open('instructions.json') as f:
             write_regs += write_extra
             write_regs += f"                RegisterSet{{ registers, f_registers: vec![{", ".join(write_data["f_registers"])}], timers: vec![{", ".join(write_data["timers"])}] }}\n"
             write_regs += "            },\n"
+
+
 
             output_file.write("    " + enum + ",\n")
     output_file.write("}\n\n")
@@ -212,6 +237,12 @@ with open('instructions.json') as f:
     output_file.write("        match self {\n")
     output_file.write(write_regs)
     output_file.write("            Self::Invalid(_value) => Default::default(),\n")
+    output_file.write("        }\n")
+    output_file.write("    }\n")
+    output_file.write("    pub fn is_valid(&self) -> bool {\n")
+    output_file.write("        match self {\n")
+    output_file.write(validities)
+    output_file.write("            Self::Invalid(_value) => true,\n")
     output_file.write("        }\n")
     output_file.write("    }\n")
     output_file.write("}\n\n")

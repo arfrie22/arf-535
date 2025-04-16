@@ -159,6 +159,18 @@ impl SimulatorGUI {
         self.program_memory_display.reload_inputs();
         self.data_memory_display.reload_inputs();
     }
+
+    fn cycle_many(&mut self, count: usize) {
+        let state = self.simulator.borrow().get_state();
+        state.borrow_mut().running = true;
+        for _ in 0..count {
+            if !state.borrow().running {
+                break
+            }
+
+            self.cycle();
+        }
+    }
 }
 
 impl eframe::App for SimulatorGUI {
@@ -166,6 +178,10 @@ impl eframe::App for SimulatorGUI {
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui.button("Single Step").clicked() {
                 self.cycle();
+            }
+
+            if ui.button("100 Step").clicked() {
+                self.cycle_many(100);
             }
 
             self.pipeline_display.ui(ui);

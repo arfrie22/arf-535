@@ -289,10 +289,13 @@ pub enum WritebackRegister {
     Timer(Timer, Option<u32>),
 }
 
+// TODO: Test is running
+
 #[derive(Debug, Clone, Default)]
 pub struct ExecuteResult {
     pub memory: MemoryAction,
     pub writeback: Vec<WritebackRegister>,
+    pub end_running: bool,
 }
 
 impl Instruction {
@@ -387,8 +390,11 @@ impl Instruction {
         match self {
             Instruction::Invalid(_) => Default::default(),
             Instruction::Trap => {
-                state.running = false;
-                Default::default()
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: Vec::new(),
+                    end_running: true,
+                }
             },
             Instruction::PushIntegerRegister { rx } => {
                 let sp = state.registers[Register::SP as usize];
@@ -398,6 +404,7 @@ impl Instruction {
                     writeback: vec![
                         WritebackRegister::Standard(Register::SP, Some(sp.wrapping_add(1))),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::PushFloatingPointRegister { fx } => {
@@ -408,6 +415,7 @@ impl Instruction {
                     writeback: vec![
                         WritebackRegister::Standard(Register::SP, Some(sp.wrapping_add(1))),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::PopIntegerRegister { rx } => {
@@ -418,6 +426,7 @@ impl Instruction {
                         WritebackRegister::Standard(*rx, None),
                         WritebackRegister::Standard(Register::SP, Some(sp.wrapping_sub(1))),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::PopFloatingPointRegister { fx } => {
@@ -428,6 +437,7 @@ impl Instruction {
                         WritebackRegister::FloatingPoint(*fx, None),
                         WritebackRegister::Standard(Register::SP, Some(sp.wrapping_sub(1))),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::SwapRegister { rx, fy } => {
@@ -439,6 +449,7 @@ impl Instruction {
                         WritebackRegister::Standard(*rx, Some(raw_cast_from_f32(val_fy))),
                         WritebackRegister::FloatingPoint(*fy, Some(raw_cast_to_f32(val_rx))),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::StallImmediate { .. } => Default::default(),
@@ -459,6 +470,7 @@ impl Instruction {
                     ExecuteResult {
                         memory: MemoryAction::None,
                         writeback,
+                        end_running: false,
                     }
                 } else {
                     Default::default()
@@ -486,6 +498,7 @@ impl Instruction {
                     ExecuteResult {
                         memory: MemoryAction::Read(MemoryBank::Program, val_rx + (*i << *s)),
                         writeback,
+                        end_running: false,
                     }
                 } else {
                     Default::default()
@@ -514,6 +527,7 @@ impl Instruction {
                     ExecuteResult {
                         memory: MemoryAction::Read(MemoryBank::Program, val_rx + (val_ro << *s)),
                         writeback,
+                        end_running: false,
                     }
                 } else {
                     Default::default()
@@ -536,6 +550,7 @@ impl Instruction {
                     ExecuteResult {
                         memory: MemoryAction::None,
                         writeback,
+                        end_running: false,
                     }
                 } else {
                     Default::default()
@@ -556,6 +571,7 @@ impl Instruction {
                     ExecuteResult {
                         memory: MemoryAction::None,
                         writeback,
+                        end_running: false,
                     }
                 } else {
                     Default::default()
@@ -582,6 +598,7 @@ impl Instruction {
                     ExecuteResult {
                         memory: MemoryAction::None,
                         writeback,
+                        end_running: false,
                     }
                 } else {
                     Default::default()
@@ -595,6 +612,7 @@ impl Instruction {
                         *rx,
                         Some((val_rx & 0xFFFF0000) | *value),
                     )],
+                    end_running: false,
                 }
             },
             Instruction::IntegerLoadHigh { rx, value } => {
@@ -605,6 +623,7 @@ impl Instruction {
                         *rx,
                         Some((val_rx & 0x0000FFFF) | *value),
                     )],
+                    end_running: false,
                 }
             },
             Instruction::SwapIntegerRegisters { rx, ry } => {
@@ -616,6 +635,7 @@ impl Instruction {
                         WritebackRegister::Standard(*rx, Some(val_ry)),
                         WritebackRegister::Standard(*ry, Some(val_rx)),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::CopyIntegerRegister { rx, ry } => {
@@ -623,6 +643,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry))],
+                    end_running: false,
                 }
             },
             Instruction::LoadIntegerRegisterIndirect { rx, ry, i, s } => {
@@ -630,6 +651,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Data, val_ry + (*i << *s)),
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
+                    end_running: false,
                 }
             },
             Instruction::LoadIntegerRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => {
@@ -638,6 +660,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Data, val_ry + (val_ro << *s)),
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
+                    end_running: false,
                 }
             },
             Instruction::LoadIntegerRegisterIndirectProgram { rx, ry, i, s } => {
@@ -645,6 +668,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Program, val_ry + (*i << *s)),
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
+                    end_running: false,
                 }
             },
             Instruction::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, ry, ro, s } => {
@@ -653,6 +677,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Program, val_ry + (val_ro << *s)),
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
+                    end_running: false,
                 }
             },
             Instruction::StoreIntegerRegisterIndirect { rx, ry, i, s } => {
@@ -661,6 +686,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, val_rx + (*i << *s), val_ry),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect {
@@ -675,6 +701,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, val_rx + (val_ro << *s), val_ry),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::StoreIntegerRegisterIndirectProgram { rx, ry, i, s } => {
@@ -683,6 +710,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Program, val_rx + (*i << *s), val_ry),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetProgram {
@@ -697,18 +725,21 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Program, val_rx + (val_ro << *s), val_ry),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::IntegerLoadData { rx, label } => {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Data, *label),
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
+                    end_running: false,
                 }
             },
             Instruction::IntegerLoadProgram { rx, label } => {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Program, *label),
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
+                    end_running: false,
                 }
             },
             Instruction::IntegerStoreData { rx, label } => {
@@ -716,6 +747,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, *label, val_rx),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::IntegerStoreProgram { rx, label } => {
@@ -723,6 +755,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Program, *label, val_rx),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::UnsignedZeroExtend { rx, ry, count } => {
@@ -730,6 +763,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry & (0xFFFFFFFF >> *count)))],
+                    end_running: false,
                 }
             },
             Instruction::SignExtend { rx, ry, count } => {
@@ -742,6 +776,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val))],
+                    end_running: false,
                 }
             },
             Instruction::FloatingPointLoadLow { fx, value } => {
@@ -752,6 +787,7 @@ impl Instruction {
                         *fx,
                         Some(raw_cast_to_f32((val_fx & 0xFFFF0000) | *value)),
                     )],
+                    end_running: false,
                 }
             },
             Instruction::FloatingPointLoadHigh { fx, value } => {
@@ -762,6 +798,7 @@ impl Instruction {
                         *fx,
                         Some(raw_cast_to_f32((val_fx & 0x0000FFFF) | *value)),
                     )],
+                    end_running: false,
                 }
             },
             Instruction::SwapFloatingPointRegisters { fx, fy } => {
@@ -773,6 +810,7 @@ impl Instruction {
                         WritebackRegister::FloatingPoint(*fx, Some(val_fy)),
                         WritebackRegister::FloatingPoint(*fy, Some(val_fx)),
                     ],
+                    end_running: false,
                 }
             },
             Instruction::CopyFloatingPointRegister { fx, fy } => {
@@ -780,6 +818,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::FloatingPoint(*fx, Some(val_fy))],
+                    end_running: false,
                 }
             },
             Instruction::LoadFloatingPointRegisterIndirect { fx, ry, i, s } => {
@@ -787,6 +826,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Data, val_ry.wrapping_add(*i << *s)),
                     writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                    end_running: false,
                 }
             },
             Instruction::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, ry, ro, s } => {
@@ -795,6 +835,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Data, val_ry.wrapping_add(val_ro << *s)),
                     writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                    end_running: false,
                 }
             }
             Instruction::StoreFloatingPointRegisterIndirect { rx, fy, i, s } => {
@@ -803,6 +844,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, val_rx.wrapping_add(*i << *s), val_fy),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, fy, ro, s } => {
@@ -812,12 +854,14 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, val_rx.wrapping_add(val_ro << *s), val_fy),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             }
             Instruction::FloatingPointLoadData { fx, label } => {
                 ExecuteResult {
                     memory: MemoryAction::Read(MemoryBank::Data, *label),
                     writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                    end_running: false,
                 }
             },
             Instruction::FloatingPointStoreData { fx, label } => {
@@ -825,6 +869,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, *label, val_fx),
                     writeback: Vec::new(),
+                    end_running: false,
                 }
             },
             Instruction::IntegerCompare { rx, ry } => {
@@ -842,6 +887,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
+                    end_running: false,
                 }
             },
             Instruction::IntegerCompareSingleAgainstZero { rx } => {
@@ -858,6 +904,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
+                    end_running: false,
                 }
             },
             Instruction::AddUnsignedInteger { c, rx, ry, rz } => {
@@ -875,6 +922,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::SubtractUnsignedInteger { c, rx, ry, rz } => {
@@ -892,6 +940,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::MultiplyUnsignedInteger { c, rx, ry, rz } => {
@@ -909,6 +958,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::DivideUnsignedInteger { c, rx, ry, rz } => {
@@ -936,6 +986,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::ModuloUnsignedInteger { c, rx, ry, rz } => {
@@ -963,6 +1014,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::AddSignedInteger { c, rx, ry, rz } => {
@@ -980,6 +1032,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::SubtractSignedInteger { c, rx, ry, rz } => {
@@ -997,6 +1050,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::MultiplySignedInteger { c, rx, ry, rz } => {
@@ -1014,6 +1068,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::DivideSignedInteger { c, rx, ry, rz } => {
@@ -1041,6 +1096,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::ModuloSignedInteger { c, rx, ry, rz } => {
@@ -1068,6 +1124,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::BitwiseAND { rx, ry, rz } => {
@@ -1077,6 +1134,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry & val_rz))],
+                    end_running: false,
                 }  
             },
             Instruction::BitwiseOR { rx, ry, rz } => {
@@ -1086,6 +1144,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry | val_rz))],
+                    end_running: false,
                 }  
             },
             Instruction::BitwiseNOT { rx, ry } => {
@@ -1094,6 +1153,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(!val_ry))],
+                    end_running: false,
                 }  
             },
             Instruction::BitwiseXOR { rx, ry, rz } => {
@@ -1103,6 +1163,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry ^ val_rz))],
+                    end_running: false,
                 }  
             },
             Instruction::LogicalShiftLeft { rx, ry, value } => {
@@ -1111,6 +1172,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry << *value))],
+                    end_running: false,
                 }  
             },
             Instruction::LogicalShiftRight { rx, ry, value } => {
@@ -1119,6 +1181,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry >> *value))],
+                    end_running: false,
                 }  
             },
             Instruction::ArithmeticShiftLeft { rx, ry, value } => {
@@ -1127,6 +1190,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry << *value)))],
+                    end_running: false,
                 }  
             },
             Instruction::ArithmeticShiftRight { rx, ry, value } => {
@@ -1135,6 +1199,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry >> *value)))],
+                    end_running: false,
                 }  
             },
             Instruction::RotateRight { rx, ry, value } => {
@@ -1143,6 +1208,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry.rotate_right(*value)))],
+                    end_running: false,
                 }  
             },
             Instruction::LogicalShiftLeftRegister { rx, ry, rz } => {
@@ -1152,6 +1218,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry << val_rz))],
+                    end_running: false,
                 }  
             },
             Instruction::LogicalShiftRightRegister { rx, ry, rz } => {
@@ -1161,6 +1228,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry >> val_rz))],
+                    end_running: false,
                 }  
             },
             Instruction::ArithmeticShiftLeftRegister { rx, ry, rz } => {
@@ -1170,6 +1238,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry << val_rz)))],
+                    end_running: false,
                 }  
             },
             Instruction::ArithmeticShiftRightRegister { rx, ry, rz } => {
@@ -1179,6 +1248,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry >> val_rz)))],
+                    end_running: false,
                 }  
             },
             Instruction::RotateRightRegister { rx, ry, rz } => {
@@ -1188,6 +1258,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry.rotate_right(val_rz)))],
+                    end_running: false,
                 }  
             },
             Instruction::MapUnsignedToSigned { rx, ry } => {
@@ -1202,6 +1273,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(res))],
+                    end_running: false,
                 }
             },
             Instruction::MapSignedToUnsigned { rx, ry } => {
@@ -1216,6 +1288,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(res))],
+                    end_running: false,
                 }  
             },
             Instruction::FloatingPointCompare { fx, fy } => {
@@ -1236,6 +1309,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
+                    end_running: false,
                 }
             },
             Instruction::FloatingPointCompareSingleAgainstZero { fx } => {
@@ -1255,6 +1329,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
+                    end_running: false,
                 }
             },
             Instruction::AddFloatingPoint { c, fx, fy, fz } => {
@@ -1274,6 +1349,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::SubtractFloatingPoint { c, fx, fy, fz } => {
@@ -1293,6 +1369,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::MultiplyFloatingPoint { c, fx, fy, fz } => {
@@ -1312,6 +1389,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::DivideFloatingPoint { c, fx, fy, fz } => {
@@ -1331,6 +1409,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::CastToFloat { c, fx, ry } => {
@@ -1351,6 +1430,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::CastFromFloat { c, rx, fy } => {
@@ -1372,6 +1452,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback,
+                    end_running: false,
                 }
             },
             Instruction::SetTimer { tx, ry } => {
@@ -1379,6 +1460,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Timer(*tx, Some(val_ry))],
+                    end_running: false,
                 }
             },
             Instruction::GetCurrentTimer { rx, ty } => {
@@ -1386,6 +1468,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ty))],
+                    end_running: false,
                 }
             },
             Instruction::CheckTimer { .. } => Default::default(),
@@ -1393,6 +1476,7 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Timer(*tx, Some(0))],
+                    end_running: false,
                 }
             },
         }
@@ -1441,6 +1525,7 @@ impl PipelineInner for ExecuteStage {
                     instruction: execute_state.instruction,
                     registers: execute.writeback,
                     holds: execute_state.registers,
+                    end_running: execute.end_running
                 },
             });
 
@@ -1458,8 +1543,9 @@ impl PipelineInner for ExecuteStage {
                 writeback: WritebackState {
                     pc: state.pc,
                     instruction: state.instruction,
-                    registers: vec![],
+                    registers: Vec::new(),
                     holds: Default::default(),
+                    end_running: false,
                 },
             });
         }
@@ -1594,8 +1680,9 @@ impl PipelineInner for MemoryStage {
             state_ref.memory_result = Some(WritebackState {
                 pc: state.writeback.pc,
                 instruction: state.writeback.instruction,
-                registers: vec![],
+                registers: Vec::new(),
                 holds: Default::default(),
+                end_running: false,
             });
         }
         Ok(())
@@ -1608,6 +1695,7 @@ pub struct WritebackState {
     pub instruction: Instruction,
     pub registers: Vec<WritebackRegister>,
     pub holds: RegisterSet,
+    pub end_running: bool,
 }
 
 #[derive(Debug)]
@@ -1653,6 +1741,10 @@ impl PipelineInner for WritebackStage {
 
                 decrement_inflight(&mut state_ref.inflight, &wb_state.holds);
                 state_ref.hold_fetch = false;
+
+                if wb_state.end_running {
+                    state_ref.running = false;
+                }
                 Ok(())
             };
 
