@@ -1,15 +1,15 @@
-use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
-use eframe::egui::{self, Color32, Context, Id, Margin, Stroke, TextEdit, UiBuilder, Vec2, Widget};
-use regex::Regex;
-use simulator::memory::{Cache, InnerMemory};
+use eframe::egui::{self, Context, Id, Margin, UiBuilder, Vec2};
+use simulator::memory::Cache;
+
+const TOP_ROW_HEIGHT: f32 = 24.0;
+const ROW_HEIGHT: f32 = 18.0;
 
 pub struct CacheDisplay<const C: usize> {
     salt: String,
     cache_cell: Rc<RefCell<dyn Cache>>,
     default_column: egui_table::Column,
-    top_row_height: f32,
-    row_height: f32,
     prefetched: Vec<egui_table::PrefetchInfo>,
 }
 
@@ -21,8 +21,6 @@ impl<const C: usize> CacheDisplay<C> {
             default_column: egui_table::Column::new(100.0)
                 .range(10.0..=500.0)
                 .resizable(false),
-            top_row_height: 24.0,
-            row_height: 18.0,
             prefetched: vec![],
         }
     }
@@ -56,11 +54,11 @@ impl<const C: usize> CacheDisplay<C> {
                 });
             } else if col_nr == 3 {
                 ui.horizontal(|ui| {
-                    ui.label(format!("{}", self.cache_cell.borrow().line_metadata(row_nr as usize).tag));
+                    ui.label(format!("{:04X}", self.cache_cell.borrow().line_metadata(row_nr as usize).tag));
                 });
             } else {
                 ui.horizontal(|ui| {
-                    ui.label(format!("{:08}", self.cache_cell.borrow().raw_line(row_nr as usize)[col_nr-4]));
+                    ui.label(format!("{:08X}", self.cache_cell.borrow().raw_line(row_nr as usize)[col_nr-4]));
                 });
             }
         });
@@ -128,7 +126,7 @@ impl<const C: usize> egui_table::TableDelegate for CacheDisplay<C> {
     }
 
     fn row_top_offset(&self, _ctx: &Context, _table_id: Id, row_nr: u64) -> f32 {
-        row_nr as f32 * self.row_height
+        row_nr as f32 * ROW_HEIGHT
     }
 }
 
@@ -136,14 +134,14 @@ impl<const C: usize> CacheDisplay<C> {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         let id_salt = Id::new(&self.salt);
         ui.push_id(id_salt, |ui| {
-            let estimated_height = (C as f32) * self.row_height * 2.0 + self.top_row_height;
+            let estimated_height = (C as f32) * ROW_HEIGHT + TOP_ROW_HEIGHT;
             let estimated_width = 8.0 * self.default_column.current;
 
             let (_id, rect) = ui.allocate_space(
                 Vec2::new(estimated_width, estimated_height),
             );
 
-            ui.allocate_new_ui(UiBuilder::new().max_rect(rect), |ui| {
+            ui.allocate_new_ui(UiBuilder::new().sizing_pass().max_rect(rect), |ui| {
                 let id_salt = Id::new("table");
                 let table = egui_table::Table::new()
                     .id_salt(id_salt)
@@ -151,18 +149,11 @@ impl<const C: usize> CacheDisplay<C> {
                     .columns(vec![self.default_column; 8])
                     .num_sticky_cols(1)
                     .headers([
-                        egui_table::HeaderRow::new(self.top_row_height),
+                        egui_table::HeaderRow::new(TOP_ROW_HEIGHT),
                     ])
                     .auto_size_mode(egui_table::AutoSizeMode::Never);
 
                 table.show(ui, self);
-
-                ui.painter().rect_stroke(
-                    rect,
-                    0.0,
-                    Stroke::new(1.0, Color32::LIGHT_GREEN),
-                    egui::StrokeKind::Middle,
-                );
             });
         });
     }

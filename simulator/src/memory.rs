@@ -167,7 +167,6 @@ impl<const T: usize, MEM: InnerMemory> FrontMemory for ClockedMemory<T, MEM> {
             None => None,
         };
         
-        // println!("{:?}, {:?}", a, b);
         match (a, b)  {
             (Ok(_), None) | (Ok(_), Some(Ok(()))) => {
                 let res = self.memory.borrow_mut().write(address, value);

@@ -1,17 +1,17 @@
 use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
-use eframe::egui::{self, Color32, Context, Id, Margin, Stroke, TextEdit, UiBuilder, Vec2, Widget};
-use regex::Regex;
+use eframe::egui::{self, Context, Id, Margin, TextEdit, UiBuilder, Vec2, Widget};
 use simulator::memory::InnerMemory;
 
 const NUM_ROWS: u64 = 0xFFFF >> 2;
+
+const TOP_ROW_HEIGHT: f32 = 24.0;
+const ROW_HEIGHT: f32 = 18.0;
 
 pub struct MemoryDisplay {
     salt: String,
     memory_cell: Rc<RefCell<dyn InnerMemory>>,
     default_column: egui_table::Column,
-    top_row_height: f32,
-    row_height: f32,
     input_values: [BTreeMap<u64, String>; 4],
     prefetched: Vec<egui_table::PrefetchInfo>,
 }
@@ -24,11 +24,13 @@ impl MemoryDisplay {
             default_column: egui_table::Column::new(100.0)
                 .range(10.0..=500.0)
                 .resizable(false),
-            top_row_height: 24.0,
-            row_height: 18.0,
             input_values: Default::default(),
             prefetched: vec![],
         }
+    }
+
+    pub fn reload_inputs(&mut self) {
+        self.input_values.iter_mut().for_each(|tree| tree.clear());
     }
 }
 
@@ -48,7 +50,7 @@ impl MemoryDisplay {
         ui.vertical(|ui| {
             if col_nr == 0 {
                 ui.horizontal(|ui| {
-                    ui.label(format!("{:#06x}", row_nr << 2));
+                    ui.label(format!("{:#06X}", row_nr << 2));
                 });
             } else {
                 let value = if let Some(value) = self.input_values[col_nr - 1].get_mut(&row_nr) {
@@ -56,17 +58,25 @@ impl MemoryDisplay {
                 } else {
                     let line = self.memory_cell.borrow().read_line((row_nr << 2) as u32).unwrap();
                     for (i, l) in line.iter().enumerate() {
-                        self.input_values[i].insert(row_nr, format!("{:08}", *l));
+                        self.input_values[i].insert(row_nr, format!("{:08X}", *l));
                     }
                     self.input_values[col_nr - 1].get_mut(&row_nr).unwrap()
                 };
 
                 ui.horizontal(|ui| {
-                    let response = TextEdit::singleline(value).char_limit(8).ui(ui);
+                    let color = if row_nr % 2 == 1 {ui.visuals().faint_bg_color} else {ui.visuals().extreme_bg_color};
+
+                    let response = TextEdit::singleline(value).background_color(color).char_limit(8).ui(ui);
                     if response.lost_focus() {
-                        let re = Regex::new(r"[^A-Fa-f0-9]").unwrap();
-                        *value = re.replace_all(value, "").to_string();
-                        println!("{}, {}: changed", row_nr, col_nr);
+                        let address = ((row_nr << 2) + ((col_nr - 1) as u64)) as u32;
+                        match u32::from_str_radix(value, 16) {
+                            Ok(value) => {
+                                self.memory_cell.borrow_mut().write(address, value).unwrap();
+                            }
+                            Err(_) => {}
+                        }
+
+                        *value = format!("{:08X}", self.memory_cell.borrow().read(address).unwrap());
                     }
                 });
             }
@@ -129,7 +139,7 @@ impl egui_table::TableDelegate for MemoryDisplay {
     }
 
     fn row_top_offset(&self, _ctx: &Context, _table_id: Id, row_nr: u64) -> f32 {
-        row_nr as f32 * self.row_height
+        row_nr as f32 * ROW_HEIGHT
     }
 }
 
@@ -137,16 +147,14 @@ impl MemoryDisplay {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         let id_salt = Id::new(&self.salt);
         ui.push_id(id_salt, |ui| {
-            // let estimated_height = (NUM_ROWS as f32) * self.row_height + self.top_row_height * 2.0;
-            // let estimated_height = 16.0 * self.row_height + self.top_row_height * 2.0;
-            let estimated_height = 500.0;
+            let estimated_height = 16.0 * ROW_HEIGHT + TOP_ROW_HEIGHT;
             let estimated_width = 5.0 * self.default_column.current;
 
             let (_id, rect) = ui.allocate_space(
                 Vec2::new(estimated_width, estimated_height),
             );
 
-            ui.allocate_new_ui(UiBuilder::new().max_rect(rect), |ui| {
+            ui.allocate_new_ui(UiBuilder::new().sizing_pass().max_rect(rect), |ui| {
                 let id_salt = Id::new("table");
                 let table = egui_table::Table::new()
                     .id_salt(id_salt)
@@ -154,18 +162,11 @@ impl MemoryDisplay {
                     .columns(vec![self.default_column; 5])
                     .num_sticky_cols(1)
                     .headers([
-                        egui_table::HeaderRow::new(self.top_row_height),
+                        egui_table::HeaderRow::new(TOP_ROW_HEIGHT),
                     ])
                     .auto_size_mode(egui_table::AutoSizeMode::Never);
 
                 table.show(ui, self);
-
-                ui.painter().rect_stroke(
-                    ui.max_rect(),
-                    0.0,
-                    Stroke::new(1.0, Color32::RED),
-                    egui::StrokeKind::Middle,
-                );
             });
         });
     }

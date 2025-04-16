@@ -150,13 +150,21 @@ impl Default for SimulatorGUI {
     }
 }
 
+impl SimulatorGUI {
+    fn cycle(&mut self) {
+        self.simulator.borrow().cycle();
+        self.program_memory_display.reload_inputs();
+        self.data_memory_display.reload_inputs();
+    }
+}
+
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui.button("Single Step").clicked() {
-                self.simulator.borrow().cycle();
+                self.cycle();
             }
-            ui.horizontal(|ui| {
+            ui.horizontal_top(|ui| {
                 self.program_memory_display.ui(ui);
                 self.program_cache_display.ui(ui);
             });
