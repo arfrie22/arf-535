@@ -46,7 +46,6 @@ impl AssembledData {
         let mut ptr = 0;
 
         for instruction in self.instructions.iter() {
-            println!("instruction: {:?}", instruction);
             let v: u32 = (*instruction).into();
             scratch[ptr..ptr+4].copy_from_slice(&v.to_le_bytes());
             ptr += 4;
