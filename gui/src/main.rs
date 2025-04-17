@@ -5,9 +5,8 @@ use std::{cell::RefCell, rc::Rc};
 use assembler::{assemble, load_file};
 use displays::{cache::CacheDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay};
 use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
-use egui_extras::{Column, TableBuilder};
 use simulator::{
-    enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory}, Simulator
+    memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, Simulator
 };
 
 const DATA_M_CYCLES: usize = 2;
@@ -58,6 +57,8 @@ fn main() -> eframe::Result {
                 .push("monaspace".to_owned());
 
             cc.egui_ctx.set_fonts(fonts);
+
+            catppuccin_egui::set_theme(&cc.egui_ctx, catppuccin_egui::MACCHIATO);
 
             Ok(Box::<SimulatorGUI>::default())
         }),
@@ -242,13 +243,15 @@ impl eframe::App for SimulatorGUI {
                 }
             });
 
-            if ui.button("Single Step").clicked() {
-                self.cycle();
-            }
+            ui.horizontal(|ui| {
+                if ui.button("Single Step").clicked() {
+                    self.cycle();
+                }
 
-            if ui.button("1000 Steps").clicked() {
-                self.cycle_many(1000);
-            }
+                if ui.button("1000 Steps").clicked() {
+                    self.cycle_many(1000);
+                }
+            });
 
             self.pipeline_display.ui(ui);
             ui.horizontal_top(|ui| {
