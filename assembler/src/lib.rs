@@ -1,7 +1,7 @@
-use std::{collections::HashMap, num::ParseIntError};
+use std::{collections::HashMap, io::{self, Read, Write}, num::ParseIntError};
 
 use pest_derive::Parser;
-use simulator::{enums::ParseError, instruction::Instruction};
+use simulator::{enums::ParseError, instruction::Instruction, Simulator};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AssemblerError {
@@ -40,8 +40,50 @@ impl Default for AssembledData {
     }
 }
 
+impl AssembledData {
+    pub fn to_file(&self, writer: impl Write) {
+        let mut scratch = [0; 0xFFFF * 4 * 2];
+        let mut ptr = 0;
 
-// TODO: Assembler should have a validate function to make sure all numbers are in range
+        for instruction in self.instructions.iter() {
+            let v: u32 = (*instruction).into();
+            scratch[ptr..ptr+4].copy_from_slice(&v.to_le_bytes());
+            ptr += 4;
+        }
+
+        ptr = 0xFFFF * 4;
+
+        for d in self.data.iter() {
+            scratch[ptr..ptr+4].copy_from_slice(&d.to_le_bytes());
+            ptr += 4;
+        }
+
+        zstd::stream::copy_encode(&scratch[..], writer, 22).unwrap();
+    }
+}
+
+pub fn load_file(reader: impl Read, simulator: &mut Simulator) {
+    let mut decoded = Vec::new();
+    zstd::stream::copy_decode(reader, &mut decoded).unwrap();
+
+    let p = simulator.get_program_memory();
+    let mut prog = p.borrow_mut();
+    for i in 0..0xFFFF {
+        let v = i * 4;
+        let mut slice = [0; 4];
+        slice.copy_from_slice(&decoded[v..v + 4]);
+        prog.inner[i] = u32::from_le_bytes(slice);
+    }
+
+    let d = simulator.get_data_memory();
+    let mut data = d.borrow_mut();
+    for i in 0..0xFFFF {
+        let v = (i * 4) + 0xFFFF;
+        let mut slice = [0; 4];
+        slice.copy_from_slice(&decoded[v..v + 4]);
+        data.inner[i] = u32::from_le_bytes(slice);
+    }
+}
 
 fn parse_number(input: &str) -> Result<u32, AssemblerError> {
     if input.is_empty() {
@@ -74,8 +116,7 @@ fn parse_signed_number(input: &str) -> Result<i32, AssemblerError> {
         i32::from_str_radix(input, 10)?
     })
 }
-//TODO: Add data section parsing
-// TODO: Add load/export to binary file
+
 fn parse_prog_label(input: &str, prog_labels: &HashMap<String, u32>) -> Result<u32, AssemblerError> {
     if let Some(v) = prog_labels.get(input) {
         Ok(*v)
@@ -106,21 +147,38 @@ pub struct AssemblerParser;
 
 mod gen_functions;
 pub use gen_functions::assemble;
+use zstd::zstd_safe::CompressionLevel;
 
 #[cfg(test)]
 mod tests {
+    use std::io;
+
     use crate::assemble;
 
     #[test]
     fn it_works() {
         let input = "
+        .prog
         test_2: 
         SWP pc r3
         SWP R1 f1
+        B p:test_4
+        test_3: 
+        STR [R1 ] R2
         STR [R1  + 0x4] R2
-        STR [R1 + 0x4 << 0x2] F3
+        STR [R1 + r1 << 0x2] F3
+        test_4:
+        B p:test_3
+        BO -1
+        BO 10
+        .data
+        a 1#10 2#0x1
         ";
 
-        assemble(input).unwrap();
+        let a = assemble(input).unwrap();
+        let mut v = Vec::new();
+        a.to_file(&mut v);
+
+        println!("v: {}", v.len());
     }
 }

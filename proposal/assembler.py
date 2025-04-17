@@ -108,9 +108,9 @@ with open('instructions.json') as f:
 
     output_file.write("value = _{ instruction | label | comment }\n")
     output_file.write("prog_line = _{ WHITESPACE* ~ value ~ WHITESPACE* }\n")
-    output_file.write("prog = ${ \".prog\" ~ WHITESPACE* ~ NEWLINE+ ~ prog_line ~ ((WHITESPACE* ~ NEWLINE) ~ prog_line)* }\n")
-    output_file.write("data_value = ${(number | signed_number) ~ \";\" ~ number}\n")
-    output_file.write("data_line = ${label_arg ~ (WHITESPACE+ ~ data_value)+ ~ WHITESPACE*}\n")
+    output_file.write("prog = ${ \".prog\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ prog_line)+ }\n")
+    output_file.write("data_value = ${(number | signed_number) ~ \"#\" ~ number}\n")
+    output_file.write("data_line = ${WHITESPACE* ~ label_arg ~ (WHITESPACE+ ~ data_value)+ ~ WHITESPACE*}\n")
     output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE) ~ data_line)* }\n")
     output_file.write("file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ prog ~ (WHITESPACE | NEWLINE)* ~ data? ~ (WHITESPACE | NEWLINE)* ~ EOI }\n")
     

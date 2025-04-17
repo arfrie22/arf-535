@@ -2,11 +2,12 @@
 
 use std::{cell::RefCell, rc::Rc};
 
+use assembler::{assemble, load_file};
 use displays::{cache::CacheDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay};
 use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
 use egui_extras::{Column, TableBuilder};
 use simulator::{
-    enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, Simulator
+    enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory}, Simulator
 };
 
 const DATA_M_CYCLES: usize = 2;
@@ -124,24 +125,52 @@ impl Default for SimulatorGUI {
         let data_cache = simulator.borrow().get_data_cache();
 
 
-            data_memory.borrow_mut().write(0, 42).unwrap();
+            // data_memory.borrow_mut().write(0, 42).unwrap();
         
-            program_memory.borrow_mut().write(0, Instruction::IntegerLoadData { rx: Register::R1, label: 0 }.into()).unwrap();
-            program_memory.borrow_mut().write(1, Instruction::IntegerStoreData { rx: Register::R1, label: 1 }.into()).unwrap();
-            program_memory.borrow_mut().write(2, Instruction::AddUnsignedInteger { c: false, rx: Register::R1, ry: Register::R1, rz: Register::R1 }.into()).unwrap();
-            program_memory.borrow_mut().write(3, Instruction::IntegerLoadLow { rx: Register::R3, value: 1 }.into()).unwrap();
+            // program_memory.borrow_mut().write(0, Instruction::IntegerLoadData { rx: Register::R1, label: 0 }.into()).unwrap();
+            // program_memory.borrow_mut().write(1, Instruction::IntegerStoreData { rx: Register::R1, label: 1 }.into()).unwrap();
+            // program_memory.borrow_mut().write(2, Instruction::AddUnsignedInteger { c: false, rx: Register::R1, ry: Register::R1, rz: Register::R1 }.into()).unwrap();
+            // program_memory.borrow_mut().write(3, Instruction::IntegerLoadLow { rx: Register::R3, value: 1 }.into()).unwrap();
 
-            program_memory.borrow_mut().write(4, Instruction::IntegerLoadHigh { rx: Register::R3, value: 0 }.into()).unwrap();
+            // program_memory.borrow_mut().write(4, Instruction::IntegerLoadHigh { rx: Register::R3, value: 0 }.into()).unwrap();
 
 
-            program_memory.borrow_mut().write(5, Instruction::IntegerLoadData { rx: Register::R2, label: 0 }.into()).unwrap();
-            program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { c: false, rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
-            program_memory.borrow_mut().write(7, Instruction::IntegerStoreData { rx: Register::R2, label: 0 }.into()).unwrap();
+            // program_memory.borrow_mut().write(5, Instruction::IntegerLoadData { rx: Register::R2, label: 0 }.into()).unwrap();
+            // program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { c: false, rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
+            // program_memory.borrow_mut().write(7, Instruction::IntegerStoreData { rx: Register::R2, label: 0 }.into()).unwrap();
             
-            program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
-            program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
+            // program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
+            // program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
 
 
+        let input = "
+            .prog
+            ldr r1 d:v1
+            str r1 d:v2
+            add r1 r1 r1
+
+            ldl r3 1
+            ldh r3 0
+
+            loop:
+            ldr r2 d:v1
+            add r2 r2 r3
+            str r2 d:v1
+
+            b p:loop
+            str r4 d:v1
+
+            .data
+            v1 42#1
+            v2 0#1
+        ";
+
+        let a = assemble(input).unwrap();
+        let mut v = Vec::new();
+        a.to_file(&mut v);
+
+        load_file(&v[..], &mut simulator.borrow_mut());
+        
         Self {
             simulator,
             pipeline_display: PipelineDisplay::new(simulator_state, "pipeline"),
@@ -183,8 +212,8 @@ impl eframe::App for SimulatorGUI {
                 self.cycle();
             }
 
-            if ui.button("100 Step").clicked() {
-                self.cycle_many(100);
+            if ui.button("1000 Steps").clicked() {
+                self.cycle_many(1000);
             }
 
             self.pipeline_display.ui(ui);

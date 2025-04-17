@@ -109,9 +109,9 @@ with open('instructions.json') as f:
                         write_extra += "                }\n"
                     elif re.match("_offset_", bit_data["short"]):
                         arg_type = "i32"
-                        check = f"((*{arg_name} as u32) & (0xFFFFFF << {bit_data["count"]}) == 0)"
+                        check = f"*{arg_name} < (1 << {bit_data["count"] - 1}) && *{arg_name} >= -(1 << {bit_data["count"] - 1})"
                     else:
-                        check = f"({arg_name} & (0xFFFFFF << {bit_data["count"]}) == 0)"
+                        check = f"*{arg_name} < (1 << {bit_data["count"]})"
 
                     if check != "":
                         if valid_check != "":

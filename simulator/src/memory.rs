@@ -218,7 +218,7 @@ impl<const T: usize, MEM: InnerMemory> FrontMemory for ClockedMemory<T, MEM> {
 
 #[derive(Debug)]
 pub struct Memory {
-    inner: [u32; MEMORY_SIZE]
+    pub inner: [u32; MEMORY_SIZE]
 }
 
 impl Memory {

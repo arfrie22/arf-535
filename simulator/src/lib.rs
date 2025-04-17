@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use enums::{FPRegister, Register, Timer};
-use memory::{Cache, FrontMemory, InnerMemory};
+use memory::{Cache, FrontMemory, InnerMemory, Memory};
 use pipeline::{
     DecodeStage, DecodeState, ExecuteStage, ExecuteState, FetchResult, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackStage, WritebackState
 };
@@ -236,7 +236,7 @@ impl Simulator {
 
 type SimulatorStateCell = Rc<RefCell<SimulatorState>>;
 type MemoryCell = Rc<RefCell<dyn FrontMemory>>;
-type RawMemoryCell = Rc<RefCell<dyn InnerMemory>>;
+type RawMemoryCell = Rc<RefCell<Memory>>;
 type RawCacheCell = Rc<RefCell<dyn Cache>>;
 type PipelineCell<T> = Rc<RefCell<PipelineStage<T>>>;
 
