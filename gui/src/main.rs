@@ -205,13 +205,20 @@ impl SimulatorGUI {
                     match input_file.read_to_string(&mut buf) {
                         Ok(_) => match assemble(&buf) {
                             Ok(data) => {
-                                let mut output_file = std::fs::File::create(&output_path).unwrap();
-                                match data.to_file(&mut output_file) {
-                                    Ok(_) => {
-                                        info!("Wrote {}:", output_path.to_string_lossy());
+                                match std::fs::File::create(&output_path) {
+                                    Ok(mut output_file) => {
+                                        match data.to_file(&mut output_file) {
+                                            Ok(_) => {
+                                                info!("Wrote {}:", output_path.to_string_lossy());
+                                            },
+                                            Err(e) => {
+                                                error!("Error writing {}:", output_path.to_string_lossy());
+                                                error!("{:?}", e);
+                                            },
+                                        }
                                     },
                                     Err(e) => {
-                                        error!("Error writing {}:", output_path.to_string_lossy());
+                                        error!("Error creating {}:", output_path.to_string_lossy());
                                         error!("{:?}", e);
                                     },
                                 }
