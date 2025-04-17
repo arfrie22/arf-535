@@ -122,12 +122,12 @@ struct SimulatorGUI {
 
 impl Default for SimulatorGUI {
     fn default() -> Self {
-        Self::new(true, true)
+        Self::new(true, true, "test")
     }
 }
 
 impl SimulatorGUI {
-    fn new(use_pipeline: bool, use_cache: bool) -> Self {
+    fn new(use_pipeline: bool, use_cache: bool, file_name: &str) -> Self {
         let simulator = Rc::new(RefCell::new(create_simulator(use_cache)));
         let simulator_state = simulator.borrow().get_state();
         simulator_state.borrow_mut().single_instruction_pipeline = !use_pipeline;
@@ -144,7 +144,7 @@ impl SimulatorGUI {
             data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
             program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
             data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
-            file_name: "test".to_owned(),
+            file_name: file_name.to_owned(),
             use_pipeline,
             use_cache,
         }
@@ -169,7 +169,7 @@ impl SimulatorGUI {
     }
 
     fn load_file(&mut self) {
-        *self = Self::new(self.use_pipeline, self.use_cache);
+        *self = Self::new(self.use_pipeline, self.use_cache, &self.file_name);
 
         let input_path = Path::new("compiled").join(format!("{}.o", self.file_name));
         if input_path.exists() {

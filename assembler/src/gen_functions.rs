@@ -36,7 +36,6 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                 Rule::label_arg => {
                     let label = beginning.clone() + t.as_str();
                     labels.insert(label, first_pass_index);
-                    first_pass_index += 1;
                 },
                 Rule::data_line => {
                     for t in t.into_inner() {

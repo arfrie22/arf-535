@@ -339,7 +339,7 @@ impl Condition {
         match self {
             Condition::AlwaysTrue => true,
             Condition::NeverTrue => false,
-            _ => st & (1 << (*self as u32)) == 1,
+            _ => st & (1 << (*self as u32)) > 0,
         }
     }
 

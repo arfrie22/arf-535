@@ -109,6 +109,6 @@ prog_line = _{ WHITESPACE* ~ value ~ WHITESPACE* }
 prog = ${ ".prog" ~ ((WHITESPACE* ~ NEWLINE)+ ~ prog_line)+ }
 data_value = ${(number | signed_number) ~ "#" ~ number}
 data_line = ${WHITESPACE* ~ label_arg ~ (WHITESPACE+ ~ data_value)+ ~ WHITESPACE*}
-data = ${ ".data" ~ ((WHITESPACE* ~ NEWLINE) ~ data_line)* }
+data = ${ ".data" ~ ((WHITESPACE* ~ NEWLINE)+ ~ data_line)* }
 file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ prog ~ (WHITESPACE | NEWLINE)* ~ data? ~ (WHITESPACE | NEWLINE)* ~ EOI }
 WHITESPACE = _{" " | "\t"}

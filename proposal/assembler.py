@@ -111,7 +111,7 @@ with open('instructions.json') as f:
     output_file.write("prog = ${ \".prog\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ prog_line)+ }\n")
     output_file.write("data_value = ${(number | signed_number) ~ \"#\" ~ number}\n")
     output_file.write("data_line = ${WHITESPACE* ~ label_arg ~ (WHITESPACE+ ~ data_value)+ ~ WHITESPACE*}\n")
-    output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE) ~ data_line)* }\n")
+    output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ data_line)* }\n")
     output_file.write("file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ prog ~ (WHITESPACE | NEWLINE)* ~ data? ~ (WHITESPACE | NEWLINE)* ~ EOI }\n")
     
 
@@ -162,7 +162,6 @@ with open('instructions.json') as f:
     output_file_rs.write("                Rule::label_arg => {\n")
     output_file_rs.write("                    let label = beginning.clone() + t.as_str();\n")
     output_file_rs.write("                    labels.insert(label, first_pass_index);\n")
-    output_file_rs.write("                    first_pass_index += 1;\n")
     output_file_rs.write("                },\n")
     output_file_rs.write("                Rule::data_line => {\n")
     output_file_rs.write("                    for t in t.into_inner() {\n")

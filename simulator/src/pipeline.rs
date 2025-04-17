@@ -903,7 +903,6 @@ impl Instruction {
             Instruction::IntegerCompareSingleAgainstZero { rx } => {
                 let val_rx = state.registers[*rx as usize];
                 let mut st = state.registers[Register::ST as usize];
-
                 st = Condition::Equal.set(st, val_rx == 0);
                 st = Condition::GreaterThan.set(st, val_rx > 0);
                 st = Condition::LessThan.set(st, false);
@@ -1786,7 +1785,6 @@ impl PipelineInner for WritebackStage {
                 state_ref.hold_fetch = false;
 
                 if wb_state.end_running {
-                    println!("Cancel");
                     state_ref.running = false;
                 }
                 Ok(())
