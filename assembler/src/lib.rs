@@ -78,7 +78,7 @@ pub fn load_file(reader: impl Read, simulator: &mut Simulator) -> io::Result<()>
     let d = simulator.get_data_memory();
     let mut data = d.borrow_mut();
     for i in 0..0xFFFF {
-        let v = (i * 4) + 0xFFFF;
+        let v = (i * 4) + (0xFFFF * 4);
         let mut slice = [0; 4];
         slice.copy_from_slice(&decoded[v..v + 4]);
         data.inner[i] = u32::from_le_bytes(slice);
