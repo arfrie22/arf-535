@@ -1,4 +1,3 @@
-
 .prog
 ldr r1 d:v1
 str r1 d:v2

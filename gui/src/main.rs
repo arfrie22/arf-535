@@ -113,35 +113,89 @@ struct SimulatorGUI {
     data_memory_display: MemoryDisplay,
     program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
     data_cache_display: CacheDisplay<DATA_CACHE_LINES>,
+    use_pipeline: bool,
+    use_cache: bool,
 }
 
 impl Default for SimulatorGUI {
     fn default() -> Self {
-        let simulator = Rc::new(RefCell::new(create_simulator(true)));
+        let res = Self::new(true, true);
+        
+        let input = "
+            .prog
+            ldr r1 d:v1
+            str r1 d:v2
+            add r1 r1 r1
+
+            ldl r3 1
+            ldh r3 0
+
+            loop:
+            ldr r2 d:v1
+            add r2 r2 r3
+            str r2 d:v1
+
+            b p:loop
+            str r4 d:v1
+
+            .data
+            v1 42#1
+            v2 0#1
+        ";
+
+        let a = assemble(input).unwrap();
+        let mut v = Vec::new();
+        a.to_file(&mut v);
+
+        load_file(&v[..], &mut res.simulator.borrow_mut());
+
+        res
+    }
+}
+
+impl SimulatorGUI {
+    fn new(use_pipeline: bool, use_cache: bool) -> Self {
+        let simulator = Rc::new(RefCell::new(create_simulator(use_cache)));
         let simulator_state = simulator.borrow().get_state();
+        simulator_state.borrow_mut().single_instruction_pipeline = !use_pipeline;
+
         let program_memory = simulator.borrow().get_program_memory();
         let data_memory = simulator.borrow().get_data_memory();
         let program_cache = simulator.borrow().get_program_cache();
         let data_cache = simulator.borrow().get_data_cache();
 
+        Self {
+            simulator,
+            pipeline_display: PipelineDisplay::new(simulator_state, "pipeline"),
+            program_memory_display: MemoryDisplay::new(program_memory, "program_memory"),
+            data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
+            program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
+            data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
+            use_pipeline,
+            use_cache,
+        }
+    }
 
-            // data_memory.borrow_mut().write(0, 42).unwrap();
-        
-            // program_memory.borrow_mut().write(0, Instruction::IntegerLoadData { rx: Register::R1, label: 0 }.into()).unwrap();
-            // program_memory.borrow_mut().write(1, Instruction::IntegerStoreData { rx: Register::R1, label: 1 }.into()).unwrap();
-            // program_memory.borrow_mut().write(2, Instruction::AddUnsignedInteger { c: false, rx: Register::R1, ry: Register::R1, rz: Register::R1 }.into()).unwrap();
-            // program_memory.borrow_mut().write(3, Instruction::IntegerLoadLow { rx: Register::R3, value: 1 }.into()).unwrap();
+    fn cycle(&mut self) {
+        self.simulator.borrow().cycle();
+        self.program_memory_display.reload_inputs();
+        self.data_memory_display.reload_inputs();
+    }
 
-            // program_memory.borrow_mut().write(4, Instruction::IntegerLoadHigh { rx: Register::R3, value: 0 }.into()).unwrap();
+    fn cycle_many(&mut self, count: usize) {
+        let state = self.simulator.borrow().get_state();
+        state.borrow_mut().running = true;
+        for _ in 0..count {
+            if !state.borrow().running {
+                break
+            }
 
+            self.cycle();
+        }
+    }
 
-            // program_memory.borrow_mut().write(5, Instruction::IntegerLoadData { rx: Register::R2, label: 0 }.into()).unwrap();
-            // program_memory.borrow_mut().write(6, Instruction::AddUnsignedInteger { c: false, rx: Register::R2, ry: Register::R2, rz: Register::R3 }.into()).unwrap();
-            // program_memory.borrow_mut().write(7, Instruction::IntegerStoreData { rx: Register::R2, label: 0 }.into()).unwrap();
-            
-            // program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
-            // program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
-
+    fn reload(&mut self) {
+        *self = Self::new(self.use_pipeline, self.use_cache);
 
         let input = "
             .prog
@@ -169,36 +223,7 @@ impl Default for SimulatorGUI {
         let mut v = Vec::new();
         a.to_file(&mut v);
 
-        load_file(&v[..], &mut simulator.borrow_mut());
-        
-        Self {
-            simulator,
-            pipeline_display: PipelineDisplay::new(simulator_state, "pipeline"),
-            program_memory_display: MemoryDisplay::new(program_memory, "program_memory"),
-            data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
-            program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
-            data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
-        }
-    }
-}
-
-impl SimulatorGUI {
-    fn cycle(&mut self) {
-        self.simulator.borrow().cycle();
-        self.program_memory_display.reload_inputs();
-        self.data_memory_display.reload_inputs();
-    }
-
-    fn cycle_many(&mut self, count: usize) {
-        let state = self.simulator.borrow().get_state();
-        state.borrow_mut().running = true;
-        for _ in 0..count {
-            if !state.borrow().running {
-                break
-            }
-
-            self.cycle();
-        }
+        load_file(&v[..], &mut self.simulator.borrow_mut());
     }
 }
 
@@ -208,6 +233,15 @@ impl SimulatorGUI {
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                let button = ui.button("Load");
+                ui.checkbox(&mut self.use_pipeline, "Use Pipeline");
+                ui.checkbox(&mut self.use_cache, "Use Cache");
+                if button.clicked() {
+                    self.reload();
+                }
+            });
+
             if ui.button("Single Step").clicked() {
                 self.cycle();
             }
