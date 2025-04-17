@@ -47,6 +47,8 @@ pub enum Instruction {
     FloatingPointStoreData { fx: FPRegister, label: u32 },
     IntegerCompare { rx: Register, ry: Register },
     IntegerCompareSingleAgainstZero { rx: Register },
+    IncrementIntegerRegister { c: bool, rx: Register },
+    DecrementIntegerRegister { c: bool, rx: Register },
     AddUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
     SubtractUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
     MultiplyUnsignedInteger { c: bool, rx: Register, ry: Register, rz: Register },
@@ -134,32 +136,34 @@ impl From<u32> for Instruction {
             0x69 => Self::FloatingPointStoreData { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), label: (value >> 3) & 0xffff },
             0x80 => Self::IntegerCompare { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0x81 => Self::IntegerCompareSingleAgainstZero { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
-            0x82 => Self::AddUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x83 => Self::SubtractUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x84 => Self::MultiplyUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x85 => Self::DivideUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x86 => Self::ModuloUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x87 => Self::AddSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x88 => Self::SubtractSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x89 => Self::MultiplySignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x8a => Self::DivideSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x8b => Self::ModuloSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
-            0x8c => Self::BitwiseAND { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x8d => Self::BitwiseOR { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x8e => Self::BitwiseNOT { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x8f => Self::BitwiseXOR { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x90 => Self::LogicalShiftLeft { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
-            0x91 => Self::LogicalShiftRight { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
-            0x92 => Self::ArithmeticShiftLeft { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
-            0x93 => Self::ArithmeticShiftRight { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
-            0x94 => Self::RotateRight { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
-            0x95 => Self::LogicalShiftLeftRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x96 => Self::LogicalShiftRightRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x97 => Self::ArithmeticShiftLeftRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x98 => Self::ArithmeticShiftRightRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x99 => Self::RotateRightRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
-            0x9a => Self::MapUnsignedToSigned { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
-            0x9b => Self::MapSignedToUnsigned { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
+            0x82 => Self::IncrementIntegerRegister { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap() },
+            0x83 => Self::DecrementIntegerRegister { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap() },
+            0x84 => Self::AddUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x85 => Self::SubtractUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x86 => Self::MultiplyUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x87 => Self::DivideUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x88 => Self::ModuloUnsignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x89 => Self::AddSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8a => Self::SubtractSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8b => Self::MultiplySignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8c => Self::DivideSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8d => Self::ModuloSignedInteger { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
+            0x8e => Self::BitwiseAND { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x8f => Self::BitwiseOR { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x90 => Self::BitwiseNOT { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
+            0x91 => Self::BitwiseXOR { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x92 => Self::LogicalShiftLeft { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
+            0x93 => Self::LogicalShiftRight { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
+            0x94 => Self::ArithmeticShiftLeft { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
+            0x95 => Self::ArithmeticShiftRight { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
+            0x96 => Self::RotateRight { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), value: (value >> 9) & 0x1f },
+            0x97 => Self::LogicalShiftLeftRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x98 => Self::LogicalShiftRightRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x99 => Self::ArithmeticShiftLeftRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x9a => Self::ArithmeticShiftRightRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x9b => Self::RotateRightRegister { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap(), rz: Register::try_from(((value as usize) >> 9) & 0x1f).unwrap() },
+            0x9c => Self::MapUnsignedToSigned { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
+            0x9d => Self::MapSignedToUnsigned { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xa0 => Self::FloatingPointCompare { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xa1 => Self::FloatingPointCompareSingleAgainstZero { fx: FPRegister::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0xa2 => Self::AddFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
@@ -224,32 +228,34 @@ impl Into<u32> for Instruction {
             Self::FloatingPointStoreData { fx, label } => (0x69 << 24)| ((fx as u32) << 19)| (label << 3),
             Self::IntegerCompare { rx, ry } => (0x80 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
             Self::IntegerCompareSingleAgainstZero { rx } => (0x81 << 24)| ((rx as u32) << 19),
-            Self::AddUnsignedInteger { c, rx, ry, rz } => (0x82 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::SubtractUnsignedInteger { c, rx, ry, rz } => (0x83 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::MultiplyUnsignedInteger { c, rx, ry, rz } => (0x84 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::DivideUnsignedInteger { c, rx, ry, rz } => (0x85 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::ModuloUnsignedInteger { c, rx, ry, rz } => (0x86 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::AddSignedInteger { c, rx, ry, rz } => (0x87 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::SubtractSignedInteger { c, rx, ry, rz } => (0x88 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::MultiplySignedInteger { c, rx, ry, rz } => (0x89 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::DivideSignedInteger { c, rx, ry, rz } => (0x8a << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::ModuloSignedInteger { c, rx, ry, rz } => (0x8b << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
-            Self::BitwiseAND { rx, ry, rz } => (0x8c << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::BitwiseOR { rx, ry, rz } => (0x8d << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::BitwiseNOT { rx, ry } => (0x8e << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
-            Self::BitwiseXOR { rx, ry, rz } => (0x8f << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::LogicalShiftLeft { rx, ry, value } => (0x90 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
-            Self::LogicalShiftRight { rx, ry, value } => (0x91 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
-            Self::ArithmeticShiftLeft { rx, ry, value } => (0x92 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
-            Self::ArithmeticShiftRight { rx, ry, value } => (0x93 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
-            Self::RotateRight { rx, ry, value } => (0x94 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
-            Self::LogicalShiftLeftRegister { rx, ry, rz } => (0x95 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::LogicalShiftRightRegister { rx, ry, rz } => (0x96 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::ArithmeticShiftLeftRegister { rx, ry, rz } => (0x97 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::ArithmeticShiftRightRegister { rx, ry, rz } => (0x98 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::RotateRightRegister { rx, ry, rz } => (0x99 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
-            Self::MapUnsignedToSigned { rx, ry } => (0x9a << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
-            Self::MapSignedToUnsigned { rx, ry } => (0x9b << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
+            Self::IncrementIntegerRegister { c, rx } => (0x82 << 24)| ((c as u32) << 23)| ((rx as u32) << 18),
+            Self::DecrementIntegerRegister { c, rx } => (0x83 << 24)| ((c as u32) << 23)| ((rx as u32) << 18),
+            Self::AddUnsignedInteger { c, rx, ry, rz } => (0x84 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::SubtractUnsignedInteger { c, rx, ry, rz } => (0x85 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::MultiplyUnsignedInteger { c, rx, ry, rz } => (0x86 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::DivideUnsignedInteger { c, rx, ry, rz } => (0x87 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::ModuloUnsignedInteger { c, rx, ry, rz } => (0x88 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::AddSignedInteger { c, rx, ry, rz } => (0x89 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::SubtractSignedInteger { c, rx, ry, rz } => (0x8a << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::MultiplySignedInteger { c, rx, ry, rz } => (0x8b << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::DivideSignedInteger { c, rx, ry, rz } => (0x8c << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::ModuloSignedInteger { c, rx, ry, rz } => (0x8d << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((ry as u32) << 13)| ((rz as u32) << 8),
+            Self::BitwiseAND { rx, ry, rz } => (0x8e << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::BitwiseOR { rx, ry, rz } => (0x8f << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::BitwiseNOT { rx, ry } => (0x90 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
+            Self::BitwiseXOR { rx, ry, rz } => (0x91 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::LogicalShiftLeft { rx, ry, value } => (0x92 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
+            Self::LogicalShiftRight { rx, ry, value } => (0x93 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
+            Self::ArithmeticShiftLeft { rx, ry, value } => (0x94 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
+            Self::ArithmeticShiftRight { rx, ry, value } => (0x95 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
+            Self::RotateRight { rx, ry, value } => (0x96 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| (value << 9),
+            Self::LogicalShiftLeftRegister { rx, ry, rz } => (0x97 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::LogicalShiftRightRegister { rx, ry, rz } => (0x98 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::ArithmeticShiftLeftRegister { rx, ry, rz } => (0x99 << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::ArithmeticShiftRightRegister { rx, ry, rz } => (0x9a << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::RotateRightRegister { rx, ry, rz } => (0x9b << 24)| ((rx as u32) << 19)| ((ry as u32) << 14)| ((rz as u32) << 9),
+            Self::MapUnsignedToSigned { rx, ry } => (0x9c << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
+            Self::MapSignedToUnsigned { rx, ry } => (0x9d << 24)| ((rx as u32) << 19)| ((ry as u32) << 14),
             Self::FloatingPointCompare { fx, fy } => (0xa0 << 24)| ((fx as u32) << 19)| ((fy as u32) << 14),
             Self::FloatingPointCompareSingleAgainstZero { fx } => (0xa1 << 24)| ((fx as u32) << 19),
             Self::AddFloatingPoint { c, fx, fy, fz } => (0xa2 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13)| ((fz as u32) << 8),
@@ -271,10 +277,10 @@ impl Instruction {
     pub fn read_registers(&self) -> RegisterSet {
         match self {
             Self::Trap => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::PushIntegerRegister { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
-            Self::PushFloatingPointRegister { fx } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
-            Self::PopIntegerRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
-            Self::PopFloatingPointRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
+            Self::PushIntegerRegister { rx } => RegisterSet{ registers: vec![*rx, Register::try_from(31).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::PushFloatingPointRegister { fx } => RegisterSet{ registers: vec![Register::try_from(31).unwrap()], f_registers: vec![*fx], timers: vec![]  },
+            Self::PopIntegerRegister { .. } => RegisterSet{ registers: vec![Register::try_from(31).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::PopFloatingPointRegister { .. } => RegisterSet{ registers: vec![Register::try_from(31).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::SwapRegister { rx, fy } => RegisterSet{ registers: vec![*rx], f_registers: vec![*fy], timers: vec![]  },
             Self::StallImmediate { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::StallRegister { rx } => RegisterSet{ registers: vec![*rx], f_registers: vec![], timers: vec![]  },
@@ -314,6 +320,8 @@ impl Instruction {
             Self::FloatingPointStoreData { fx, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fx], timers: vec![]  },
             Self::IntegerCompare { rx, ry } => RegisterSet{ registers: vec![*rx, *ry, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::IntegerCompareSingleAgainstZero { rx } => RegisterSet{ registers: vec![*rx, Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
+            Self::IncrementIntegerRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
+            Self::DecrementIntegerRegister { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::AddUnsignedInteger { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
             Self::SubtractUnsignedInteger { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
             Self::MultiplyUnsignedInteger { ry, rz, .. } => RegisterSet{ registers: vec![*ry, *rz], f_registers: vec![], timers: vec![]  },
@@ -362,19 +370,19 @@ impl Instruction {
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::PushIntegerRegister { .. } => {
-                let registers = vec![];
+                let registers = vec![Register::try_from(31).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::PushFloatingPointRegister { .. } => {
-                let registers = vec![];
+                let registers = vec![Register::try_from(31).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::PopIntegerRegister { rx } => {
-                let registers = vec![*rx];
+                let registers = vec![*rx, Register::try_from(31).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::PopFloatingPointRegister { fx } => {
-                let registers = vec![];
+                let registers = vec![Register::try_from(31).unwrap()];
                 RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
             },
             Self::SwapRegister { rx, fy } => {
@@ -549,6 +557,20 @@ impl Instruction {
             },
             Self::IntegerCompareSingleAgainstZero { .. } => {
                 let registers = vec![Register::try_from(30).unwrap()];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::IncrementIntegerRegister { c, rx } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
+            Self::DecrementIntegerRegister { c, rx } => {
+                let mut registers = vec![*rx];
+                if *c {
+                    registers.push(Register::ST);
+                }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::AddUnsignedInteger { c, rx, .. } => {
@@ -800,6 +822,8 @@ impl Instruction {
             Self::FloatingPointStoreData { fx, label } => *label < (1 << 16),
             Self::IntegerCompare { rx, ry } => true,
             Self::IntegerCompareSingleAgainstZero { rx } => true,
+            Self::IncrementIntegerRegister { c, rx } => true,
+            Self::DecrementIntegerRegister { c, rx } => true,
             Self::AddUnsignedInteger { c, rx, ry, rz } => true,
             Self::SubtractUnsignedInteger { c, rx, ry, rz } => true,
             Self::MultiplyUnsignedInteger { c, rx, ry, rz } => true,

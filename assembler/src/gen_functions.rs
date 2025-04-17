@@ -64,7 +64,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                         }
                     }
                 },
-                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_ADD_82 | Rule::instruction_SUB_83 | Rule::instruction_MUL_84 | Rule::instruction_DIV_85 | Rule::instruction_MOD_86 | Rule::instruction_ADDS_87 | Rule::instruction_SUBS_88 | Rule::instruction_MULS_89 | Rule::instruction_DIVS_8a | Rule::instruction_MODS_8b | Rule::instruction_AND_8c | Rule::instruction_OR_8d | Rule::instruction_NOT_8e | Rule::instruction_XOR_8f | Rule::instruction_LSL_90 | Rule::instruction_LSR_91 | Rule::instruction_ASL_92 | Rule::instruction_ASR_93 | Rule::instruction_RTR_94 | Rule::instruction_LSL_95 | Rule::instruction_LSR_96 | Rule::instruction_ASL_97 | Rule::instruction_ASR_98 | Rule::instruction_RTR_99 | Rule::instruction_MUS_9a | Rule::instruction_MSU_9b | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {
+                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_INC_82 | Rule::instruction_DEC_83 | Rule::instruction_ADD_84 | Rule::instruction_SUB_85 | Rule::instruction_MUL_86 | Rule::instruction_DIV_87 | Rule::instruction_MOD_88 | Rule::instruction_ADDS_89 | Rule::instruction_SUBS_8a | Rule::instruction_MULS_8b | Rule::instruction_DIVS_8c | Rule::instruction_MODS_8d | Rule::instruction_AND_8e | Rule::instruction_OR_8f | Rule::instruction_NOT_90 | Rule::instruction_XOR_91 | Rule::instruction_LSL_92 | Rule::instruction_LSR_93 | Rule::instruction_ASL_94 | Rule::instruction_ASR_95 | Rule::instruction_RTR_96 | Rule::instruction_LSL_97 | Rule::instruction_LSR_98 | Rule::instruction_ASL_99 | Rule::instruction_ASR_9a | Rule::instruction_RTR_9b | Rule::instruction_MUS_9c | Rule::instruction_MSU_9d | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {
                     first_pass_index += 1;
                 },
                 _ => unreachable!(),
@@ -369,7 +369,19 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rx = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::IntegerCompareSingleAgainstZero { rx });
                         }
-                        Rule::instruction_ADD_82 => {
+                        Rule::instruction_INC_82 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let rx = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::IncrementIntegerRegister { c, rx });
+                        }
+                        Rule::instruction_DEC_83 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let rx = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::DecrementIntegerRegister { c, rx });
+                        }
+                        Rule::instruction_ADD_84 => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -377,7 +389,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::AddUnsignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_SUB_83 => {
+                        Rule::instruction_SUB_85 => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -385,7 +397,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::SubtractUnsignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_MUL_84 => {
+                        Rule::instruction_MUL_86 => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -393,7 +405,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::MultiplyUnsignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_DIV_85 => {
+                        Rule::instruction_DIV_87 => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -401,7 +413,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::DivideUnsignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_MOD_86 => {
+                        Rule::instruction_MOD_88 => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -409,7 +421,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::ModuloUnsignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_ADDS_87 => {
+                        Rule::instruction_ADDS_89 => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -417,7 +429,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::AddSignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_SUBS_88 => {
+                        Rule::instruction_SUBS_8a => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -425,7 +437,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::SubtractSignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_MULS_89 => {
+                        Rule::instruction_MULS_8b => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -433,7 +445,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::MultiplySignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_DIVS_8a => {
+                        Rule::instruction_DIVS_8c => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -441,7 +453,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::DivideSignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_MODS_8b => {
+                        Rule::instruction_MODS_8d => {
                             let mut iter = t.into_inner();
                             let c = iter.next().unwrap().as_str().len() > 0;
                             let rx = iter.next().unwrap().as_str().parse()?;
@@ -449,110 +461,110 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::ModuloSignedInteger { c, rx, ry, rz });
                         }
-                        Rule::instruction_AND_8c => {
+                        Rule::instruction_AND_8e => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::BitwiseAND { rx, ry, rz });
                         }
-                        Rule::instruction_OR_8d => {
+                        Rule::instruction_OR_8f => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::BitwiseOR { rx, ry, rz });
                         }
-                        Rule::instruction_NOT_8e => {
+                        Rule::instruction_NOT_90 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::BitwiseNOT { rx, ry });
                         }
-                        Rule::instruction_XOR_8f => {
+                        Rule::instruction_XOR_91 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::BitwiseXOR { rx, ry, rz });
                         }
-                        Rule::instruction_LSL_90 => {
+                        Rule::instruction_LSL_92 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let value = parse_number(iter.next().unwrap().as_str())?;
                             data.instructions.push(Instruction::LogicalShiftLeft { rx, ry, value });
                         }
-                        Rule::instruction_LSR_91 => {
+                        Rule::instruction_LSR_93 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let value = parse_number(iter.next().unwrap().as_str())?;
                             data.instructions.push(Instruction::LogicalShiftRight { rx, ry, value });
                         }
-                        Rule::instruction_ASL_92 => {
+                        Rule::instruction_ASL_94 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let value = parse_number(iter.next().unwrap().as_str())?;
                             data.instructions.push(Instruction::ArithmeticShiftLeft { rx, ry, value });
                         }
-                        Rule::instruction_ASR_93 => {
+                        Rule::instruction_ASR_95 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let value = parse_number(iter.next().unwrap().as_str())?;
                             data.instructions.push(Instruction::ArithmeticShiftRight { rx, ry, value });
                         }
-                        Rule::instruction_RTR_94 => {
+                        Rule::instruction_RTR_96 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let value = parse_number(iter.next().unwrap().as_str())?;
                             data.instructions.push(Instruction::RotateRight { rx, ry, value });
                         }
-                        Rule::instruction_LSL_95 => {
+                        Rule::instruction_LSL_97 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::LogicalShiftLeftRegister { rx, ry, rz });
                         }
-                        Rule::instruction_LSR_96 => {
+                        Rule::instruction_LSR_98 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::LogicalShiftRightRegister { rx, ry, rz });
                         }
-                        Rule::instruction_ASL_97 => {
+                        Rule::instruction_ASL_99 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::ArithmeticShiftLeftRegister { rx, ry, rz });
                         }
-                        Rule::instruction_ASR_98 => {
+                        Rule::instruction_ASR_9a => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::ArithmeticShiftRightRegister { rx, ry, rz });
                         }
-                        Rule::instruction_RTR_99 => {
+                        Rule::instruction_RTR_9b => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let rz = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::RotateRightRegister { rx, ry, rz });
                         }
-                        Rule::instruction_MUS_9a => {
+                        Rule::instruction_MUS_9c => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::MapUnsignedToSigned { rx, ry });
                         }
-                        Rule::instruction_MSU_9b => {
+                        Rule::instruction_MSU_9d => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;

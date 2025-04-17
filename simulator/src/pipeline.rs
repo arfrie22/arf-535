@@ -356,6 +356,8 @@ impl Instruction {
             Instruction::FloatingPointStoreData { .. } => 1,
             Instruction::IntegerCompare { .. } => 1,
             Instruction::IntegerCompareSingleAgainstZero { .. } => 1,
+            Instruction::IncrementIntegerRegister { .. } => 1,
+            Instruction::DecrementIntegerRegister { .. } => 1,
             Instruction::AddUnsignedInteger { .. } => 1,
             Instruction::SubtractUnsignedInteger { .. } => 1,
             Instruction::MultiplyUnsignedInteger { .. } => 1,
@@ -892,7 +894,7 @@ impl Instruction {
                 st = Condition::LessThan.set(st, val_rx < val_ry);
                 st = Condition::GreaterEqual.set(st, val_rx >= val_ry);
                 st = Condition::LessEqual.set(st, val_rx <= val_ry);
-                st = Condition::IsEven.set(st, (val_rx - val_ry) % 2 == 0);
+                st = Condition::IsEven.set(st, (val_rx.wrapping_sub(val_ry)) % 2 == 0);
 
                 ExecuteResult {
                     memory: MemoryAction::None,
@@ -913,6 +915,40 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
+                    end_running: false,
+                }
+            },
+            Instruction::IncrementIntegerRegister { c, rx } => {
+                let val_rx = state.registers[*rx as usize];
+                let (res, ovf) = val_rx.overflowing_add(1); 
+                let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::Overflow.set(st, ovf);
+                    st = Condition::IsEven.set(st, res & 2 == 0);
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::DecrementIntegerRegister { c, rx } => {
+                let val_rx = state.registers[*rx as usize];
+                let (res, ovf) = val_rx.overflowing_sub(1); 
+                let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::Underflow.set(st, ovf);
+                    st = Condition::IsEven.set(st, res & 2 == 0);
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
                     end_running: false,
                 }
             },

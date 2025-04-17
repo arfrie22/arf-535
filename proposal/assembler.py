@@ -79,7 +79,7 @@ with open('instructions.json') as f:
     output_file.write("number = ${ hex_number | binary_number | digit_number }\n")
     output_file.write("signed_number = ${ (\"+\" | \"-\" )? ~ number }\n")
 
-    numbers = " | ".join([f"\"{i}\"" for i in range(32)])
+    numbers = " | ".join([f"\"{i}\"" for i in reversed(range(32))])
     output_file.write("register = ${ ^\"R\" ~ (" + numbers + ") | (^\"A\" | ^\"D\") ~ ('1'..'4') | ^\"PC\" | ^\"LR\" | ^\"ST\" | ^\"SP\" }\n")
     output_file.write("f_register = ${ ^\"F\" ~ (" + numbers +  ") }\n")
     output_file.write("timer = ${ ^\"T\" ~ (" + numbers +  ") }\n")
@@ -98,7 +98,7 @@ with open('instructions.json') as f:
     
     output_file.write("condition = ${ (^\"NVR\" | ^\"EQ\" | ^\"GT\" | ^\"LT\" | ^\"GE\" | ^\"LE\" | ^\"OVRF\" | ^\"UNDF\" | ^\"DIVZ\" | ^\"EVEN\" | ^\"FINF\" | ^\"FZ\" | ^\"FNAN\" | ^\"FPOS\")? }\n")
     output_file.write("condition_bit = ${ (^\"C\")? }\n")
-    output_file.write("link_bit = ${ (^\"L\")? }\n")
+    output_file.write("link_bit = ${ (^\"R\")? }\n")
 
     output_file.write(rules)
 
@@ -111,7 +111,7 @@ with open('instructions.json') as f:
     output_file.write("prog = ${ \".prog\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ prog_line)+ }\n")
     output_file.write("data_value = ${(number | signed_number) ~ \"#\" ~ number}\n")
     output_file.write("data_line = ${WHITESPACE* ~ label_arg ~ (WHITESPACE+ ~ data_value)+ ~ WHITESPACE*}\n")
-    output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ data_line)* }\n")
+    output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ (data_line | comment))* }\n")
     output_file.write("file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ prog ~ (WHITESPACE | NEWLINE)* ~ data? ~ (WHITESPACE | NEWLINE)* ~ EOI }\n")
     
 
@@ -186,7 +186,7 @@ with open('instructions.json') as f:
     output_file_rs.write("                        }\n")
     output_file_rs.write("                    }\n")
     output_file_rs.write("                },\n")
-    output_file_rs.write("                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_ADD_82 | Rule::instruction_SUB_83 | Rule::instruction_MUL_84 | Rule::instruction_DIV_85 | Rule::instruction_MOD_86 | Rule::instruction_ADDS_87 | Rule::instruction_SUBS_88 | Rule::instruction_MULS_89 | Rule::instruction_DIVS_8a | Rule::instruction_MODS_8b | Rule::instruction_AND_8c | Rule::instruction_OR_8d | Rule::instruction_NOT_8e | Rule::instruction_XOR_8f | Rule::instruction_LSL_90 | Rule::instruction_LSR_91 | Rule::instruction_ASL_92 | Rule::instruction_ASR_93 | Rule::instruction_RTR_94 | Rule::instruction_LSL_95 | Rule::instruction_LSR_96 | Rule::instruction_ASL_97 | Rule::instruction_ASR_98 | Rule::instruction_RTR_99 | Rule::instruction_MUS_9a | Rule::instruction_MSU_9b | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {\n")
+    output_file_rs.write("                " + " | ".join(all_rules) + " => {\n")
     output_file_rs.write("                    first_pass_index += 1;\n")
     output_file_rs.write("                },\n")
     output_file_rs.write("                _ => unreachable!(),\n")

@@ -31,7 +31,9 @@
                     }
                 ],
                 "extra_reg": {
-                    "registers": [],
+                    "registers": [
+                        { "number": 31, "read": true, "write": true }
+                    ],
                     "f_registers": [],
                     "timers": []
                 }
@@ -53,7 +55,9 @@
                     }
                 ],
                 "extra_reg": {
-                    "registers": [],
+                    "registers": [
+                        { "number": 31, "read": true, "write": true }
+                    ],
                     "f_registers": [],
                     "timers": []
                 }
@@ -75,7 +79,9 @@
                     }
                 ],
                 "extra_reg": {
-                    "registers": [],
+                    "registers": [
+                        { "number": 31, "read": true, "write": true }
+                    ],
                     "f_registers": [],
                     "timers": []
                 }
@@ -97,7 +103,9 @@
                     }
                 ],
                 "extra_reg": {
-                    "registers": [],
+                    "registers": [
+                        { "number": 31, "read": true, "write": true }
+                    ],
                     "f_registers": [],
                     "timers": []
                 }
@@ -1446,6 +1454,70 @@
                     "registers": [
                         { "number": 30, "read": true, "write": true }
                     ],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Increment Integer Register",
+                "assembly": {
+                    "pneumonic": "INC",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "register", "argument": "Rx" }
+                    ]
+                },
+                "description": "Sets Rx := Rx + 1.\\\nSets overflow bit if $\"Rx\" + \"1\" >= 2^32$",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Decrement Integer Register",
+                "assembly": {
+                    "pneumonic": "DEC",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "register", "argument": "Rx" }
+                    ]
+                },
+                "description": "Sets Rx := Rx - 1.\\\nSets underflow bit if $\"Rx\" - \"1\" < 0$",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Rx",
+                        "long": "Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
                     "f_registers": [],
                     "timers": []
                 }
