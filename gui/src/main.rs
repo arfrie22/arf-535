@@ -3,7 +3,7 @@
 use std::{cell::RefCell, io::Read, path::Path, rc::Rc};
 
 use assembler::{assemble, load_file};
-use displays::{cache::CacheDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay};
+use displays::{cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay, timer::TimerDisplay};
 use eframe::egui::{self, output, FontData, FontDefinitions, FontFamily};
 use log::{error, info};
 use simulator::{
@@ -111,6 +111,10 @@ fn create_simulator(use_cache: bool) -> Simulator {
 struct SimulatorGUI {
     simulator: Rc<RefCell<Simulator>>,
     pipeline_display: PipelineDisplay,
+    register_display: RegisterDisplay,
+    f_register_display: FRegisterDisplay,
+    timer_display: TimerDisplay,
+    condition_display: ConditionDisplay,
     program_memory_display: MemoryDisplay,
     data_memory_display: MemoryDisplay,
     program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
@@ -139,7 +143,11 @@ impl SimulatorGUI {
 
         Self {
             simulator,
-            pipeline_display: PipelineDisplay::new(simulator_state, "pipeline"),
+            pipeline_display: PipelineDisplay::new(simulator_state.clone(), "pipeline"),
+            register_display: RegisterDisplay::new(simulator_state.clone(), "register"),
+            f_register_display: FRegisterDisplay::new(simulator_state.clone(), "f_register"),
+            timer_display: TimerDisplay::new(simulator_state.clone(), "timer"),
+            condition_display: ConditionDisplay::new(simulator_state.clone(), "condition"),
             program_memory_display: MemoryDisplay::new(program_memory, "program_memory"),
             data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
             program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
@@ -274,29 +282,44 @@ impl eframe::App for SimulatorGUI {
             });
 
             ui.add_space(10.0);
-            ui.vertical(|ui| {
-                ui.horizontal(|ui| {
-                    ui.vertical(|ui| {
-                        ui.heading("Program Memory");
-                        self.program_memory_display.ui(ui);
-                    });
-                    ui.add_space(10.0);
-                    ui.vertical(|ui| {
-                        ui.heading("Data Memory");
-                        self.data_memory_display.ui(ui);
-                    });
-                });
-                ui.vertical(|ui| {
-                    ui.heading("Program Cache");
-                    self.program_cache_display.ui(ui);
-                    ui.add_space(10.0);
-                    ui.heading("Data Cache");
-                    self.data_cache_display.ui(ui);
-                });
 
+            ui.horizontal(|ui| {
+                ui.vertical(|ui| {
+                    ui.horizontal(|ui| {
+                        ui.vertical(|ui| {
+                            ui.heading("Program Memory");
+                            self.program_memory_display.ui(ui);
+                        });
+                        ui.add_space(10.0);
+                        ui.vertical(|ui| {
+                            ui.heading("Data Memory");
+                            self.data_memory_display.ui(ui);
+                        });
+                    });
+                    ui.vertical(|ui| {
+                        ui.heading("Program Cache");
+                        self.program_cache_display.ui(ui);
+                        ui.add_space(10.0);
+                        ui.heading("Data Cache");
+                        self.data_cache_display.ui(ui);
+                    });
+
+                    ui.add_space(10.0);
+                    ui.heading("Pipeline");
+                    self.pipeline_display.ui(ui);
+                });
+                
                 ui.add_space(10.0);
-                ui.heading("Pipeline");
-                self.pipeline_display.ui(ui);
+
+                ui.vertical(|ui| {
+                    self.register_display.ui(ui);
+                    ui.add_space(10.0);
+                    self.f_register_display.ui(ui);
+                    ui.add_space(10.0);
+                    self.timer_display.ui(ui);
+                    ui.add_space(10.0);
+                    self.condition_display.ui(ui);
+                });
             });
         });
     }

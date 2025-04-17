@@ -8,7 +8,7 @@ pub enum ParseError {
 }
 
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive, strum::IntoStaticStr)]
 #[repr(usize)]
 pub enum Register {
     R0 = 0,
@@ -99,7 +99,7 @@ impl FromStr for Register {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive, strum::IntoStaticStr)]
 #[repr(usize)]
 pub enum FPRegister {
     F0 = 0,
@@ -178,7 +178,7 @@ impl FromStr for FPRegister {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive, strum::IntoStaticStr)]
 #[repr(usize)]
 pub enum Timer {
     T0 = 0,
@@ -257,7 +257,7 @@ impl FromStr for Timer {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive, strum::IntoStaticStr)]
 #[repr(usize)]
 pub enum Condition {
     // C0
