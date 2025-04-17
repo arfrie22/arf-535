@@ -1,12 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, io::Read, path::Path, rc::Rc};
 
 use assembler::{assemble, load_file};
 use displays::{cache::CacheDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay};
-use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
+use eframe::egui::{self, output, FontData, FontDefinitions, FontFamily};
+use log::{error, info};
 use simulator::{
-    memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, Simulator
+    memory::{ClockedMemory, DirectCache, FrontMemory, Memory},
+    Simulator,
 };
 
 const DATA_M_CYCLES: usize = 2;
@@ -49,7 +51,6 @@ fn main() -> eframe::Result {
                 .unwrap()
                 .insert(0, "monaspace".to_owned());
 
-            // Put my font as last fallback for monospace:
             fonts
                 .families
                 .get_mut(&FontFamily::Monospace)
@@ -114,43 +115,14 @@ struct SimulatorGUI {
     data_memory_display: MemoryDisplay,
     program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
     data_cache_display: CacheDisplay<DATA_CACHE_LINES>,
+    file_name: String,
     use_pipeline: bool,
     use_cache: bool,
 }
 
 impl Default for SimulatorGUI {
     fn default() -> Self {
-        let res = Self::new(true, true);
-        
-        let input = "
-            .prog
-            ldr r1 d:v1
-            str r1 d:v2
-            add r1 r1 r1
-
-            ldl r3 1
-            ldh r3 0
-
-            loop:
-            ldr r2 d:v1
-            add r2 r2 r3
-            str r2 d:v1
-
-            b p:loop
-            str r4 d:v1
-
-            .data
-            v1 42#1
-            v2 0#1
-        ";
-
-        let a = assemble(input).unwrap();
-        let mut v = Vec::new();
-        a.to_file(&mut v);
-
-        load_file(&v[..], &mut res.simulator.borrow_mut());
-
-        res
+        Self::new(true, true)
     }
 }
 
@@ -172,6 +144,7 @@ impl SimulatorGUI {
             data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
             program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
             data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
+            file_name: "test".to_owned(),
             use_pipeline,
             use_cache,
         }
@@ -188,43 +161,80 @@ impl SimulatorGUI {
         state.borrow_mut().running = true;
         for _ in 0..count {
             if !state.borrow().running {
-                break
+                break;
             }
 
             self.cycle();
         }
     }
 
-    fn reload(&mut self) {
+    fn load_file(&mut self) {
         *self = Self::new(self.use_pipeline, self.use_cache);
 
-        let input = "
-            .prog
-            ldr r1 d:v1
-            str r1 d:v2
-            add r1 r1 r1
+        let input_path = Path::new("compiled").join(format!("{}.o", self.file_name));
+        if input_path.exists() {
+            match std::fs::File::open(&input_path) {
+                Ok(mut input_file) => {
+                    match load_file(&mut input_file, &mut self.simulator.borrow_mut()) {
+                        Ok(_) => {
+                            info!("Loaded {}:", input_path.to_string_lossy());
+                        },
+                        Err(e) => {
+                            error!("Error loading {}:", input_path.to_string_lossy());
+                            error!("{:?}", e);
+                        },
+                    }
+                }
+                Err(e) => {
+                    error!("Error opening {}:", input_path.to_string_lossy());
+                    error!("{:?}", e);
+                },
+            }
+        } else {
+            error!("File {} does not exists.", input_path.to_string_lossy());
+        }
+    }
 
-            ldl r3 1
-            ldh r3 0
-
-            loop:
-            ldr r2 d:v1
-            add r2 r2 r3
-            str r2 d:v1
-
-            b p:loop
-            str r4 d:v1
-
-            .data
-            v1 42#1
-            v2 0#1
-        ";
-
-        let a = assemble(input).unwrap();
-        let mut v = Vec::new();
-        a.to_file(&mut v);
-
-        load_file(&v[..], &mut self.simulator.borrow_mut());
+    fn assemble_file(&mut self) {
+        let input_path = Path::new("asm").join(format!("{}.asm", self.file_name));
+        let output_path = Path::new("compiled").join(format!("{}.o", self.file_name));
+        if input_path.exists() {
+            match std::fs::File::open(&input_path) {
+                Ok(mut input_file) => {
+                    let mut buf = String::new();
+                    match input_file.read_to_string(&mut buf) {
+                        Ok(_) => match assemble(&buf) {
+                            Ok(data) => {
+                                let mut output_file = std::fs::File::create(&output_path).unwrap();
+                                match data.to_file(&mut output_file) {
+                                    Ok(_) => {
+                                        info!("Wrote {}:", output_path.to_string_lossy());
+                                    },
+                                    Err(e) => {
+                                        error!("Error writing {}:", output_path.to_string_lossy());
+                                        error!("{:?}", e);
+                                    },
+                                }
+                            }
+                            Err(e) => {
+                                error!("Failed to assemble {}:", input_path.to_string_lossy());
+                                error!("{:?}", e);
+                            }
+                        },
+                        Err(e) => {
+                            error!("Error reading {}:", input_path.to_string_lossy());
+                            error!("{:?}", e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("Error opening {}:", input_path.to_string_lossy());
+                    error!("{:?}", e);
+                },
+            }
+        } else {
+            error!("File {} does not exists.", input_path.to_string_lossy());
+        }
     }
 }
 
@@ -234,13 +244,16 @@ impl SimulatorGUI {
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            ui.text_edit_singleline(&mut self.file_name);
             ui.horizontal(|ui| {
-                let button = ui.button("Load");
+                if ui.button("Assemble").clicked() {
+                    self.assemble_file();
+                }
+                if ui.button("Load").clicked() {
+                    self.load_file();
+                }
                 ui.checkbox(&mut self.use_pipeline, "Use Pipeline");
                 ui.checkbox(&mut self.use_cache, "Use Cache");
-                if button.clicked() {
-                    self.reload();
-                }
             });
 
             ui.horizontal(|ui| {
@@ -253,14 +266,30 @@ impl eframe::App for SimulatorGUI {
                 }
             });
 
-            self.pipeline_display.ui(ui);
-            ui.horizontal_top(|ui| {
-                self.program_memory_display.ui(ui);
-                self.program_cache_display.ui(ui);
-            });
-            ui.horizontal(|ui| {
-                self.data_memory_display.ui(ui);
-                self.data_cache_display.ui(ui);
+            ui.add_space(10.0);
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.vertical(|ui| {
+                        ui.heading("Program Memory");
+                        self.program_memory_display.ui(ui);
+                    });
+                    ui.add_space(10.0);
+                    ui.vertical(|ui| {
+                        ui.heading("Data Memory");
+                        self.data_memory_display.ui(ui);
+                    });
+                });
+                ui.vertical(|ui| {
+                    ui.heading("Program Cache");
+                    self.program_cache_display.ui(ui);
+                    ui.add_space(10.0);
+                    ui.heading("Data Cache");
+                    self.data_cache_display.ui(ui);
+                });
+
+                ui.add_space(10.0);
+                ui.heading("Pipeline");
+                self.pipeline_display.ui(ui);
             });
         });
     }

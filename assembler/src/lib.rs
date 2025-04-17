@@ -41,7 +41,7 @@ impl Default for AssembledData {
 }
 
 impl AssembledData {
-    pub fn to_file(&self, writer: impl Write) {
+    pub fn to_file(&self, writer: impl Write) -> io::Result<()> {
         let mut scratch = [0; 0xFFFF * 4 * 2];
         let mut ptr = 0;
 
@@ -58,13 +58,13 @@ impl AssembledData {
             ptr += 4;
         }
 
-        zstd::stream::copy_encode(&scratch[..], writer, 22).unwrap();
+        zstd::stream::copy_encode(&scratch[..], writer, 22)
     }
 }
 
-pub fn load_file(reader: impl Read, simulator: &mut Simulator) {
+pub fn load_file(reader: impl Read, simulator: &mut Simulator) -> io::Result<()> {
     let mut decoded = Vec::new();
-    zstd::stream::copy_decode(reader, &mut decoded).unwrap();
+    zstd::stream::copy_decode(reader, &mut decoded)?;
 
     let p = simulator.get_program_memory();
     let mut prog = p.borrow_mut();
@@ -83,6 +83,8 @@ pub fn load_file(reader: impl Read, simulator: &mut Simulator) {
         slice.copy_from_slice(&decoded[v..v + 4]);
         data.inner[i] = u32::from_le_bytes(slice);
     }
+
+    Ok(())
 }
 
 fn parse_number(input: &str) -> Result<u32, AssemblerError> {
