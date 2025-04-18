@@ -5,11 +5,13 @@ use memory::{Cache, FrontMemory, InnerMemory, Memory};
 use pipeline::{
     DecodeStage, DecodeState, ExecuteStage, ExecuteState, FetchResult, FetchStage, MemoryStage, MemoryState, PipelineOutter, PipelineStage, WritebackStage, WritebackState
 };
+use streams::{InputStream, OutputStream};
 
 pub mod enums;
 pub mod instruction;
 pub mod memory;
 pub mod pipeline;
+pub mod streams;
 
 #[derive(Debug, Default, Clone)]
 pub struct TimerState {
@@ -177,35 +179,45 @@ impl SimulatorState {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Simulator {
     state: SimulatorStateCell,
     raw_program_memory: RawMemoryCell,
     raw_data_memory: RawMemoryCell,
     raw_program_cache: RawCacheCell,
     raw_data_cache: RawCacheCell,
-    clock_rate: usize,
+    adc_streams: [Box<dyn InputStream>; 4],
+    dac_streams: [Box<dyn OutputStream>; 4],
     cycle_number: usize,
 }
 
 impl Simulator {
-    pub fn new(raw_program_memory: RawMemoryCell, raw_data_memory: RawMemoryCell, raw_program_cache: RawCacheCell, raw_data_cache: RawCacheCell, program_memory: MemoryCell, data_memory: MemoryCell) -> Self {
+    pub fn new(raw_program_memory: RawMemoryCell, raw_data_memory: RawMemoryCell, raw_program_cache: RawCacheCell, raw_data_cache: RawCacheCell, program_memory: MemoryCell, data_memory: MemoryCell, mut adc_streams: [Box<dyn InputStream>; 4], mut dac_streams: [Box<dyn OutputStream>; 4], clock_rate: usize) -> Self {
+        adc_streams.iter_mut().for_each(|stream| {
+            stream.set_clock_rate(clock_rate);
+        });
+
+        dac_streams.iter_mut().for_each(|stream| {
+            stream.set_clock_rate(clock_rate);
+        });
+
         Self {
             state: SimulatorState::new(program_memory, data_memory),
             raw_program_memory,
             raw_data_memory,
             raw_program_cache,
             raw_data_cache,
-            clock_rate: 1,
+            adc_streams,
+            dac_streams,
             cycle_number: 0,
         }
     }
 
     pub fn cycle(&mut self) {
-        self.state.borrow_mut().registers[Register::A1 as usize] = 0;
-        self.state.borrow_mut().registers[Register::A2 as usize] = 0;
-        self.state.borrow_mut().registers[Register::A3 as usize] = 0;
-        self.state.borrow_mut().registers[Register::A4 as usize] = 0;
+        self.state.borrow_mut().registers[Register::A1 as usize] = self.adc_streams[0].get_next();
+        self.state.borrow_mut().registers[Register::A2 as usize] = self.adc_streams[1].get_next();
+        self.state.borrow_mut().registers[Register::A3 as usize] = self.adc_streams[2].get_next();
+        self.state.borrow_mut().registers[Register::A4 as usize] = self.adc_streams[3].get_next();
 
         self.state.borrow_mut().timers.iter_mut().for_each(|v| {
             let _ = v.value.saturating_sub(1);
@@ -213,6 +225,11 @@ impl Simulator {
 
         let stage = self.state.borrow().pipeline_stage.write_back.clone();
         stage.borrow_mut().call(false).unwrap();
+
+        self.dac_streams[0].set_next(self.state.borrow_mut().registers[Register::D1 as usize]);
+        self.dac_streams[1].set_next(self.state.borrow_mut().registers[Register::D2 as usize]);
+        self.dac_streams[2].set_next(self.state.borrow_mut().registers[Register::D3 as usize]);
+        self.dac_streams[3].set_next(self.state.borrow_mut().registers[Register::D4 as usize]);
 
         self.cycle_number += 1;
     }

@@ -1,6 +1,6 @@
 use std::{cell::{RefCell, RefMut}, io::{self, Write}, rc::Rc};
 
-use simulator::{enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory}, pipeline::PipelineOutter, Simulator, SimulatorState};
+use simulator::{enums::{Condition, Register}, instruction::Instruction, memory::{ClockedMemory, DirectCache, FrontMemory, InnerMemory, Memory}, pipeline::PipelineOutter, streams::{ConstantInput, InputStream, NoOperationOutput, OutputStream}, Simulator, SimulatorState};
 
 const DATA_M_CYCLES: usize = 2;
 const PROG_M_CYCLES: usize = 2;
@@ -77,7 +77,9 @@ fn main() {
     raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
 
-    let mut simulator = Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, program_cache, data_cache);
+    let adc_streams = core::array::from_fn(|_| Box::new(ConstantInput::new(0)) as Box<dyn InputStream>);
+    let dac_streams = core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
+    let mut simulator = Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, program_cache, data_cache, adc_streams, dac_streams, 1);
     // let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_memory, data_memory);
     
     let state = simulator.get_state();

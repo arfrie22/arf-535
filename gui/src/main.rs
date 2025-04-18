@@ -7,8 +7,7 @@ use displays::{cache::CacheDisplay, condition::ConditionDisplay, f_register::FRe
 use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
 use log::{error, info};
 use simulator::{
-    memory::{ClockedMemory, DirectCache, FrontMemory, Memory},
-    Simulator,
+    memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, streams::{InputStream, OutputStream, ConstantInput, NoOperationOutput}, Simulator
 };
 
 const DATA_M_CYCLES: usize = 4;
@@ -98,6 +97,9 @@ fn create_simulator(use_cache: bool) -> Simulator {
     };
     let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache { data_cache } else { data_memory };
 
+    let adc_streams = core::array::from_fn(|_| Box::new(ConstantInput::new(0)) as Box<dyn InputStream>);
+    let dac_streams = core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
+
     Simulator::new(
         raw_program_memory,
         raw_data_memory,
@@ -105,6 +107,9 @@ fn create_simulator(use_cache: bool) -> Simulator {
         raw_data_cache,
         used_prog,
         used_data,
+        adc_streams,
+        dac_streams,
+        1
     )
 }
 
