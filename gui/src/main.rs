@@ -4,15 +4,15 @@ use std::{cell::RefCell, io::Read, path::Path, rc::Rc};
 
 use assembler::{assemble, load_file};
 use displays::{cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay, timer::TimerDisplay};
-use eframe::egui::{self, output, FontData, FontDefinitions, FontFamily};
+use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
 use log::{error, info};
 use simulator::{
     memory::{ClockedMemory, DirectCache, FrontMemory, Memory},
     Simulator,
 };
 
-const DATA_M_CYCLES: usize = 2;
-const PROG_M_CYCLES: usize = 2;
+const DATA_M_CYCLES: usize = 4;
+const PROG_M_CYCLES: usize = 10;
 
 const DATA_C_CYCLES: usize = 1;
 const PROG_C_CYCLES: usize = 1;
@@ -159,7 +159,7 @@ impl SimulatorGUI {
     }
 
     fn cycle(&mut self) {
-        self.simulator.borrow().cycle();
+        self.simulator.borrow_mut().cycle();
         self.program_memory_display.reload_inputs();
         self.data_memory_display.reload_inputs();
     }
@@ -276,9 +276,11 @@ impl eframe::App for SimulatorGUI {
                     self.cycle();
                 }
 
-                if ui.button("1000 Steps").clicked() {
-                    self.cycle_many(1000);
+                if ui.button("1M Steps").clicked() {
+                    self.cycle_many(1_000_000);
                 }
+
+                ui.label(format!("Cycle: {}", self.simulator.borrow().get_cycle_number()));
             });
 
             ui.add_space(10.0);

@@ -185,6 +185,7 @@ pub struct Simulator {
     raw_program_cache: RawCacheCell,
     raw_data_cache: RawCacheCell,
     clock_rate: usize,
+    cycle_number: usize,
 }
 
 impl Simulator {
@@ -196,10 +197,11 @@ impl Simulator {
             raw_program_cache,
             raw_data_cache,
             clock_rate: 1,
+            cycle_number: 0,
         }
     }
 
-    pub fn cycle(&self) {
+    pub fn cycle(&mut self) {
         self.state.borrow_mut().registers[Register::A1 as usize] = 0;
         self.state.borrow_mut().registers[Register::A2 as usize] = 0;
         self.state.borrow_mut().registers[Register::A3 as usize] = 0;
@@ -211,6 +213,12 @@ impl Simulator {
 
         let stage = self.state.borrow().pipeline_stage.write_back.clone();
         stage.borrow_mut().call(false).unwrap();
+
+        self.cycle_number += 1;
+    }
+
+    pub fn get_cycle_number(&self) -> usize {
+        self.cycle_number
     }
 
     pub fn get_state(&self) -> SimulatorStateCell {

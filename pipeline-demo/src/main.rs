@@ -77,7 +77,7 @@ fn main() {
     raw_program_memory.borrow_mut().write(8, Instruction::ImmediateJump { l: false, condition: Condition::AlwaysTrue, label: 5 }.into()).unwrap();
     raw_program_memory.borrow_mut().write(9, Instruction::IntegerStoreData { rx: Register::R4, label: 0 }.into()).unwrap();
 
-    let simulator = Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, program_cache, data_cache);
+    let mut simulator = Simulator::new(raw_program_memory, raw_data_memory, raw_program_cache, raw_data_cache, program_cache, data_cache);
     // let simulator = Simulator::new(raw_program_memory, raw_data_memory, program_memory, data_memory);
     
     let state = simulator.get_state();
