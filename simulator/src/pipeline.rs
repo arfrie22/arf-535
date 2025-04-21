@@ -342,6 +342,10 @@ impl Instruction {
             Instruction::IntegerLoadProgram { .. } => 1,
             Instruction::IntegerStoreData { .. } => 1,
             Instruction::IntegerStoreProgram { .. } => 1,
+            Instruction::IntegerLoadEffectiveDataAddress { .. } => 1,
+            Instruction::IntegerLoadEffectiveProgramAddress { .. } => 1,
+            Instruction::LoadIntegerEffectiveAddressRegisterIndirect { .. } => 1,
+            Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset { .. } => 1,
             Instruction::UnsignedZeroExtend { .. } => 1,
             Instruction::SignExtend { .. } => 1,
             Instruction::FloatingPointLoadLow { .. } => 1,
@@ -767,6 +771,37 @@ impl Instruction {
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Program, *label, val_rx),
                     writeback: Vec::new(),
+                    end_running: false,
+                }
+            },
+            Instruction::IntegerLoadEffectiveDataAddress { rx, label } => {
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(*label))],
+                    end_running: false,
+                }
+            },
+            Instruction::IntegerLoadEffectiveProgramAddress { rx, label } => {
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(*label))],
+                    end_running: false,
+                }
+            },
+            Instruction::LoadIntegerEffectiveAddressRegisterIndirect { rx, ry, i, s } => {
+                let val_ry = state.registers[*ry as usize];
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + (*i << *s)))],
+                    end_running: false,
+                }
+            },
+            Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => {
+                let val_ry = state.registers[*ry as usize];
+                let val_ro = state.registers[*ro as usize];
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + (val_ro << *s)))],
                     end_running: false,
                 }
             },

@@ -43,15 +43,16 @@ with open('instructions.json') as f:
                 opcode_bit_remaining = 32-8
                 read = False
                 write = False
+                used_valid = False
                 read_unused = False
                 write_unused = False
+                valid_unused = False
                 for i, bit_data in enumerate(bits):
                     opcode_bit_remaining -= bit_data["count"]
                     if (i > 0):
                         enum += ", "
                         parses += ", "
                         intos += ", "
-                        validities += ", "
                     
                     if read:
                         read_regs += ", "
@@ -59,6 +60,10 @@ with open('instructions.json') as f:
                     if write:
                         write_regs += ", "
                         write = False
+
+                    if used_valid:
+                        validities += ", "
+                        used_valid = False
                     arg_name = bit_data["short"].replace("_", "").lower()
                     arg_type = "u32"
                     parse_value = "value"
@@ -117,10 +122,14 @@ with open('instructions.json') as f:
                         if valid_check != "":
                             valid_check += " && "
                         valid_check += check
+                        validities += arg_name
+                        used_valid = True
+                    else:
+                        valid_unused = True
                     
                     enum += arg_name + ": " + arg_type
                     intos += arg_name
-                    validities += arg_name
+        
 
                     if read:
                         read_regs += arg_name
@@ -151,7 +160,6 @@ with open('instructions.json') as f:
                 enum += " }"
                 parses += " }"
                 intos += " }"
-                validities += " }"
 
                 if read_unused:
                     if read:
@@ -161,11 +169,16 @@ with open('instructions.json') as f:
 
                 
                 if write_unused:
-                    read = False
                     if write:
                         write_regs += ", "
                     write_regs += ".."
                 write_regs += " }"
+                
+                if valid_unused:
+                    if used_valid:
+                        validities += ", "
+                    validities += ".."
+                validities += " }"
             
             for reg in opcode_data["extra_reg"]["registers"]:
                 name = f"Register::try_from({reg["number"]}).unwrap()" 

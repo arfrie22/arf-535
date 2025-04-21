@@ -48,12 +48,12 @@ with open('instructions.json') as f:
                         parse += "parse_number(iter.next().unwrap().as_str())?;\n"
                     elif arg["type"] == "signed_number":
                         parse += "parse_signed_number(iter.next().unwrap().as_str())?;\n"
-                    elif arg["type"] == "data_shift_imm" or arg["type"] == "prog_shift_imm":
+                    elif arg["type"] == "data_shift_imm" or arg["type"] == "prog_shift_imm" or arg["type"] == "address_shift_imm":
                         instruction += ", i, s"
                         parse += "iter.next().unwrap().as_str().parse()?;\n"
                         parse += "                            let i = parse_number(iter.next().unwrap().as_str())?;\n"
                         parse += "                            let s = parse_number(iter.next().unwrap().as_str())?;\n"
-                    elif arg["type"] == "data_shift_register" or arg["type"] == "prog_shift_register":
+                    elif arg["type"] == "data_shift_register" or arg["type"] == "prog_shift_register" or arg["type"] == "address_shift_register":
                         instruction += ", ro, s"
                         parse += "iter.next().unwrap().as_str().parse()?;\n"
                         parse += "                            let ro = iter.next().unwrap().as_str().parse()?;\n"
@@ -91,10 +91,13 @@ with open('instructions.json') as f:
     output_file.write("d_address = ${ \"d\" ~ number | \"d:\" ~ label_arg }\n")
     output_file.write("d_address_implicit = ${ \"d\"? ~ number | \"d:\"? ~ label_arg }\n")
     
-    output_file.write("data_shift_register = _{ \"d\"? ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
-    output_file.write("data_shift_imm = _{ \"d\"? ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
+    output_file.write("data_shift_register = _{ \"d\" ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
+    output_file.write("data_shift_imm = _{ \"d\" ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("prog_shift_register = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
     output_file.write("prog_shift_imm = _{ \"p\" ~ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
+    
+    output_file.write("address_shift_register = _{ \"[\" ~ WHITESPACE* ~ register ~ (WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) ~ WHITESPACE* ~ \"]\" }\n")
+    output_file.write("address_shift_imm = _{ \"[\" ~ WHITESPACE* ~ register ~ ((WHITESPACE* ~ \"+\" ~ WHITESPACE* ~ number ~ ((WHITESPACE* ~ \"<<\" ~ WHITESPACE* ~ number) | empty)) | empty ~ empty) ~ WHITESPACE* ~ \"]\" }\n")
     
     output_file.write("condition = ${ (^\"NVR\" | ^\"EQ\" | ^\"GT\" | ^\"LT\" | ^\"GE\" | ^\"LE\" | ^\"OVRF\" | ^\"UNDF\" | ^\"DIVZ\" | ^\"EVEN\" | ^\"FINF\" | ^\"FZ\" | ^\"FNAN\" | ^\"FPOS\")? }\n")
     output_file.write("condition_bit = ${ (^\"C\")? }\n")
@@ -110,7 +113,7 @@ with open('instructions.json') as f:
     output_file.write("prog_line = _{ WHITESPACE* ~ value ~ WHITESPACE* }\n")
     output_file.write("prog = ${ \".prog\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ prog_line)+ }\n")
     output_file.write("data_value = ${(number | signed_number) ~ \"#\" ~ number}\n")
-    output_file.write("data_line = ${WHITESPACE* ~ label_arg ~ (WHITESPACE+ ~ data_value)+ ~ WHITESPACE*}\n")
+    output_file.write("data_line = ${WHITESPACE* ~ label_arg ~ ((WHITESPACE | NEWLINE)+ ~ data_value)+ ~ WHITESPACE*}\n")
     output_file.write("data = ${ \".data\" ~ ((WHITESPACE* ~ NEWLINE)+ ~ (data_line | comment))* }\n")
     output_file.write("file = _{ SOI ~ (WHITESPACE | NEWLINE)* ~ prog ~ (WHITESPACE | NEWLINE)* ~ data? ~ (WHITESPACE | NEWLINE)* ~ EOI }\n")
     

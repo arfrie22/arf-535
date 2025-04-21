@@ -49,3 +49,31 @@ impl NoOperationOutput {
         Self {}
     }
 }
+
+
+// #[derive(Debug)]
+// pub struct WAVInput {
+//     value: u32,
+//     wav_file
+// }
+
+// impl InputStream for WAVInput {
+//     fn get_next(&mut self) -> u32 {
+//         self.value
+//     }
+// }
+
+// impl Stream for ConstantInput {
+//     fn set_clock_rate(&mut self, _clock_rate: usize) {}
+// }
+
+// #[derive(Debug)]
+// pub struct WAVOutput {}
+
+// impl OutputStream for NoOperationOutput {
+//     fn set_next(&mut self, _value: u32) {}
+// }
+
+// impl Stream for NoOperationOutput {
+//     fn set_clock_rate(&mut self, _clock_rate: usize) {}
+// }

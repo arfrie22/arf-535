@@ -64,7 +64,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                         }
                     }
                 },
-                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_ZEX_50 | Rule::instruction_SEX_51 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_INC_82 | Rule::instruction_DEC_83 | Rule::instruction_ADD_84 | Rule::instruction_SUB_85 | Rule::instruction_MUL_86 | Rule::instruction_DIV_87 | Rule::instruction_MOD_88 | Rule::instruction_ADDS_89 | Rule::instruction_SUBS_8a | Rule::instruction_MULS_8b | Rule::instruction_DIVS_8c | Rule::instruction_MODS_8d | Rule::instruction_AND_8e | Rule::instruction_OR_8f | Rule::instruction_NOT_90 | Rule::instruction_XOR_91 | Rule::instruction_LSL_92 | Rule::instruction_LSR_93 | Rule::instruction_ASL_94 | Rule::instruction_ASR_95 | Rule::instruction_RTR_96 | Rule::instruction_LSL_97 | Rule::instruction_LSR_98 | Rule::instruction_ASL_99 | Rule::instruction_ASR_9a | Rule::instruction_RTR_9b | Rule::instruction_MUS_9c | Rule::instruction_MSU_9d | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {
+                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_LEA_50 | Rule::instruction_LEA_51 | Rule::instruction_LEA_52 | Rule::instruction_LEA_53 | Rule::instruction_ZEX_54 | Rule::instruction_SEX_55 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_INC_82 | Rule::instruction_DEC_83 | Rule::instruction_ADD_84 | Rule::instruction_SUB_85 | Rule::instruction_MUL_86 | Rule::instruction_DIV_87 | Rule::instruction_MOD_88 | Rule::instruction_ADDS_89 | Rule::instruction_SUBS_8a | Rule::instruction_MULS_8b | Rule::instruction_DIVS_8c | Rule::instruction_MODS_8d | Rule::instruction_AND_8e | Rule::instruction_OR_8f | Rule::instruction_NOT_90 | Rule::instruction_XOR_91 | Rule::instruction_LSL_92 | Rule::instruction_LSR_93 | Rule::instruction_ASL_94 | Rule::instruction_ASR_95 | Rule::instruction_RTR_96 | Rule::instruction_LSL_97 | Rule::instruction_LSR_98 | Rule::instruction_ASL_99 | Rule::instruction_ASR_9a | Rule::instruction_RTR_9b | Rule::instruction_MUS_9c | Rule::instruction_MSU_9d | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 => {
                     first_pass_index += 1;
                 },
                 _ => unreachable!(),
@@ -276,14 +276,42 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let label = parse_prog_label(iter.next().unwrap().as_str(), &prog_labels)?;
                             data.instructions.push(Instruction::IntegerStoreProgram { rx, label });
                         }
-                        Rule::instruction_ZEX_50 => {
+                        Rule::instruction_LEA_50 => {
+                            let mut iter = t.into_inner();
+                            let rx = iter.next().unwrap().as_str().parse()?;
+                            let label = parse_data_label(iter.next().unwrap().as_str(), &data_labels)?;
+                            data.instructions.push(Instruction::IntegerLoadEffectiveDataAddress { rx, label });
+                        }
+                        Rule::instruction_LEA_51 => {
+                            let mut iter = t.into_inner();
+                            let rx = iter.next().unwrap().as_str().parse()?;
+                            let label = parse_data_label(iter.next().unwrap().as_str(), &data_labels)?;
+                            data.instructions.push(Instruction::IntegerLoadEffectiveProgramAddress { rx, label });
+                        }
+                        Rule::instruction_LEA_52 => {
+                            let mut iter = t.into_inner();
+                            let rx = iter.next().unwrap().as_str().parse()?;
+                            let ry = iter.next().unwrap().as_str().parse()?;
+                            let i = parse_number(iter.next().unwrap().as_str())?;
+                            let s = parse_number(iter.next().unwrap().as_str())?;
+                            data.instructions.push(Instruction::LoadIntegerEffectiveAddressRegisterIndirect { rx, ry, i, s });
+                        }
+                        Rule::instruction_LEA_53 => {
+                            let mut iter = t.into_inner();
+                            let rx = iter.next().unwrap().as_str().parse()?;
+                            let ry = iter.next().unwrap().as_str().parse()?;
+                            let ro = iter.next().unwrap().as_str().parse()?;
+                            let s = parse_number(iter.next().unwrap().as_str())?;
+                            data.instructions.push(Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset { rx, ry, ro, s });
+                        }
+                        Rule::instruction_ZEX_54 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;
                             let count = parse_number(iter.next().unwrap().as_str())?;
                             data.instructions.push(Instruction::UnsignedZeroExtend { rx, ry, count });
                         }
-                        Rule::instruction_SEX_51 => {
+                        Rule::instruction_SEX_55 => {
                             let mut iter = t.into_inner();
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let ry = iter.next().unwrap().as_str().parse()?;

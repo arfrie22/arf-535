@@ -888,7 +888,7 @@
                     },
                     {
                         "short": "_label_",
-                        "long": "Destination Address in data",
+                        "long": "Source Data Address",
                         "count": 16
                     }
                 ],
@@ -918,7 +918,7 @@
                     },
                     {
                         "short": "_label_",
-                        "long": "Destination Addres in programs",
+                        "long": "Source Program Address",
                         "count": 16
                     }
                 ],
@@ -948,7 +948,7 @@
                     },
                     {
                         "short": "_label_",
-                        "long": "Destination Address in data",
+                        "long": "Destination Data Address",
                         "count": 16
                     }
                 ],
@@ -978,9 +978,143 @@
                     },
                     {
                         "short": "_label_",
-                        "long": "Destination Address in program",
+                        "long": "Destination Program Address",
                         "count": 16
                     }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Integer Load Effective Data Address",
+                "assembly": {
+                    "pneumonic": "LEA",
+                    "arguments": [
+                        { "type": "register", "argument": "Rx" },
+                        { "type": "d_address", "argument": "_label_" }
+                    ]
+                },
+                "description": "Loads the address of data memory address label into the register Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Address in data",
+                        "count": 16
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Integer Load Effective Program Address",
+                "assembly": {
+                    "pneumonic": "LEA",
+                    "arguments": [
+                        { "type": "register", "argument": "Rx" },
+                        { "type": "d_address", "argument": "_label_" }
+                    ]
+                },
+                "description": "Loads the address of program memory address label into the register Rx.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "_label_",
+                        "long": "Address in program",
+                        "count": 16
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Load Integer Effective Address Register Indirect",
+                "assembly": {
+                    "pneumonic": "LEA",
+                    "arguments": [
+                        { "type": "register", "argument": "Rx" },
+                        { "type": "address_shift_imm", "argument": "Ry" }
+                    ]
+                },
+                "description": "Sets the value of Rx to the memory location at Ry offset by I shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    },
+                    { "short": "I", "long": "Offset", "count": 5 },
+                    { "short": "S", "long": "Shift", "count": 4 }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Load Integer Effective Address Register Indirect with Register Offset",
+                "assembly": {
+                    "pneumonic": "LEA",
+                    "arguments": [
+                        { "type": "register", "argument": "Rx" },
+                        { "type": "address_shift_register", "argument": "Ry" }
+                    ]
+                },
+                "description": "Sets the value of Rx to the memory location at Ry offset by the value of Ro shifted by S.",
+                "bits": [
+                    {
+                        "short": "Rx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Ry",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    },
+                    {
+                        "short": "Ro",
+                        "long": "Offset",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    },
+                    { "short": "S", "long": "Shift", "count": 4 }
                 ],
                 "extra_reg": {
                     "registers": [],

@@ -149,11 +149,10 @@ pub struct AssemblerParser;
 
 mod gen_functions;
 pub use gen_functions::assemble;
-use zstd::zstd_safe::CompressionLevel;
 
 #[cfg(test)]
 mod tests {
-    use std::io;
+    
 
     use crate::assemble;
 
@@ -179,7 +178,7 @@ mod tests {
 
         let a = assemble(input).unwrap();
         let mut v = Vec::new();
-        a.to_file(&mut v);
+        a.to_file(&mut v).unwrap();
 
         println!("v: {}", v.len());
     }
