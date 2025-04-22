@@ -3,11 +3,17 @@
 use std::{cell::RefCell, io::Read, path::Path, rc::Rc, time::Instant};
 
 use assembler::{assemble, load_file};
-use displays::{cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay, timer::TimerDisplay};
-use eframe::egui::{self, FontData, FontDefinitions, FontFamily};
+use displays::{
+    cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay,
+    memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay,
+    timer::TimerDisplay,
+};
+use eframe::egui::{self, FontData, FontDefinitions, FontFamily, Label, RichText, Widget};
 use log::{error, info};
 use simulator::{
-    memory::{ClockedMemory, DirectCache, FrontMemory, Memory}, streams::{InputStream, OutputStream, ConstantInput, NoOperationOutput}, Simulator
+    memory::{ClockedMemory, DirectCache, FrontMemory, Memory},
+    streams::{ConstantInput, InputStream, NoOperationOutput, OutputStream},
+    Simulator,
 };
 
 const DATA_M_CYCLES: usize = 4;
@@ -28,6 +34,7 @@ fn main() -> eframe::Result {
         viewport: egui::ViewportBuilder::default().with_maximized(true),
         ..Default::default()
     };
+
     eframe::run_native(
         "Analog/RF ISA Simulator",
         options,
@@ -97,8 +104,10 @@ fn create_simulator(use_cache: bool) -> Simulator {
     };
     let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache { data_cache } else { data_memory };
 
-    let adc_streams = core::array::from_fn(|_| Box::new(ConstantInput::new(0)) as Box<dyn InputStream>);
-    let dac_streams = core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
+    let adc_streams =
+        core::array::from_fn(|_| Box::new(ConstantInput::new(0)) as Box<dyn InputStream>);
+    let dac_streams =
+        core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
 
     Simulator::new(
         raw_program_memory,
@@ -109,22 +118,22 @@ fn create_simulator(use_cache: bool) -> Simulator {
         used_data,
         adc_streams,
         dac_streams,
-        1
+        1,
     )
 }
 
-struct SimulatorGUI {
+pub struct SimulatorGUI {
+    tree: egui_tiles::Tree<Pane>,
     simulator: Rc<RefCell<Simulator>>,
-    pipeline_display: PipelineDisplay,
-    register_display: RegisterDisplay,
-    f_register_display: FRegisterDisplay,
-    timer_display: TimerDisplay,
-    condition_display: ConditionDisplay,
-    program_memory_display: MemoryDisplay,
-    data_memory_display: MemoryDisplay,
-    program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
-    data_cache_display: CacheDisplay<DATA_CACHE_LINES>,
-    remaining_steps: usize,
+    pipeline_display: Rc<RefCell<PipelineDisplay>>,
+    register_display: Rc<RefCell<RegisterDisplay>>,
+    f_register_display: Rc<RefCell<FRegisterDisplay>>,
+    timer_display: Rc<RefCell<TimerDisplay>>,
+    condition_display: Rc<RefCell<ConditionDisplay>>,
+    program_memory_display: Rc<RefCell<MemoryDisplay>>,
+    data_memory_display: Rc<RefCell<MemoryDisplay>>,
+    program_cache_display: Rc<RefCell<CacheDisplay<PROGRAM_CACHE_LINES>>>,
+    data_cache_display: Rc<RefCell<CacheDisplay<DATA_CACHE_LINES>>>,
     file_name: String,
     use_pipeline: bool,
     use_cache: bool,
@@ -132,43 +141,130 @@ struct SimulatorGUI {
 
 impl Default for SimulatorGUI {
     fn default() -> Self {
-        Self::new(true, true, "test")
-    }
-}
+        // Self::new(true, true, "test")
 
-impl SimulatorGUI {
-    fn new(use_pipeline: bool, use_cache: bool, file_name: &str) -> Self {
-        let simulator = Rc::new(RefCell::new(create_simulator(use_cache)));
+        let simulator = Rc::new(RefCell::new(create_simulator(true)));
         let simulator_state = simulator.borrow().get_state();
-        simulator_state.borrow_mut().single_instruction_pipeline = !use_pipeline;
+        simulator_state.borrow_mut().single_instruction_pipeline = false;
 
         let program_memory = simulator.borrow().get_program_memory();
         let data_memory = simulator.borrow().get_data_memory();
         let program_cache = simulator.borrow().get_program_cache();
         let data_cache = simulator.borrow().get_data_cache();
 
+        let pipeline_display = Rc::new(RefCell::new(PipelineDisplay::new(
+            simulator_state.clone(),
+            "pipeline",
+        )));
+        let register_display = Rc::new(RefCell::new(RegisterDisplay::new(
+            simulator_state.clone(),
+            "register",
+        )));
+        let f_register_display = Rc::new(RefCell::new(FRegisterDisplay::new(
+            simulator_state.clone(),
+            "f_register",
+        )));
+        let timer_display = Rc::new(RefCell::new(TimerDisplay::new(
+            simulator_state.clone(),
+            "timer",
+        )));
+        let condition_display = Rc::new(RefCell::new(ConditionDisplay::new(
+            simulator_state.clone(),
+            "condition",
+        )));
+        let program_memory_display = Rc::new(RefCell::new(MemoryDisplay::new(
+            program_memory,
+            "program_memory",
+        )));
+        let data_memory_display =
+            Rc::new(RefCell::new(MemoryDisplay::new(data_memory, "data_memory")));
+        let program_cache_display = Rc::new(RefCell::new(CacheDisplay::new(
+            program_cache,
+            "program_cache",
+        )));
+        let data_cache_display = Rc::new(RefCell::new(CacheDisplay::new(data_cache, "data_cache")));
+
+        let mut tiles = egui_tiles::Tiles::default();
+
+        let memories = vec![
+            tiles.insert_pane(Pane::new("Program Memory", program_memory_display.clone())),
+            tiles.insert_pane(Pane::new("Data Memory", data_memory_display.clone())),
+        ];
+        let memory_tab = tiles.insert_tab_tile(memories);
+
+        let caches = vec![
+            tiles.insert_pane(Pane::new("Program Cache", program_cache_display.clone())),
+            tiles.insert_pane(Pane::new("Data Cache", data_cache_display.clone())),
+        ];
+
+        let cache_tab = tiles.insert_tab_tile(caches);
+
+        let pipeline_tile = tiles.insert_pane(Pane::new("Pipeline", pipeline_display.clone()));
+
+        let storage_tile = tiles.insert_vertical_tile(vec![memory_tab, cache_tab, pipeline_tile]);
+
+        let registers = vec![
+            tiles.insert_pane(Pane::new("Register", register_display.clone())),
+            tiles.insert_pane(Pane::new("FPRegister", f_register_display.clone())),
+            tiles.insert_pane(Pane::new("Timer", timer_display.clone())),
+        ];
+
+        let register_tile = tiles.insert_vertical_tile(registers);
+
+        let root = tiles.insert_horizontal_tile(vec![storage_tile, register_tile]);
+
+        let tree = egui_tiles::Tree::new("my_tree", root, tiles);
+
         Self {
             simulator,
-            pipeline_display: PipelineDisplay::new(simulator_state.clone(), "pipeline"),
-            register_display: RegisterDisplay::new(simulator_state.clone(), "register"),
-            f_register_display: FRegisterDisplay::new(simulator_state.clone(), "f_register"),
-            timer_display: TimerDisplay::new(simulator_state.clone(), "timer"),
-            condition_display: ConditionDisplay::new(simulator_state.clone(), "condition"),
-            program_memory_display: MemoryDisplay::new(program_memory, "program_memory"),
-            data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
-            program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
-            data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
-            remaining_steps: 0,
-            file_name: file_name.to_owned(),
-            use_pipeline,
-            use_cache,
+            tree,
+            pipeline_display,
+            register_display,
+            f_register_display,
+            timer_display,
+            condition_display,
+            program_memory_display,
+            data_memory_display,
+            program_cache_display,
+            data_cache_display,
+            file_name: "test".to_owned(),
+            use_pipeline: true,
+            use_cache: true,
         }
+    }
+}
+
+impl SimulatorGUI {
+    fn reset_simulator(&mut self) {
+        let simulator = Rc::new(RefCell::new(create_simulator(self.use_cache)));
+        let simulator_state = simulator.borrow().get_state();
+        simulator_state.borrow_mut().single_instruction_pipeline = !self.use_pipeline;
+
+        let program_memory = simulator.borrow().get_program_memory();
+        let data_memory = simulator.borrow().get_data_memory();
+        let program_cache = simulator.borrow().get_program_cache();
+        let data_cache = simulator.borrow().get_data_cache();
+
+        self.simulator = simulator;
+        *self.pipeline_display.borrow_mut() =
+            PipelineDisplay::new(simulator_state.clone(), "pipeline");
+        *self.register_display.borrow_mut() =
+            RegisterDisplay::new(simulator_state.clone(), "register");
+        *self.f_register_display.borrow_mut() =
+            FRegisterDisplay::new(simulator_state.clone(), "f_register");
+        *self.timer_display.borrow_mut() = TimerDisplay::new(simulator_state.clone(), "timer");
+        *self.condition_display.borrow_mut() =
+            ConditionDisplay::new(simulator_state.clone(), "condition");
+        *self.program_memory_display.borrow_mut() =
+            MemoryDisplay::new(program_memory, "program_memory");
+        *self.data_memory_display.borrow_mut() = MemoryDisplay::new(data_memory, "data_memory");
+        *self.program_cache_display.borrow_mut() =
+            CacheDisplay::new(program_cache, "program_cache");
+        *self.data_cache_display.borrow_mut() = CacheDisplay::new(data_cache, "data_cache");
     }
 
     fn cycle(&mut self) {
         self.simulator.borrow_mut().cycle();
-        self.program_memory_display.reload_inputs();
-        self.data_memory_display.reload_inputs();
     }
 
     fn cycle_remaining(&mut self) {
@@ -176,22 +272,16 @@ impl SimulatorGUI {
         let state = self.simulator.borrow().get_state();
         state.borrow_mut().running = true;
         loop {
-            if !state.borrow().running {
-                self.remaining_steps = 0;
-            }
-
-            if  (Instant::now() - start).as_millis() > 1000 || self.remaining_steps == 0 {
+            if (Instant::now() - start).as_millis() > 1000 || !state.borrow().running {
                 break;
             }
 
             self.cycle();
-
-            self.remaining_steps -= 1;
         }
     }
 
     fn load_file(&mut self) {
-        *self = Self::new(self.use_pipeline, self.use_cache, &self.file_name);
+        self.reset_simulator();
 
         let input_path = Path::new("compiled").join(format!("{}.o", self.file_name));
         if input_path.exists() {
@@ -200,17 +290,17 @@ impl SimulatorGUI {
                     match load_file(&mut input_file, &mut self.simulator.borrow_mut()) {
                         Ok(_) => {
                             info!("Loaded {}:", input_path.to_string_lossy());
-                        },
+                        }
                         Err(e) => {
                             error!("Error loading {}:", input_path.to_string_lossy());
                             error!("{:?}", e);
-                        },
+                        }
                     }
                 }
                 Err(e) => {
                     error!("Error opening {}:", input_path.to_string_lossy());
                     error!("{:?}", e);
-                },
+                }
             }
         } else {
             error!("File {} does not exists.", input_path.to_string_lossy());
@@ -226,25 +316,21 @@ impl SimulatorGUI {
                     let mut buf = String::new();
                     match input_file.read_to_string(&mut buf) {
                         Ok(_) => match assemble(&buf) {
-                            Ok(data) => {
-                                match std::fs::File::create(&output_path) {
-                                    Ok(mut output_file) => {
-                                        match data.to_file(&mut output_file) {
-                                            Ok(_) => {
-                                                info!("Wrote {}:", output_path.to_string_lossy());
-                                            },
-                                            Err(e) => {
-                                                error!("Error writing {}:", output_path.to_string_lossy());
-                                                error!("{:?}", e);
-                                            },
-                                        }
-                                    },
+                            Ok(data) => match std::fs::File::create(&output_path) {
+                                Ok(mut output_file) => match data.to_file(&mut output_file) {
+                                    Ok(_) => {
+                                        info!("Wrote {}:", output_path.to_string_lossy());
+                                    }
                                     Err(e) => {
-                                        error!("Error creating {}:", output_path.to_string_lossy());
+                                        error!("Error writing {}:", output_path.to_string_lossy());
                                         error!("{:?}", e);
-                                    },
+                                    }
+                                },
+                                Err(e) => {
+                                    error!("Error creating {}:", output_path.to_string_lossy());
+                                    error!("{:?}", e);
                                 }
-                            }
+                            },
                             Err(e) => {
                                 error!("Failed to assemble {}:", input_path.to_string_lossy());
                                 error!("{:?}", e);
@@ -259,7 +345,7 @@ impl SimulatorGUI {
                 Err(e) => {
                     error!("Error opening {}:", input_path.to_string_lossy());
                     error!("{:?}", e);
-                },
+                }
             }
         } else {
             error!("File {} does not exists.", input_path.to_string_lossy());
@@ -290,63 +376,127 @@ impl eframe::App for SimulatorGUI {
                     self.cycle();
                 }
 
-                if self.remaining_steps > 0 {
+                let state = self.simulator.borrow().get_state();
+                let mut state = state.borrow_mut();
+
+                if state.running {
                     if ui.button("Cancel").clicked() {
-                        self.remaining_steps = 0;
+                        state.running = false;
                     }
                 } else {
-                    if ui.button("1B Steps").clicked() {
-                        self.remaining_steps = 1_000_000_000;
+                    if ui.button("Run").clicked() {
+                        state.running = true;
                     }
                 }
 
-                ui.label(format!("Cycle: {}", self.simulator.borrow().get_cycle_number()));
+                ui.label(format!(
+                    "Cycle: {}",
+                    self.simulator.borrow().get_cycle_number()
+                ));
             });
 
             ui.add_space(10.0);
 
-            ui.horizontal(|ui| {
-                ui.vertical(|ui| {
-                    ui.horizontal(|ui| {
-                        ui.vertical(|ui| {
-                            ui.heading("Program Memory");
-                            self.program_memory_display.ui(ui);
-                        });
-                        ui.add_space(10.0);
-                        ui.vertical(|ui| {
-                            ui.heading("Data Memory");
-                            self.data_memory_display.ui(ui);
-                        });
-                    });
-                    ui.vertical(|ui| {
-                        ui.heading("Program Cache");
-                        self.program_cache_display.ui(ui);
-                        ui.add_space(10.0);
-                        ui.heading("Data Cache");
-                        self.data_cache_display.ui(ui);
-                    });
+            // ui.horizontal(|ui| {
+            //     ui.vertical(|ui| {
+            //         ui.horizontal(|ui| {
+            //             ui.vertical(|ui| {
+            //                 ui.heading("Program Memory");
+            //                 self.program_memory_display.ui(ui);
+            //             });
+            //             ui.add_space(10.0);
+            //             ui.vertical(|ui| {
+            //                 ui.heading("Data Memory");
+            //                 self.data_memory_display.ui(ui);
+            //             });
 
-                    ui.add_space(10.0);
-                    ui.heading("Pipeline");
-                    self.pipeline_display.ui(ui);
-                });
-                
-                ui.add_space(10.0);
+            //         });
 
-                ui.vertical(|ui| {
-                    self.register_display.ui(ui);
-                    ui.add_space(10.0);
-                    self.f_register_display.ui(ui);
-                    ui.add_space(10.0);
-                    self.timer_display.ui(ui);
-                    ui.add_space(10.0);
-                    self.condition_display.ui(ui);
-                });
-            });
+            //         ui.vertical(|ui| {
+            //             ui.heading("Program Cache");
+            //             self.program_cache_display.ui(ui);
+            //             ui.add_space(10.0);
+            //             ui.heading("Data Cache");
+            //             self.data_cache_display.ui(ui);
+            //         });
+
+            //         ui.add_space(10.0);
+            //         ui.heading("Pipeline");
+            //         self.pipeline_display.ui(ui);
+            //     });
+
+            //     ui.add_space(10.0);
+
+            //     ui.vertical(|ui| {
+            //         self.register_display.ui(ui);
+            //         ui.add_space(10.0);
+            //         self.f_register_display.ui(ui);
+            //         ui.add_space(10.0);
+            //         self.timer_display.ui(ui);
+            //         ui.add_space(10.0);
+            //         self.condition_display.ui(ui);
+            //     });
+            // });
+
+            let mut behavior = TreeBehavior {};
+            self.tree.ui(&mut behavior, ui);
         });
 
-        if self.remaining_steps > 0 {
+        if self.simulator.borrow().get_state().borrow().running {
             self.cycle_remaining();
         }
+    }
+}
+
+struct TreeBehavior {}
+
+impl egui_tiles::Behavior<Pane> for TreeBehavior {
+    fn tab_title_for_pane(&mut self, pane: &Pane) -> egui::WidgetText {
+        (&pane.name).into()
+    }
+
+    fn pane_ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        _tile_id: egui_tiles::TileId,
+        pane: &mut Pane,
+    ) -> egui_tiles::UiResponse {
+        Label::new(RichText::from(&pane.name).heading())
+            .selectable(false)
+            .ui(ui);
+
+        pane.inner.borrow_mut().ui(ui);
+
+        let dragged = ui
+            .allocate_rect(ui.max_rect(), egui::Sense::click_and_drag())
+            .on_hover_cursor(egui::CursorIcon::Grab)
+            .dragged();
+        if dragged {
+            egui_tiles::UiResponse::DragStarted
+        } else {
+            egui_tiles::UiResponse::None
+        }
+    }
+}
+
+pub trait PaneInner {
+    fn ui(&mut self, ui: &mut egui::Ui);
+}
+
+pub struct Pane {
+    name: String,
+    inner: Rc<RefCell<dyn PaneInner>>,
+}
+
+impl Pane {
+    pub fn new(name: &str, inner: Rc<RefCell<dyn PaneInner>>) -> Self {
+        Self {
+            name: name.to_owned(),
+            inner,
+        }
+    }
+
+    pub fn ui(&mut self, ui: &mut egui::Ui) {
+        self.inner.borrow_mut().ui(ui);
     }
 }

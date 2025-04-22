@@ -3,6 +3,8 @@ use std::{cell::RefCell, rc::Rc};
 use eframe::egui::{self, Context, Id, Margin, UiBuilder, Vec2};
 use simulator::{enums::{Register, Condition}, SimulatorState};
 
+use crate::PaneInner;
+
 const TOP_ROW_HEIGHT: f32 = 24.0;
 const ROW_HEIGHT: f32 = 18.0;
 
@@ -104,8 +106,8 @@ impl egui_table::TableDelegate for ConditionDisplay {
     }
 }
 
-impl ConditionDisplay {
-    pub fn ui(&mut self, ui: &mut egui::Ui) {
+impl PaneInner for ConditionDisplay {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         let id_salt = Id::new(&self.salt);
         ui.push_id(id_salt, |ui| {
             let estimated_height = 8.0 * ROW_HEIGHT + TOP_ROW_HEIGHT;

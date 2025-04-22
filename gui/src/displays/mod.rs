@@ -1,3 +1,7 @@
+use eframe::egui::Ui;
+
+use crate::SimulatorGUI;
+
 pub mod cache;
 pub mod memory;
 pub mod pipeline;

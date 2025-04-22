@@ -3,6 +3,8 @@ use std::{cell::RefCell, rc::Rc};
 use eframe::egui::{self, Context, Id, Margin, UiBuilder, Vec2};
 use simulator::memory::Cache;
 
+use crate::PaneInner;
+
 const TOP_ROW_HEIGHT: f32 = 24.0;
 const ROW_HEIGHT: f32 = 18.0;
 
@@ -122,8 +124,8 @@ impl<const C: usize> egui_table::TableDelegate for CacheDisplay<C> {
     }
 }
 
-impl<const C: usize> CacheDisplay<C> {
-    pub fn ui(&mut self, ui: &mut egui::Ui) {
+impl<const C: usize> PaneInner for CacheDisplay<C> {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         let id_salt = Id::new(&self.salt);
         ui.push_id(id_salt, |ui| {
             let estimated_height = (C.min(8) as f32) * ROW_HEIGHT + TOP_ROW_HEIGHT;
