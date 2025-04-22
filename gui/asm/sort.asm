@@ -26,7 +26,6 @@ push r6
 ; &top = &list + len(list)
 add r2 r0 r1
 
-trap
 sort_loop:
 ;&lower_number = &list
 ldr r3 r0

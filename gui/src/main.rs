@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::{cell::RefCell, io::Read, path::Path, rc::Rc};
+use std::{cell::RefCell, io::Read, path::Path, rc::Rc, time::Instant};
 
 use assembler::{assemble, load_file};
 use displays::{cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay, timer::TimerDisplay};
@@ -16,8 +16,8 @@ const PROG_M_CYCLES: usize = 10;
 const DATA_C_CYCLES: usize = 1;
 const PROG_C_CYCLES: usize = 1;
 
-const PROGRAM_CACHE_LINES: usize = 4;
-const DATA_CACHE_LINES: usize = 4;
+const PROGRAM_CACHE_LINES: usize = 32;
+const DATA_CACHE_LINES: usize = 32;
 
 pub mod displays;
 
@@ -124,6 +124,7 @@ struct SimulatorGUI {
     data_memory_display: MemoryDisplay,
     program_cache_display: CacheDisplay<PROGRAM_CACHE_LINES>,
     data_cache_display: CacheDisplay<DATA_CACHE_LINES>,
+    remaining_steps: usize,
     file_name: String,
     use_pipeline: bool,
     use_cache: bool,
@@ -157,6 +158,7 @@ impl SimulatorGUI {
             data_memory_display: MemoryDisplay::new(data_memory, "data_memory"),
             program_cache_display: CacheDisplay::new(program_cache, "program_cache"),
             data_cache_display: CacheDisplay::new(data_cache, "data_cache"),
+            remaining_steps: 0,
             file_name: file_name.to_owned(),
             use_pipeline,
             use_cache,
@@ -169,15 +171,22 @@ impl SimulatorGUI {
         self.data_memory_display.reload_inputs();
     }
 
-    fn cycle_many(&mut self, count: usize) {
+    fn cycle_remaining(&mut self) {
+        let start = Instant::now();
         let state = self.simulator.borrow().get_state();
         state.borrow_mut().running = true;
-        for _ in 0..count {
+        loop {
             if !state.borrow().running {
+                self.remaining_steps = 0;
+            }
+
+            if  (Instant::now() - start).as_millis() > 1000 || self.remaining_steps == 0 {
                 break;
             }
 
             self.cycle();
+
+            self.remaining_steps -= 1;
         }
     }
 
@@ -281,8 +290,14 @@ impl eframe::App for SimulatorGUI {
                     self.cycle();
                 }
 
-                if ui.button("1M Steps").clicked() {
-                    self.cycle_many(1_000_000);
+                if self.remaining_steps > 0 {
+                    if ui.button("Cancel").clicked() {
+                        self.remaining_steps = 0;
+                    }
+                } else {
+                    if ui.button("1B Steps").clicked() {
+                        self.remaining_steps = 1_000_000_000;
+                    }
                 }
 
                 ui.label(format!("Cycle: {}", self.simulator.borrow().get_cycle_number()));
@@ -329,5 +344,9 @@ impl eframe::App for SimulatorGUI {
                 });
             });
         });
+
+        if self.remaining_steps > 0 {
+            self.cycle_remaining();
+        }
     }
 }

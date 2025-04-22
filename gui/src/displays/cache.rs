@@ -126,7 +126,7 @@ impl<const C: usize> CacheDisplay<C> {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         let id_salt = Id::new(&self.salt);
         ui.push_id(id_salt, |ui| {
-            let estimated_height = (C as f32) * ROW_HEIGHT + TOP_ROW_HEIGHT;
+            let estimated_height = (C.min(8) as f32) * ROW_HEIGHT + TOP_ROW_HEIGHT;
             let estimated_width = 8.0 * self.default_column.current;
 
             let (_id, rect) = ui.allocate_space(
