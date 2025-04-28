@@ -22,8 +22,8 @@ const PROG_M_CYCLES: usize = 10;
 const DATA_C_CYCLES: usize = 1;
 const PROG_C_CYCLES: usize = 1;
 
-const PROGRAM_CACHE_LINES: usize = 32;
-const DATA_CACHE_LINES: usize = 32;
+const PROGRAM_CACHE_LINES: usize = 64;
+const DATA_CACHE_LINES: usize = 64;
 
 pub mod displays;
 
@@ -444,6 +444,7 @@ impl eframe::App for SimulatorGUI {
 
         if self.simulator.borrow().get_state().borrow().running {
             self.cycle_remaining();
+            ctx.request_repaint();
         }
     }
 }
