@@ -398,8 +398,9 @@ impl Instruction {
             Instruction::CastFromFloat { .. } => 10,
             Instruction::SetTimer { .. } => 1,
             Instruction::GetCurrentTimer { .. } => 1,
-            Instruction::CheckTimer { tx } => state.timers[*tx as usize].value as usize,
+            Instruction::CheckTimer { .. } => 1,
             Instruction::ClearTimer { .. } => 1,
+            Instruction::StallTimer { tx } => state.timers[*tx as usize].value as usize,
         }
     }
     pub fn execute(&self, state: &mut SimulatorState) -> ExecuteResult {
@@ -637,7 +638,7 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(
                         *rx,
-                        Some((val_rx & 0x0000FFFF) | *value),
+                        Some((val_rx & 0x0000FFFF) | (*value << 16)),
                     )],
                     end_running: false,
                 }
@@ -843,7 +844,7 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::FloatingPoint(
                         *fx,
-                        Some(raw_cast_to_f32((val_fx & 0x0000FFFF) | *value)),
+                        Some(raw_cast_to_f32((val_fx & 0x0000FFFF) | (*value << 16))),
                     )],
                     end_running: false,
                 }
@@ -1551,7 +1552,25 @@ impl Instruction {
                     end_running: false,
                 }
             },
-            Instruction::CheckTimer { .. } => Default::default(),
+            Instruction::CheckTimer { tx } => {
+                let mut writeback = Vec::new();
+                
+                let mut st = state.registers[Register::ST as usize];
+                if state.timers[*tx as usize].value == 0 {
+                    writeback.push(WritebackRegister::Timer(*tx, Some(state.timers[*tx as usize].previous_set)));
+                    st = Condition::Equal.set(st, true);
+                } else {
+                    st = Condition::Equal.set(st, false);
+                }
+
+                writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
             Instruction::ClearTimer { tx } => {
                 ExecuteResult {
                     memory: MemoryAction::None,
@@ -1559,6 +1578,7 @@ impl Instruction {
                     end_running: false,
                 }
             },
+            Instruction::StallTimer { .. } => Default::default(),
         }
     }
 }

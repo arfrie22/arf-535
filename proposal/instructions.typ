@@ -65,7 +65,18 @@ align: center,
 [0], [0], [0], [0], [0], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Fy], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Integer Register], table.cell(colspan: 5)[Floating-Point Register], table.cell(colspan: 14)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x06 (Stall) \
+#block(breakable: false,{text[=== OPCODE: 0x06 (Stall Immediate) \
+STALL_value_ \
+Stalls the pipeline at execute for _value_ clock cycles.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[0], [0], [0], [0], [0], [1], [1], [0], table.cell(colspan: 16)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 16)[Cycle Count], table.cell(colspan: 8)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x07 (Stall Register) \
 STALLRx \
 Stalls the pipeline at execute for Rx clock cycles.]
 table(
@@ -73,142 +84,76 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [0], [0], [0], [1], [1], [0], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[0], [0], [0], [0], [0], [1], [1], [1], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 19)[Unused]
 )}) \
 == Type 001 (Branch) \
 The condition code for a branch is testing a bit inside the Status Register, consult the table to see the short name. In the ASM write the instruction as (B).(COND) where (B) is the branch instruction and (COND) is the short condition code.
 #block(breakable: false,{text[=== OPCODE: 0x00 (Register Jump) \
-BConditionRx \
+BlConditionRx \
 Sets the program counter to Rx.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [0], [0], [0], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
+[0], [0], [1], [0], [0], [0], [0], [0], table.cell(colspan: 1)[l], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Link Register Bit], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 13)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x01 (Indirect Jump) \
-BConditionRx \
+BlConditionRx \
 Sets the program counter to the value stored at the memory location in Rx offset by I shifted by S.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [0], [0], [1], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[I], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset], table.cell(colspan: 4)[Shift], table.cell(colspan: 5)[Unused]
+[0], [0], [1], [0], [0], [0], [0], [1], table.cell(colspan: 1)[l], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[I], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Link Register Bit], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset], table.cell(colspan: 4)[Shift], table.cell(colspan: 4)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x02 (Indirect with Register Offset Jump) \
-BConditionRx \
+BlConditionRx \
 Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [0], [1], [0], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ro], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset Register], table.cell(colspan: 4)[Shift], table.cell(colspan: 5)[Unused]
+[0], [0], [1], [0], [0], [0], [1], [0], table.cell(colspan: 1)[l], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ro], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Link Register Bit], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset Register], table.cell(colspan: 4)[Shift], table.cell(colspan: 4)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x03 (Relative Jump) \
-BRConditionRx \
+BRlConditionRx \
 Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [0], [1], [1], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
+[0], [0], [1], [0], [0], [0], [1], [1], table.cell(colspan: 1)[l], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Link Register Bit], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 13)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x04 (Immediate Jump) \
-BCondition_label_ \
+BlCondition_label_ \
 Sets the program counter to the address of the label.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [1], [0], [0], table.cell(colspan: 5)[Condition], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 16)[Destination Address], table.cell(colspan: 3)[Unused]
+[0], [0], [1], [0], [0], [1], [0], [0], table.cell(colspan: 1)[l], table.cell(colspan: 5)[Condition], table.cell(colspan: 16)[_label_], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Link Register Bit], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 16)[Destination Address], table.cell(colspan: 2)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x05 (Immediate Relative Jump) \
-BOCondition_offset_ \
+BOlCondition_offset_ \
 Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number).]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [1], [0], [1], table.cell(colspan: 5)[Condition], table.cell(colspan: 16)[_offset_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 16)[Signed Offset], table.cell(colspan: 3)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x06 (Register Jump with Link) \
-BLConditionRx \
-Sets the link register to (PC + 1). Sets the program counter to Rx.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [1], [1], [0], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x07 (Indirect Jump with Link) \
-BLConditionRx \
-Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the I shifted by S.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [0], [1], [1], [1], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[I], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset], table.cell(colspan: 4)[Shift], table.cell(colspan: 5)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x08 (Indirect with Register Offset Jump with Link) \
-BLConditionRx \
-Sets the link register to (PC + 1). Sets the program counter to the value stored at the memory location in Rx offset by the value of Ro shifted by S.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [1], [0], [0], [0], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ro], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset Register], table.cell(colspan: 4)[Shift], table.cell(colspan: 5)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x09 (Relative Jump with Link) \
-BRLConditionRx \
-Sets the link register to (PC + 1). Sets the program counter to (PC + Rx) where Rx is interpreted as a signed 32-bit integer.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [1], [0], [0], [1], table.cell(colspan: 5)[Condition], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x0a (Immediate Jump with Link) \
-BLCondition_label_ \
-Sets the link register to (PC + 1). Sets the program counter to label.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [1], [0], [1], [0], table.cell(colspan: 5)[Condition], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 16)[Destination Address], table.cell(colspan: 3)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x0b (Immediate Relative Jump with Link) \
-BOLCondition_offset_ \
-Sets the link register to (PC + 1). Adds the offset sign exteneded to 32-bits to the program counter (offset treated as signed 16-bit number that is sign extended).]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [0], [1], [0], [1], [0], [1], [1], table.cell(colspan: 5)[Condition], table.cell(colspan: 16)[_offset_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 16)[Signed Offset], table.cell(colspan: 3)[Unused]
+[0], [0], [1], [0], [0], [1], [0], [1], table.cell(colspan: 1)[l], table.cell(colspan: 5)[Condition], table.cell(colspan: 16)[_offset_], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Link Register Bit], table.cell(colspan: 5)[Condition code bit], table.cell(colspan: 16)[Signed Offset], table.cell(colspan: 2)[Unused]
 )}) \
 == Type 010 (Integer Register) \
 #block(breakable: false,{text[=== OPCODE: 0x00 (Integer Load Low) \
@@ -352,7 +297,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [0], [1], [0], [0], [1], [1], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 16)[Destination Address in data], table.cell(colspan: 3)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 16)[Source Data Address], table.cell(colspan: 3)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x0d (Integer Load Program) \
 LDRRx_label_ \
@@ -363,7 +308,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [0], [1], [0], [0], [1], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 16)[Destination Addres in programs], table.cell(colspan: 3)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 16)[Source Program Address], table.cell(colspan: 3)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x0e (Integer Store Data) \
 STRRx_label_ \
@@ -374,7 +319,7 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [0], [1], [0], [0], [1], [1], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 16)[Destination Address in data], table.cell(colspan: 3)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 16)[Destination Data Address], table.cell(colspan: 3)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x0f (Integer Store Program) \
 STRRx_label_ \
@@ -385,28 +330,72 @@ align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [0], [1], [0], [0], [1], [1], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 16)[Destination Address in program], table.cell(colspan: 3)[Unused]
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 16)[Destination Program Address], table.cell(colspan: 3)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x10 (Unsigned Zero Extend) \
-ZEXRxRy_count_ \
-Stores the value of Ry into Rx where the top 31 - _count_ bits are zero.]
+#block(breakable: false,{text[=== OPCODE: 0x10 (Integer Load Effective Data Address) \
+LEARx_label_ \
+Loads the address of data memory address label into the register Rx.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [1], [0], [1], [0], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_count_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[0], [1], [0], [1], [0], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 16)[Address in data], table.cell(colspan: 3)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x11 (Integer Load Effective Program Address) \
+LEARx_label_ \
+Loads the address of program memory address label into the register Rx.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[0], [1], [0], [1], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 16)[_label_], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 16)[Address in program], table.cell(colspan: 3)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x12 (Load Integer Effective Address Register Indirect) \
+LEARxRy \
+Sets the value of Rx to the memory location at Ry offset by I shifted by S.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[0], [1], [0], [1], [0], [0], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[I], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset], table.cell(colspan: 4)[Shift], table.cell(colspan: 5)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x13 (Load Integer Effective Address Register Indirect with Register Offset) \
+LEARxRy \
+Sets the value of Rx to the memory location at Ry offset by the value of Ro shifted by S.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[0], [1], [0], [1], [0], [0], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Ro], table.cell(colspan: 4)[S], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Offset], table.cell(colspan: 4)[Shift], table.cell(colspan: 5)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x14 (Unsigned Zero Extend) \
+ZEXRxRy_count_ \
+Stores the value of Ry into Rx where the top _count_ bits are zero.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[0], [1], [0], [1], [0], [1], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_count_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Bit Count], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x11 (Sign Extend) \
+#block(breakable: false,{text[=== OPCODE: 0x15 (Sign Extend) \
 SEXRxRy_count_ \
-Stores the value of Ry into Rx where the top 31 - _count_ bits are sign extended.]
+Stores the value of Ry into Rx where the top _count_ bits are sign extended.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[0], [1], [0], [1], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_count_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[0], [1], [0], [1], [0], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_count_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 5)[Bit Count], table.cell(colspan: 9)[Unused]
 )}) \
 == Type 011 (Floating-Point Register) \
@@ -554,7 +543,31 @@ align: center,
 [1], [0], [0], [0], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 19)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x02 (Add Unsigned Integer) \
+#block(breakable: false,{text[=== OPCODE: 0x02 (Increment Integer Register) \
+INCcRx \
+Sets Rx := Rx + 1.\
+Sets overflow bit if $"Rx" + "1" >= 2^32$]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [0], [0], [0], [1], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Register], table.cell(colspan: 18)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x03 (Decrement Integer Register) \
+DECcRx \
+Sets Rx := Rx - 1.\
+Sets underflow bit if $"Rx" - "1" < 0$]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [0], [0], [0], [1], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Register], table.cell(colspan: 18)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x04 (Add Unsigned Integer) \
 ADDcRxRyRz \
 Sets Rx := Ry + Rz.\
 Sets overflow bit if $"Ry" + "Rz" >= 2^32$]
@@ -563,11 +576,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [0], [0], [1], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[1], [0], [0], [0], [0], [1], [0], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x03 (Subtract Unsigned Integer) \
-SUBRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x05 (Subtract Unsigned Integer) \
+SUBcRxRyRz \
 Sets Rx := Ry - Rz.\
 Sets underflow bit if $"Ry" - "Rz" < 0$]
 table(
@@ -575,11 +588,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [0], [0], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [0], [1], [0], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x04 (Multiply Unsigned Integer) \
-MULRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x06 (Multiply Unsigned Integer) \
+MULcRxRyRz \
 Sets Rx := Ry \* Rz.\
 Sets overflow bit if $"Ry" times "Rz" >= 2^32$]
 table(
@@ -587,11 +600,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [0], [1], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [0], [1], [1], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x05 (Divide Unsigned Integer) \
-DIVRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x07 (Divide Unsigned Integer) \
+DIVcRxRyRz \
 Sets Rx := Ry / Rz.\
 Sets divide by zero bit if $"Rz" = 0$]
 table(
@@ -599,11 +612,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [0], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [0], [1], [1], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x06 (Modulo Unsigned Integer) \
-MODRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x08 (Modulo Unsigned Integer) \
+MODcRxRyRz \
 Sets Rx := Ry % Rz.\
 Sets divide by zero bit if $"Rz" = 0$]
 table(
@@ -611,11 +624,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [0], [1], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [1], [0], [0], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x07 (Add Signed Integer) \
-ADDSRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x09 (Add Signed Integer) \
+ADDScRxRyRz \
 Sets Rx := Ry + Rz (treats all registers as signed).\
 Sets overflow bit if $"Ry" + "Rz" >= 2^31 - 1$. Sets underflow bit if $"Ry" + "Rz" < -2^31$.]
 table(
@@ -623,11 +636,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [0], [1], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [1], [0], [0], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x08 (Subtract Signed Integer) \
-SUBSRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x0a (Subtract Signed Integer) \
+SUBScRxRyRz \
 Sets Rx := Ry - Rz (treats all registers as signed).\
 Sets overflow bit if $"Ry" - "Rz" >= 2^31 - 1$. Sets underflow bit if $"Ry" - "Rz" < -2^31$.]
 table(
@@ -635,11 +648,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [1], [0], [1], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x09 (Multiply Signed Integer) \
-MULSRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x0b (Multiply Signed Integer) \
+MULScRxRyRz \
 Sets Rx := Ry \* Rz (treats all registers as signed).\
 Sets overflow bit if $"Ry" times "Rz" >= 2^31 - 1$. Sets underflow bit if $"Ry" times "Rz" < -2^31$.]
 table(
@@ -647,11 +660,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [1], [0], [1], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x0a (Divide Signed Integer) \
-DIVSRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x0c (Divide Signed Integer) \
+DIVScRxRyRz \
 Sets Rx := Ry / Rz (treats all registers as signed).\
 Sets divide by zero bit if $"Rz" = 0$]
 table(
@@ -659,11 +672,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [0], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [1], [1], [0], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x0b (Modulo Signed Integer) \
-MODSRxRyRz \
+#block(breakable: false,{text[=== OPCODE: 0x0d (Modulo Signed Integer) \
+MODScRxRyRz \
 Sets Rx := Ry % Rz (treats all registers as signed).\
 Sets divide by zero bit if $"Rz" = 0$.]
 table(
@@ -671,10 +684,10 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [0], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [0], [0], [1], [1], [0], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x0c (Bitwise AND) \
+#block(breakable: false,{text[=== OPCODE: 0x0e (Bitwise AND) \
 ANDRxRyRz \
 Sets Rx := Ry & Rz.]
 table(
@@ -682,34 +695,12 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [1], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[1], [0], [0], [0], [1], [1], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x0d (Bitwise OR) \
+#block(breakable: false,{text[=== OPCODE: 0x0f (Bitwise OR) \
 ORRxRyRz \
 Sets Rx := Ry | Rz]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x0e (Bitwise NOT) \
-NOTRxRy \
-Sets Rx := ~Ry]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [0], [1], [1], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x0f (Bitwise XOR) \
-XORRxRyRz \
-Sets Rx := Ry ^ Rz]
 table(
 columns: 32,
 align: center,
@@ -718,31 +709,31 @@ align: center,
 [1], [0], [0], [0], [1], [1], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x10 (Logical Shift Left) \
+#block(breakable: false,{text[=== OPCODE: 0x10 (Bitwise NOT) \
+NOTRxRy \
+Sets Rx := ~Ry]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [1], [0], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x11 (Bitwise XOR) \
+XORRxRyRz \
+Sets Rx := Ry ^ Rz]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [1], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x12 (Logical Shift Left) \
 LSLRxRy_value_ \
 Shifts Ry left by value bits, where 0 is the new value on the right and the extra bit falls off. Value stored in Rx.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [1], [0], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x11 (Logical Shift Right) \
-LSRRxRy_value_ \
-Shifts Ry right by value bits, where 0 is the new value on the left and the extra bit falls off. Value stored in Rx.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [1], [0], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x12 (Arithmetic Shift Left) \
-ASLRxRy_value_ \
-Shifts Ry left by value bits, where 0 is the new value on the right and only up to the 31st bit, the 32nd bit remains untouched. Value stored in Rx.]
 table(
 columns: 32,
 align: center,
@@ -751,9 +742,9 @@ align: center,
 [1], [0], [0], [1], [0], [0], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x13 (Arithmetic Shift Right) \
-ASRRxRy_value_ \
-Shifts Ry right by value bits, where the 32nd bit is now the value of what it was previously and the extra bit falls off. Value stored in Rx.]
+#block(breakable: false,{text[=== OPCODE: 0x13 (Logical Shift Right) \
+LSRRxRy_value_ \
+Shifts Ry right by value bits, where 0 is the new value on the left and the extra bit falls off. Value stored in Rx.]
 table(
 columns: 32,
 align: center,
@@ -762,9 +753,9 @@ align: center,
 [1], [0], [0], [1], [0], [0], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x14 (Rotate Right) \
-RTRRxRy_value_ \
-Shifts Ry right by value bits, the bit that falls off gets shifted back in. Value stored in Rx.]
+#block(breakable: false,{text[=== OPCODE: 0x14 (Arithmetic Shift Left) \
+ASLRxRy_value_ \
+Shifts Ry left by value bits, where 0 is the new value on the right and only up to the 31st bit, the 32nd bit remains untouched. Value stored in Rx.]
 table(
 columns: 32,
 align: center,
@@ -773,31 +764,31 @@ align: center,
 [1], [0], [0], [1], [0], [1], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x15 (Logical Shift Left Register) \
+#block(breakable: false,{text[=== OPCODE: 0x15 (Arithmetic Shift Right) \
+ASRRxRy_value_ \
+Shifts Ry right by value bits, where the 32nd bit is now the value of what it was previously and the extra bit falls off. Value stored in Rx.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [1], [0], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x16 (Rotate Right) \
+RTRRxRy_value_ \
+Shifts Ry right by value bits, the bit that falls off gets shifted back in. Value stored in Rx.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [1], [0], [1], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[_value_], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Shift Amount], table.cell(colspan: 9)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x17 (Logical Shift Left Register) \
 LSLRxRyRz \
 Shifts Ry left by value bits, where 0 is the new value on the right and the extra bit falls off. Value stored in Rx.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [1], [0], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x16 (Logical Shift Right Register) \
-LSRRxRyRz \
-Shifts Ry right by value bits, where 0 is the new value on the left and the extra bit falls off. Value stored in Rx.]
-table(
-columns: 32,
-align: center,
-
-[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [1], [0], [1], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
-)}) \
-#block(breakable: false,{text[=== OPCODE: 0x17 (Arithmetic Shift Left Register) \
-ASLRxRyRz \
-Shifts Ry left by value bits, where 0 is the new value on the right and only up to the 31st bit, the 32nd bit remains untouched. Value stored in Rx.]
 table(
 columns: 32,
 align: center,
@@ -806,9 +797,9 @@ align: center,
 [1], [0], [0], [1], [0], [1], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x18 (Arithmetic Shift Right Register) \
-ASRRxRyRz \
-Shifts Ry right by value bits, where the 32nd bit is now the value of what it was previously and the extra bit falls off. Value stored in Rx.]
+#block(breakable: false,{text[=== OPCODE: 0x18 (Logical Shift Right Register) \
+LSRRxRyRz \
+Shifts Ry right by value bits, where 0 is the new value on the left and the extra bit falls off. Value stored in Rx.]
 table(
 columns: 32,
 align: center,
@@ -817,9 +808,9 @@ align: center,
 [1], [0], [0], [1], [1], [0], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x19 (Rotate Right Register) \
-RTRRxRyRz \
-Shifts Ry right by value bits, the bit that falls off gets shifted back in. Value stored in Rx.]
+#block(breakable: false,{text[=== OPCODE: 0x19 (Arithmetic Shift Left Register) \
+ASLRxRyRz \
+Shifts Ry left by value bits, where 0 is the new value on the right and only up to the 31st bit, the 32nd bit remains untouched. Value stored in Rx.]
 table(
 columns: 32,
 align: center,
@@ -828,7 +819,29 @@ align: center,
 [1], [0], [0], [1], [1], [0], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x1a (Map Unsigned To Signed) \
+#block(breakable: false,{text[=== OPCODE: 0x1a (Arithmetic Shift Right Register) \
+ASRRxRyRz \
+Shifts Ry right by value bits, where the 32nd bit is now the value of what it was previously and the extra bit falls off. Value stored in Rx.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [1], [1], [0], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x1b (Rotate Right Register) \
+RTRRxRyRz \
+Shifts Ry right by value bits, the bit that falls off gets shifted back in. Value stored in Rx.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [0], [0], [1], [1], [0], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], table.cell(colspan: 5)[Rz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x1c (Map Unsigned To Signed) \
 MUSRxRy \
 Equivalent of storing (Ry-0x80000000) into Rx without loosing any bits due to casting due to signed numbers having one less bit.]
 table(
@@ -836,10 +849,10 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [1], [1], [0], [1], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[1], [0], [0], [1], [1], [1], [0], [0], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x1b (Map Signed To Unsigned) \
+#block(breakable: false,{text[=== OPCODE: 0x1d (Map Signed To Unsigned) \
 MSURxRy \
 Equivalent of storing (Ry+0x80000000) into Rx without loosing any bits due to casting due to signed numbers having one less bit.]
 table(
@@ -847,7 +860,7 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [0], [1], [1], [0], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+[1], [0], [0], [1], [1], [1], [0], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
 )}) \
 == Type 101 (Floating-Point ALU) \
@@ -887,7 +900,7 @@ align: center,
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Source Register], table.cell(colspan: 19)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x02 (Add Floating-Point) \
-ADDFxFyFz \
+ADDcFxFyFz \
 Sets Fx := Fy + Fz.\
 Sets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.]
 table(
@@ -895,11 +908,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [1], [0], [0], [0], [1], [0], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [1], [0], [0], [0], [1], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x03 (Subtract Floating-Point) \
-SUBFxFyFz \
+SUBcFxFyFz \
 Sets Fx := Fy - Fz.\
 Sets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.]
 table(
@@ -907,11 +920,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [1], [0], [0], [0], [1], [1], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [1], [0], [0], [0], [1], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x04 (Multiply Floating-Point) \
-MULFxFyFz \
+MULcFxFyFz \
 Sets Fx := Fy \* Fz.\
 Sets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.]
 table(
@@ -919,11 +932,11 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [1], [0], [0], [1], [0], [0], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [1], [0], [0], [1], [0], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
 #block(breakable: false,{text[=== OPCODE: 0x05 (Divide Floating-Point) \
-DIVFxFyFz \
+DIVcFxFyFz \
 Sets Fx := Fy / Fz.\
 Sets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.]
 table(
@@ -931,22 +944,22 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [1], [0], [0], [1], [0], [1], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 9)[Unused]
+[1], [0], [1], [0], [0], [1], [0], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Fy], table.cell(colspan: 5)[Fz], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register 1], table.cell(colspan: 5)[Source Register 2], table.cell(colspan: 8)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x06 (Cast to Float) \
-CSTFxRy \
+#block(breakable: false,{text[=== OPCODE: 0x06 (Cast To Float) \
+CSTcFxRy \
 Converts the value of Ry into a float and stores it in Fx.]
 table(
 columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [1], [0], [0], [1], [1], [0], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
+[1], [0], [1], [0], [0], [1], [1], [0], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Fx], table.cell(colspan: 5)[Ry], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 13)[Unused]
 )}) \
-#block(breakable: false,{text[=== OPCODE: 0x07 (Cast from Float) \
-CSTRxFy \
+#block(breakable: false,{text[=== OPCODE: 0x07 (Cast From Float) \
+CSTcRxFy \
 Converts the value of Fy into a signed integer (rounded towards zero) and stores it in Rx.\
 Sets OVRF if $"Fy" > 2^31 - 1$. Sets UNDF if $"Fy" < -2^31$.]
 table(
@@ -954,8 +967,8 @@ columns: 32,
 align: center,
 
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
-[1], [0], [1], [0], [0], [1], [1], [1], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Fy], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
-table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 14)[Unused]
+[1], [0], [1], [0], [0], [1], [1], [1], table.cell(colspan: 1)[c], table.cell(colspan: 5)[Rx], table.cell(colspan: 5)[Fy], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 1)[Condition Code Bit], table.cell(colspan: 5)[Destination Register], table.cell(colspan: 5)[Source Register], table.cell(colspan: 13)[Unused]
 )}) \
 == Type 110 (Timers) \
 #block(breakable: false,{text[=== OPCODE: 0x00 (Set Timer) \
@@ -1001,6 +1014,17 @@ align: center,
 [31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
 [1], [1], [0], [0], [0], [0], [1], [1], table.cell(colspan: 5)[Tx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
 table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Destination Timer], table.cell(colspan: 19)[Unused]
+)}) \
+#block(breakable: false,{text[=== OPCODE: 0x04 (Stall Timer) \
+STALLTx \
+Stalls the pipeline at execute until the timer is 0.]
+table(
+columns: 32,
+align: center,
+
+[31], [30], [29], [28], [27], [26], [25], [24], [23], [22], [21], [20], [19], [18], [17], [16], [15], [14], [13], [12], [11], [10], [9], [8], [7], [6], [5], [4], [3], [2], [1], [0],
+[1], [1], [0], [0], [0], [1], [0], [0], table.cell(colspan: 5)[Tx], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], [\*], 
+table.cell(colspan: 3)[Type], table.cell(colspan: 5)[Opcode], table.cell(colspan: 5)[Timer], table.cell(colspan: 19)[Unused]
 )}) \
 == Type 111 (RFU) \
 This section is intentionally left blank as it is reserved for future use.\

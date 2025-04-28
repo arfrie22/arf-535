@@ -91,6 +91,7 @@ pub enum Instruction {
     GetCurrentTimer { rx: Register, ty: Timer },
     CheckTimer { tx: Timer },
     ClearTimer { tx: Timer },
+    StallTimer { tx: Timer },
 }
 
 impl From<u32> for Instruction {
@@ -184,6 +185,7 @@ impl From<u32> for Instruction {
             0xc1 => Self::GetCurrentTimer { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ty: Timer::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xc2 => Self::CheckTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             0xc3 => Self::ClearTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
+            0xc4 => Self::StallTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
             _ => Self::Invalid(value),
         }
     }
@@ -280,6 +282,7 @@ impl Into<u32> for Instruction {
             Self::GetCurrentTimer { rx, ty } => (0xc1 << 24)| ((rx as u32) << 19)| ((ty as u32) << 14),
             Self::CheckTimer { tx } => (0xc2 << 24)| ((tx as u32) << 19),
             Self::ClearTimer { tx } => (0xc3 << 24)| ((tx as u32) << 19),
+            Self::StallTimer { tx } => (0xc4 << 24)| ((tx as u32) << 19),
             Self::Invalid(value) => value,
         }
     }
@@ -376,6 +379,7 @@ impl Instruction {
             Self::GetCurrentTimer { ty, .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*ty]  },
             Self::CheckTimer { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::ClearTimer { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
+            Self::StallTimer { tx } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*tx]  },
             Self::Invalid(_value) => Default::default(),
         }
     }
@@ -805,6 +809,10 @@ impl Instruction {
                 let registers = vec![];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
             },
+            Self::StallTimer { .. } => {
+                let registers = vec![];
+                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+            },
             Self::Invalid(_value) => Default::default(),
         }
     }
@@ -898,6 +906,7 @@ impl Instruction {
             Self::GetCurrentTimer { .. } => true,
             Self::CheckTimer { .. } => true,
             Self::ClearTimer { .. } => true,
+            Self::StallTimer { .. } => true,
             Self::Invalid(_value) => true,
         }
     }

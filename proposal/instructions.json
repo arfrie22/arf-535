@@ -3145,7 +3145,9 @@
                     }
                 ],
                 "extra_reg": {
-                    "registers": [],
+                    "registers": [
+                        { "number": 30, "read": true, "write": true }
+                    ],
                     "f_registers": [],
                     "timers": []
                 }
@@ -3163,6 +3165,28 @@
                         "long": "Destination Timer",
                         "count": 5,
                         "read": false,
+                        "write": true
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Stall Timer",
+                "assembly": {
+                    "pneumonic": "STALL",
+                    "arguments": [{ "type": "timer", "argument": "Tx" }]
+                },
+                "description": "Stalls the pipeline at execute until the timer is 0.",
+                "bits": [
+                    {
+                        "short": "Tx",
+                        "long": "Timer",
+                        "count": 5,
+                        "read": true,
                         "write": true
                     }
                 ],
