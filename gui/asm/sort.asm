@@ -25,6 +25,7 @@ push r6
 
 ; &top = &list + len(list)
 add r2 r0 r1
+dec r2
 
 sort_loop:
 ;&lower_number = &list
