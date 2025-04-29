@@ -64,7 +64,7 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                         }
                     }
                 },
-                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_LEA_50 | Rule::instruction_LEA_51 | Rule::instruction_LEA_52 | Rule::instruction_LEA_53 | Rule::instruction_ZEX_54 | Rule::instruction_SEX_55 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_INC_82 | Rule::instruction_DEC_83 | Rule::instruction_ADD_84 | Rule::instruction_SUB_85 | Rule::instruction_MUL_86 | Rule::instruction_DIV_87 | Rule::instruction_MOD_88 | Rule::instruction_ADDS_89 | Rule::instruction_SUBS_8a | Rule::instruction_MULS_8b | Rule::instruction_DIVS_8c | Rule::instruction_MODS_8d | Rule::instruction_AND_8e | Rule::instruction_OR_8f | Rule::instruction_NOT_90 | Rule::instruction_XOR_91 | Rule::instruction_LSL_92 | Rule::instruction_LSR_93 | Rule::instruction_ASL_94 | Rule::instruction_ASR_95 | Rule::instruction_RTR_96 | Rule::instruction_LSL_97 | Rule::instruction_LSR_98 | Rule::instruction_ASL_99 | Rule::instruction_ASR_9a | Rule::instruction_RTR_9b | Rule::instruction_MUS_9c | Rule::instruction_MSU_9d | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 | Rule::instruction_STALL_c4 => {
+                Rule::instruction_TRAP_00 | Rule::instruction_PUSH_01 | Rule::instruction_PUSH_02 | Rule::instruction_POP_03 | Rule::instruction_POP_04 | Rule::instruction_SWP_05 | Rule::instruction_STALL_06 | Rule::instruction_STALL_07 | Rule::instruction_B_20 | Rule::instruction_B_21 | Rule::instruction_B_22 | Rule::instruction_BR_23 | Rule::instruction_B_24 | Rule::instruction_BO_25 | Rule::instruction_LDL_40 | Rule::instruction_LDH_41 | Rule::instruction_SWP_42 | Rule::instruction_LDR_43 | Rule::instruction_LDR_44 | Rule::instruction_LDR_45 | Rule::instruction_LDR_46 | Rule::instruction_LDR_47 | Rule::instruction_STR_48 | Rule::instruction_STR_49 | Rule::instruction_STR_4a | Rule::instruction_STR_4b | Rule::instruction_LDR_4c | Rule::instruction_LDR_4d | Rule::instruction_STR_4e | Rule::instruction_STR_4f | Rule::instruction_LEA_50 | Rule::instruction_LEA_51 | Rule::instruction_LEA_52 | Rule::instruction_LEA_53 | Rule::instruction_ZEX_54 | Rule::instruction_SEX_55 | Rule::instruction_LDL_60 | Rule::instruction_LDH_61 | Rule::instruction_SWP_62 | Rule::instruction_LDR_63 | Rule::instruction_LDR_64 | Rule::instruction_LDR_65 | Rule::instruction_STR_66 | Rule::instruction_STR_67 | Rule::instruction_LDR_68 | Rule::instruction_STR_69 | Rule::instruction_CMP_80 | Rule::instruction_CMP_81 | Rule::instruction_INC_82 | Rule::instruction_DEC_83 | Rule::instruction_ADD_84 | Rule::instruction_SUB_85 | Rule::instruction_MUL_86 | Rule::instruction_DIV_87 | Rule::instruction_MOD_88 | Rule::instruction_ADDS_89 | Rule::instruction_SUBS_8a | Rule::instruction_MULS_8b | Rule::instruction_DIVS_8c | Rule::instruction_MODS_8d | Rule::instruction_AND_8e | Rule::instruction_OR_8f | Rule::instruction_NOT_90 | Rule::instruction_XOR_91 | Rule::instruction_LSL_92 | Rule::instruction_LSR_93 | Rule::instruction_ASL_94 | Rule::instruction_ASR_95 | Rule::instruction_RTR_96 | Rule::instruction_LSL_97 | Rule::instruction_LSR_98 | Rule::instruction_ASL_99 | Rule::instruction_ASR_9a | Rule::instruction_RTR_9b | Rule::instruction_MUS_9c | Rule::instruction_MSU_9d | Rule::instruction_CMP_a0 | Rule::instruction_CMP_a1 | Rule::instruction_ADD_a2 | Rule::instruction_SUB_a3 | Rule::instruction_MUL_a4 | Rule::instruction_DIV_a5 | Rule::instruction_CST_a6 | Rule::instruction_CST_a7 | Rule::instruction_NEG_a8 | Rule::instruction_ABS_a9 | Rule::instruction_RND_aa | Rule::instruction_RNDZ_ab | Rule::instruction_RNDI_ac | Rule::instruction_ABS_ad | Rule::instruction_LOG_ae | Rule::instruction_LN_af | Rule::instruction_EXP_b0 | Rule::instruction_SIN_b1 | Rule::instruction_COS_b2 | Rule::instruction_SIN_b3 | Rule::instruction_ASN_b4 | Rule::instruction_ACS_b5 | Rule::instruction_ATN_b6 | Rule::instruction_SETT_c0 | Rule::instruction_GETT_c1 | Rule::instruction_CHKT_c2 | Rule::instruction_CLRT_c3 | Rule::instruction_STALL_c4 => {
                     first_pass_index += 1;
                 },
                 _ => unreachable!(),
@@ -654,6 +654,111 @@ pub fn assemble(input: &str) -> Result<AssembledData, AssemblerError> {
                             let rx = iter.next().unwrap().as_str().parse()?;
                             let fy = iter.next().unwrap().as_str().parse()?;
                             data.instructions.push(Instruction::CastFromFloat { c, rx, fy });
+                        }
+                        Rule::instruction_NEG_a8 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::NegateFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_ABS_a9 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::AbsoluteValueFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_RND_aa => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::RoundFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_RNDZ_ab => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::RoundToZeroFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_RNDI_ac => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::RoundToInfinityFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_ABS_ad => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::SquareRootFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_LOG_ae => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::LogBase10FloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_LN_af => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::LogNatrualFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_EXP_b0 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::ExponentialFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_SIN_b1 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::SineFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_COS_b2 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::CosineFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_SIN_b3 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::TangentFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_ASN_b4 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::ArcsineFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_ACS_b5 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::ArccosineFloatingPoint { c, fx, fy });
+                        }
+                        Rule::instruction_ATN_b6 => {
+                            let mut iter = t.into_inner();
+                            let c = iter.next().unwrap().as_str().len() > 0;
+                            let fx = iter.next().unwrap().as_str().parse()?;
+                            let fy = iter.next().unwrap().as_str().parse()?;
+                            data.instructions.push(Instruction::ArctangentFloatingPoint { c, fx, fy });
                         }
                         Rule::instruction_SETT_c0 => {
                             let mut iter = t.into_inner();

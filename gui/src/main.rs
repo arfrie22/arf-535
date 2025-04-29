@@ -12,7 +12,7 @@ use eframe::egui::{self, FontData, FontDefinitions, FontFamily, Label, RichText,
 use log::{error, info};
 use simulator::{
     memory::{ClockedMemory, DirectCache, FrontMemory, Memory},
-    streams::{ConstantInput, InputStream, NoOperationOutput, OutputStream},
+    streams::{ConstantInput, InputStream, NoOperationOutput, OutputStream, WavInput},
     Simulator,
 };
 
@@ -105,7 +105,8 @@ fn create_simulator(use_cache: bool) -> Simulator {
     let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache { data_cache } else { data_memory };
 
     let adc_streams =
-        core::array::from_fn(|_| Box::new(ConstantInput::new(0)) as Box<dyn InputStream>);
+        core::array::from_fn(|_| Box::new(WavInput::new("wav/sine.wav")) as Box<dyn InputStream>);
+    
     let dac_streams =
         core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
 
@@ -118,7 +119,7 @@ fn create_simulator(use_cache: bool) -> Simulator {
         used_data,
         adc_streams,
         dac_streams,
-        1,
+        10_000_000,
     )
 }
 
@@ -396,47 +397,6 @@ impl eframe::App for SimulatorGUI {
             });
 
             ui.add_space(10.0);
-
-            // ui.horizontal(|ui| {
-            //     ui.vertical(|ui| {
-            //         ui.horizontal(|ui| {
-            //             ui.vertical(|ui| {
-            //                 ui.heading("Program Memory");
-            //                 self.program_memory_display.ui(ui);
-            //             });
-            //             ui.add_space(10.0);
-            //             ui.vertical(|ui| {
-            //                 ui.heading("Data Memory");
-            //                 self.data_memory_display.ui(ui);
-            //             });
-
-            //         });
-
-            //         ui.vertical(|ui| {
-            //             ui.heading("Program Cache");
-            //             self.program_cache_display.ui(ui);
-            //             ui.add_space(10.0);
-            //             ui.heading("Data Cache");
-            //             self.data_cache_display.ui(ui);
-            //         });
-
-            //         ui.add_space(10.0);
-            //         ui.heading("Pipeline");
-            //         self.pipeline_display.ui(ui);
-            //     });
-
-            //     ui.add_space(10.0);
-
-            //     ui.vertical(|ui| {
-            //         self.register_display.ui(ui);
-            //         ui.add_space(10.0);
-            //         self.f_register_display.ui(ui);
-            //         ui.add_space(10.0);
-            //         self.timer_display.ui(ui);
-            //         ui.add_space(10.0);
-            //         self.condition_display.ui(ui);
-            //     });
-            // });
 
             let mut behavior = TreeBehavior {};
             self.tree.ui(&mut behavior, ui);

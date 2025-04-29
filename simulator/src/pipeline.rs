@@ -1,7 +1,11 @@
 use std::{cell::RefCell, fmt, i32, marker::PhantomData, rc::Rc};
 
 use crate::{
-    enums::{Condition, FPRegister, Register, Timer}, instruction::Instruction, memory::line_offset, raw_cast_from_f32, raw_cast_from_i32, raw_cast_to_f32, raw_cast_to_i32, InFlightRegisters, RegisterSet, SimulatorState, SimulatorStateCell
+    enums::{Condition, FPRegister, Register, Timer},
+    instruction::Instruction,
+    memory::line_offset,
+    raw_cast_from_f32, raw_cast_from_i32, raw_cast_to_f32, raw_cast_to_i32, InFlightRegisters,
+    RegisterSet, SimulatorState, SimulatorStateCell,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -161,7 +165,10 @@ impl PipelineInner for FetchStage {
 
             match res {
                 Ok(v) => {
-                    state_ref.fetch_result = Some(FetchResult {pc: address, value: v[line_offset(address as usize)]});
+                    state_ref.fetch_result = Some(FetchResult {
+                        pc: address,
+                        value: v[line_offset(address as usize)],
+                    });
                     state_ref.fetch_state = None;
                     state_ref.hold_fetch = true;
                     Ok(())
@@ -313,7 +320,7 @@ impl Instruction {
         match self {
             Instruction::Invalid(_) => 1,
             Instruction::Trap => 1,
-            Instruction::PushIntegerRegister { ..  } => 1,
+            Instruction::PushIntegerRegister { .. } => 1,
             Instruction::PushFloatingPointRegister { .. } => 1,
             Instruction::PopIntegerRegister { .. } => 1,
             Instruction::PopFloatingPointRegister { .. } => 1,
@@ -345,7 +352,9 @@ impl Instruction {
             Instruction::IntegerLoadEffectiveDataAddress { .. } => 1,
             Instruction::IntegerLoadEffectiveProgramAddress { .. } => 1,
             Instruction::LoadIntegerEffectiveAddressRegisterIndirect { .. } => 1,
-            Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset { .. } => 1,
+            Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset {
+                ..
+            } => 1,
             Instruction::UnsignedZeroExtend { .. } => 1,
             Instruction::SignExtend { .. } => 1,
             Instruction::FloatingPointLoadLow { .. } => 1,
@@ -396,6 +405,21 @@ impl Instruction {
             Instruction::DivideFloatingPoint { .. } => 16,
             Instruction::CastToFloat { .. } => 8,
             Instruction::CastFromFloat { .. } => 10,
+            Instruction::NegateFloatingPoint { .. } => 1,
+            Instruction::AbsoluteValueFloatingPoint { .. } => 1,
+            Instruction::RoundFloatingPoint { .. } => 1,
+            Instruction::RoundToZeroFloatingPoint { .. } => 1,
+            Instruction::RoundToInfinityFloatingPoint { .. } => 1,
+            Instruction::SquareRootFloatingPoint { .. } => 15,
+            Instruction::LogBase10FloatingPoint { .. } => 30,
+            Instruction::LogNatrualFloatingPoint { .. } => 30,
+            Instruction::ExponentialFloatingPoint { .. } => 30,
+            Instruction::SineFloatingPoint { .. } => 20,
+            Instruction::CosineFloatingPoint { .. } => 20,
+            Instruction::TangentFloatingPoint { .. } => 20,
+            Instruction::ArcsineFloatingPoint { .. } => 20,
+            Instruction::ArccosineFloatingPoint { .. } => 20,
+            Instruction::ArctangentFloatingPoint { .. } => 20,
             Instruction::SetTimer { .. } => 1,
             Instruction::GetCurrentTimer { .. } => 1,
             Instruction::CheckTimer { .. } => 1,
@@ -406,35 +430,35 @@ impl Instruction {
     pub fn execute(&self, state: &mut SimulatorState) -> ExecuteResult {
         match self {
             Instruction::Invalid(_) => Default::default(),
-            Instruction::Trap => {
-                ExecuteResult {
-                    memory: MemoryAction::None,
-                    writeback: Vec::new(),
-                    end_running: true,
-                }
+            Instruction::Trap => ExecuteResult {
+                memory: MemoryAction::None,
+                writeback: Vec::new(),
+                end_running: true,
             },
             Instruction::PushIntegerRegister { rx } => {
                 let sp = state.registers[Register::SP as usize];
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, sp, val_rx),
-                    writeback: vec![
-                        WritebackRegister::Standard(Register::SP, Some(sp.wrapping_add(1))),
-                    ],
+                    writeback: vec![WritebackRegister::Standard(
+                        Register::SP,
+                        Some(sp.wrapping_add(1)),
+                    )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::PushFloatingPointRegister { fx } => {
                 let sp = state.registers[Register::SP as usize];
                 let val_fx = state.f_registers[*fx as usize];
                 ExecuteResult {
                     memory: MemoryAction::Write(MemoryBank::Data, sp, raw_cast_from_f32(val_fx)),
-                    writeback: vec![
-                        WritebackRegister::Standard(Register::SP, Some(sp.wrapping_add(1))),
-                    ],
+                    writeback: vec![WritebackRegister::Standard(
+                        Register::SP,
+                        Some(sp.wrapping_add(1)),
+                    )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::PopIntegerRegister { rx } => {
                 let sp = state.registers[Register::SP as usize];
                 ExecuteResult {
@@ -445,7 +469,7 @@ impl Instruction {
                     ],
                     end_running: false,
                 }
-            },
+            }
             Instruction::PopFloatingPointRegister { fx } => {
                 let sp = state.registers[Register::SP as usize];
                 ExecuteResult {
@@ -456,7 +480,7 @@ impl Instruction {
                     ],
                     end_running: false,
                 }
-            },
+            }
             Instruction::SwapRegister { rx, fy } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_fy = state.f_registers[*fy as usize];
@@ -468,16 +492,15 @@ impl Instruction {
                     ],
                     end_running: false,
                 }
-            },
+            }
             Instruction::StallImmediate { .. } => Default::default(),
             Instruction::StallRegister { .. } => Default::default(),
             Instruction::RegisterJump { l, condition, rx } => {
                 let st: u32 = state.registers[Register::ST as usize];
                 if condition.check(st) {
                     let val_rx = state.registers[*rx as usize];
-                    let mut writeback = vec![
-                        WritebackRegister::Standard(Register::PC, Some(val_rx)),
-                    ];
+                    let mut writeback =
+                        vec![WritebackRegister::Standard(Register::PC, Some(val_rx))];
 
                     if *l {
                         let pc = state.registers[Register::PC as usize];
@@ -492,7 +515,7 @@ impl Instruction {
                 } else {
                     Default::default()
                 }
-            },
+            }
             Instruction::IndirectJump {
                 l,
                 condition,
@@ -503,9 +526,7 @@ impl Instruction {
                 let st: u32 = state.registers[Register::ST as usize];
                 if condition.check(st) {
                     let val_rx = state.registers[*rx as usize];
-                    let mut writeback = vec![
-                        WritebackRegister::Standard(Register::PC, None),
-                    ];
+                    let mut writeback = vec![WritebackRegister::Standard(Register::PC, None)];
 
                     if *l {
                         let pc = state.registers[Register::PC as usize];
@@ -520,7 +541,7 @@ impl Instruction {
                 } else {
                     Default::default()
                 }
-            },
+            }
             Instruction::IndirectwithRegisterOffsetJump {
                 l,
                 condition,
@@ -532,9 +553,7 @@ impl Instruction {
                 if condition.check(st) {
                     let val_rx = state.registers[*rx as usize];
                     let val_ro = state.registers[*ro as usize];
-                    let mut writeback = vec![
-                        WritebackRegister::Standard(Register::PC, None),
-                    ];
+                    let mut writeback = vec![WritebackRegister::Standard(Register::PC, None)];
 
                     if *l {
                         let pc = state.registers[Register::PC as usize];
@@ -549,15 +568,16 @@ impl Instruction {
                 } else {
                     Default::default()
                 }
-            },
+            }
             Instruction::RelativeJump { l, condition, rx } => {
                 let st: u32 = state.registers[Register::ST as usize];
                 if condition.check(st) {
                     let pc = state.registers[Register::PC as usize];
                     let val_rx = state.registers[*rx as usize];
-                    let mut writeback = vec![
-                        WritebackRegister::Standard(Register::PC, Some(pc.wrapping_add(val_rx))),
-                    ];
+                    let mut writeback = vec![WritebackRegister::Standard(
+                        Register::PC,
+                        Some(pc.wrapping_add(val_rx)),
+                    )];
 
                     if *l {
                         let pc = state.registers[Register::PC as usize];
@@ -572,13 +592,16 @@ impl Instruction {
                 } else {
                     Default::default()
                 }
-            },
-            Instruction::ImmediateJump { l, condition, label } => {
+            }
+            Instruction::ImmediateJump {
+                l,
+                condition,
+                label,
+            } => {
                 let st: u32 = state.registers[Register::ST as usize];
                 if condition.check(st) {
-                    let mut writeback = vec![
-                        WritebackRegister::Standard(Register::PC, Some(*label)),
-                    ];
+                    let mut writeback =
+                        vec![WritebackRegister::Standard(Register::PC, Some(*label))];
 
                     if *l {
                         let pc = state.registers[Register::PC as usize];
@@ -593,8 +616,12 @@ impl Instruction {
                 } else {
                     Default::default()
                 }
-            },
-            Instruction::ImmediateRelativeJump { l, condition, offset } => {
+            }
+            Instruction::ImmediateRelativeJump {
+                l,
+                condition,
+                offset,
+            } => {
                 let st: u32 = state.registers[Register::ST as usize];
                 if condition.check(st) {
                     let pc = state.registers[Register::PC as usize];
@@ -602,9 +629,15 @@ impl Instruction {
                     let mut writeback = Vec::new();
 
                     if *offset < 0 {
-                        writeback.push(WritebackRegister::Standard(Register::PC, Some(pc.wrapping_sub(raw_cast_from_i32(-(*offset))))));
+                        writeback.push(WritebackRegister::Standard(
+                            Register::PC,
+                            Some(pc.wrapping_sub(raw_cast_from_i32(-(*offset)))),
+                        ));
                     } else {
-                        writeback.push(WritebackRegister::Standard(Register::PC, Some(pc.wrapping_add(raw_cast_from_i32(*offset)))));
+                        writeback.push(WritebackRegister::Standard(
+                            Register::PC,
+                            Some(pc.wrapping_add(raw_cast_from_i32(*offset))),
+                        ));
                     }
 
                     if *l {
@@ -620,7 +653,7 @@ impl Instruction {
                 } else {
                     Default::default()
                 }
-            },
+            }
             Instruction::IntegerLoadLow { rx, value } => {
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
@@ -631,7 +664,7 @@ impl Instruction {
                     )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::IntegerLoadHigh { rx, value } => {
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
@@ -642,7 +675,7 @@ impl Instruction {
                     )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::SwapIntegerRegisters { rx, ry } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_ry = state.registers[*ry as usize];
@@ -654,7 +687,7 @@ impl Instruction {
                     ],
                     end_running: false,
                 }
-            },
+            }
             Instruction::CopyIntegerRegister { rx, ry } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
@@ -662,7 +695,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::LoadIntegerRegisterIndirect { rx, ry, i, s } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
@@ -670,7 +703,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
                     end_running: false,
                 }
-            },
+            }
             Instruction::LoadIntegerRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_ro = state.registers[*ro as usize];
@@ -679,7 +712,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
                     end_running: false,
                 }
-            },
+            }
             Instruction::LoadIntegerRegisterIndirectProgram { rx, ry, i, s } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
@@ -687,7 +720,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
                     end_running: false,
                 }
-            },
+            }
             Instruction::LoadIntegerRegisterIndirectwithRegisterOffsetProgram { rx, ry, ro, s } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_ro = state.registers[*ro as usize];
@@ -696,7 +729,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, None)],
                     end_running: false,
                 }
-            },
+            }
             Instruction::StoreIntegerRegisterIndirect { rx, ry, i, s } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_ry = state.registers[*ry as usize];
@@ -705,7 +738,7 @@ impl Instruction {
                     writeback: Vec::new(),
                     end_running: false,
                 }
-            },
+            }
             Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetIndirect {
                 rx,
                 ry,
@@ -720,7 +753,7 @@ impl Instruction {
                     writeback: Vec::new(),
                     end_running: false,
                 }
-            },
+            }
             Instruction::StoreIntegerRegisterIndirectProgram { rx, ry, i, s } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_ry = state.registers[*ry as usize];
@@ -729,7 +762,7 @@ impl Instruction {
                     writeback: Vec::new(),
                     end_running: false,
                 }
-            },
+            }
             Instruction::StoreIntegerRegisterIndirectwithRegisterOffsetProgram {
                 rx,
                 ry,
@@ -740,24 +773,24 @@ impl Instruction {
                 let val_ry = state.registers[*ry as usize];
                 let val_ro = state.registers[*ro as usize];
                 ExecuteResult {
-                    memory: MemoryAction::Write(MemoryBank::Program, val_rx + (val_ro << *s), val_ry),
+                    memory: MemoryAction::Write(
+                        MemoryBank::Program,
+                        val_rx + (val_ro << *s),
+                        val_ry,
+                    ),
                     writeback: Vec::new(),
                     end_running: false,
                 }
+            }
+            Instruction::IntegerLoadData { rx, label } => ExecuteResult {
+                memory: MemoryAction::Read(MemoryBank::Data, *label),
+                writeback: vec![WritebackRegister::Standard(*rx, None)],
+                end_running: false,
             },
-            Instruction::IntegerLoadData { rx, label } => {
-                ExecuteResult {
-                    memory: MemoryAction::Read(MemoryBank::Data, *label),
-                    writeback: vec![WritebackRegister::Standard(*rx, None)],
-                    end_running: false,
-                }
-            },
-            Instruction::IntegerLoadProgram { rx, label } => {
-                ExecuteResult {
-                    memory: MemoryAction::Read(MemoryBank::Program, *label),
-                    writeback: vec![WritebackRegister::Standard(*rx, None)],
-                    end_running: false,
-                }
+            Instruction::IntegerLoadProgram { rx, label } => ExecuteResult {
+                memory: MemoryAction::Read(MemoryBank::Program, *label),
+                writeback: vec![WritebackRegister::Standard(*rx, None)],
+                end_running: false,
             },
             Instruction::IntegerStoreData { rx, label } => {
                 let val_rx = state.registers[*rx as usize];
@@ -766,7 +799,7 @@ impl Instruction {
                     writeback: Vec::new(),
                     end_running: false,
                 }
-            },
+            }
             Instruction::IntegerStoreProgram { rx, label } => {
                 let val_rx = state.registers[*rx as usize];
                 ExecuteResult {
@@ -774,20 +807,16 @@ impl Instruction {
                     writeback: Vec::new(),
                     end_running: false,
                 }
+            }
+            Instruction::IntegerLoadEffectiveDataAddress { rx, label } => ExecuteResult {
+                memory: MemoryAction::None,
+                writeback: vec![WritebackRegister::Standard(*rx, Some(*label))],
+                end_running: false,
             },
-            Instruction::IntegerLoadEffectiveDataAddress { rx, label } => {
-                ExecuteResult {
-                    memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(*label))],
-                    end_running: false,
-                }
-            },
-            Instruction::IntegerLoadEffectiveProgramAddress { rx, label } => {
-                ExecuteResult {
-                    memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(*label))],
-                    end_running: false,
-                }
+            Instruction::IntegerLoadEffectiveProgramAddress { rx, label } => ExecuteResult {
+                memory: MemoryAction::None,
+                writeback: vec![WritebackRegister::Standard(*rx, Some(*label))],
+                end_running: false,
             },
             Instruction::LoadIntegerEffectiveAddressRegisterIndirect { rx, ry, i, s } => {
                 let val_ry = state.registers[*ry as usize];
@@ -796,24 +825,35 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + (*i << *s)))],
                     end_running: false,
                 }
-            },
-            Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset { rx, ry, ro, s } => {
+            }
+            Instruction::LoadIntegerEffectiveAddressRegisterIndirectwithRegisterOffset {
+                rx,
+                ry,
+                ro,
+                s,
+            } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_ro = state.registers[*ro as usize];
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry + (val_ro << *s)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(val_ry + (val_ro << *s)),
+                    )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::UnsignedZeroExtend { rx, ry, count } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry & (0xFFFFFFFF >> *count)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(val_ry & (0xFFFFFFFF >> *count)),
+                    )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::SignExtend { rx, ry, count } => {
                 let val_ry = state.registers[*ry as usize];
                 let mut val = val_ry & (0xFFFFFFFF >> *count);
@@ -826,7 +866,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::FloatingPointLoadLow { fx, value } => {
                 let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
                 ExecuteResult {
@@ -837,7 +877,7 @@ impl Instruction {
                     )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::FloatingPointLoadHigh { fx, value } => {
                 let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
                 ExecuteResult {
@@ -848,7 +888,7 @@ impl Instruction {
                     )],
                     end_running: false,
                 }
-            },
+            }
             Instruction::SwapFloatingPointRegisters { fx, fy } => {
                 let val_fx = state.f_registers[*fx as usize];
                 let val_fy = state.f_registers[*fy as usize];
@@ -860,7 +900,7 @@ impl Instruction {
                     ],
                     end_running: false,
                 }
-            },
+            }
             Instruction::CopyFloatingPointRegister { fx, fy } => {
                 let val_fy = state.f_registers[*fy as usize];
                 ExecuteResult {
@@ -868,7 +908,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::FloatingPoint(*fx, Some(val_fy))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::LoadFloatingPointRegisterIndirect { fx, ry, i, s } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
@@ -876,7 +916,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
                     end_running: false,
                 }
-            },
+            }
             Instruction::LoadFloatingPointRegisterIndirectwithRegisterOffset { fx, ry, ro, s } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_ro = state.registers[*ro as usize];
@@ -890,27 +930,33 @@ impl Instruction {
                 let val_rx = state.registers[*rx as usize];
                 let val_fy = raw_cast_from_f32(state.f_registers[*fy as usize]);
                 ExecuteResult {
-                    memory: MemoryAction::Write(MemoryBank::Data, val_rx.wrapping_add(*i << *s), val_fy),
+                    memory: MemoryAction::Write(
+                        MemoryBank::Data,
+                        val_rx.wrapping_add(*i << *s),
+                        val_fy,
+                    ),
                     writeback: Vec::new(),
                     end_running: false,
                 }
-            },
+            }
             Instruction::StoreFloatingPointRegisterIndirectwithRegisterOffset { rx, fy, ro, s } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_fy = raw_cast_from_f32(state.f_registers[*fy as usize]);
                 let val_ro = state.registers[*ro as usize];
                 ExecuteResult {
-                    memory: MemoryAction::Write(MemoryBank::Data, val_rx.wrapping_add(val_ro << *s), val_fy),
+                    memory: MemoryAction::Write(
+                        MemoryBank::Data,
+                        val_rx.wrapping_add(val_ro << *s),
+                        val_fy,
+                    ),
                     writeback: Vec::new(),
                     end_running: false,
                 }
             }
-            Instruction::FloatingPointLoadData { fx, label } => {
-                ExecuteResult {
-                    memory: MemoryAction::Read(MemoryBank::Data, *label),
-                    writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
-                    end_running: false,
-                }
+            Instruction::FloatingPointLoadData { fx, label } => ExecuteResult {
+                memory: MemoryAction::Read(MemoryBank::Data, *label),
+                writeback: vec![WritebackRegister::FloatingPoint(*fx, None)],
+                end_running: false,
             },
             Instruction::FloatingPointStoreData { fx, label } => {
                 let val_fx = raw_cast_from_f32(state.f_registers[*fx as usize]);
@@ -919,7 +965,7 @@ impl Instruction {
                     writeback: Vec::new(),
                     end_running: false,
                 }
-            },
+            }
             Instruction::IntegerCompare { rx, ry } => {
                 let val_rx = state.registers[*rx as usize];
                 let val_ry = state.registers[*ry as usize];
@@ -937,7 +983,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::IntegerCompareSingleAgainstZero { rx } => {
                 let val_rx = state.registers[*rx as usize];
                 let mut st = state.registers[Register::ST as usize];
@@ -953,10 +999,10 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::IncrementIntegerRegister { c, rx } => {
                 let val_rx = state.registers[*rx as usize];
-                let (res, ovf) = val_rx.overflowing_add(1); 
+                let (res, ovf) = val_rx.overflowing_add(1);
                 let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
@@ -970,10 +1016,10 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::DecrementIntegerRegister { c, rx } => {
                 let val_rx = state.registers[*rx as usize];
-                let (res, ovf) = val_rx.overflowing_sub(1); 
+                let (res, ovf) = val_rx.overflowing_sub(1);
                 let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
@@ -987,11 +1033,11 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::AddUnsignedInteger { c, rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
-                let (res, ovf) = val_ry.overflowing_add(val_rz); 
+                let (res, ovf) = val_ry.overflowing_add(val_rz);
                 let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
@@ -1005,11 +1051,11 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::SubtractUnsignedInteger { c, rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
-                let (res, ovf) = val_ry.overflowing_sub(val_rz); 
+                let (res, ovf) = val_ry.overflowing_sub(val_rz);
                 let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
@@ -1023,11 +1069,11 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::MultiplyUnsignedInteger { c, rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
-                let (res, ovf) = val_ry.overflowing_mul(val_rz); 
+                let (res, ovf) = val_ry.overflowing_mul(val_rz);
                 let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
@@ -1041,7 +1087,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::DivideUnsignedInteger { c, rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1049,11 +1095,14 @@ impl Instruction {
                     let mut writeback = vec![WritebackRegister::Standard(*rx, Some(0))];
                     if *c {
                         let st = state.registers[Register::ST as usize];
-                        writeback.push(WritebackRegister::Standard(Register::ST, Some(Condition::DivideByZero.set(st, true))));
+                        writeback.push(WritebackRegister::Standard(
+                            Register::ST,
+                            Some(Condition::DivideByZero.set(st, true)),
+                        ));
                     }
                     writeback
                 } else {
-                    let (res, ovf) = val_ry.overflowing_div(val_rz); 
+                    let (res, ovf) = val_ry.overflowing_div(val_rz);
                     let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                     if *c {
                         let mut st = state.registers[Register::ST as usize];
@@ -1069,7 +1118,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::ModuloUnsignedInteger { c, rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1077,11 +1126,14 @@ impl Instruction {
                     let mut writeback = vec![WritebackRegister::Standard(*rx, Some(0))];
                     if *c {
                         let st = state.registers[Register::ST as usize];
-                        writeback.push(WritebackRegister::Standard(Register::ST, Some(Condition::DivideByZero.set(st, true))));
+                        writeback.push(WritebackRegister::Standard(
+                            Register::ST,
+                            Some(Condition::DivideByZero.set(st, true)),
+                        ));
                     }
                     writeback
                 } else {
-                    let (res, ovf) = val_ry.overflowing_rem(val_rz); 
+                    let (res, ovf) = val_ry.overflowing_rem(val_rz);
                     let mut writeback = vec![WritebackRegister::Standard(*rx, Some(res))];
                     if *c {
                         let mut st = state.registers[Register::ST as usize];
@@ -1097,12 +1149,15 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::AddSignedInteger { c, rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = raw_cast_to_i32(state.registers[*rz as usize]);
-                let (res, ovf) = val_ry.overflowing_add(val_rz); 
-                let mut writeback = vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(res)))];
+                let (res, ovf) = val_ry.overflowing_add(val_rz);
+                let mut writeback = vec![WritebackRegister::Standard(
+                    *rx,
+                    Some(raw_cast_from_i32(res)),
+                )];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
                     st = Condition::Overflow.set(st, ovf);
@@ -1115,12 +1170,15 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::SubtractSignedInteger { c, rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = raw_cast_to_i32(state.registers[*rz as usize]);
-                let (res, ovf) = val_ry.overflowing_sub(val_rz); 
-                let mut writeback = vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(res)))];
+                let (res, ovf) = val_ry.overflowing_sub(val_rz);
+                let mut writeback = vec![WritebackRegister::Standard(
+                    *rx,
+                    Some(raw_cast_from_i32(res)),
+                )];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
                     st = Condition::Underflow.set(st, ovf);
@@ -1133,12 +1191,15 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::MultiplySignedInteger { c, rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = raw_cast_to_i32(state.registers[*rz as usize]);
-                let (res, ovf) = val_ry.overflowing_mul(val_rz); 
-                let mut writeback = vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(res)))];
+                let (res, ovf) = val_ry.overflowing_mul(val_rz);
+                let mut writeback = vec![WritebackRegister::Standard(
+                    *rx,
+                    Some(raw_cast_from_i32(res)),
+                )];
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
                     st = Condition::Overflow.set(st, ovf);
@@ -1151,7 +1212,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::DivideSignedInteger { c, rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = raw_cast_to_i32(state.registers[*rz as usize]);
@@ -1159,12 +1220,18 @@ impl Instruction {
                     let mut writeback = vec![WritebackRegister::Standard(*rx, Some(0))];
                     if *c {
                         let st = state.registers[Register::ST as usize];
-                        writeback.push(WritebackRegister::Standard(Register::ST, Some(Condition::DivideByZero.set(st, true))));
+                        writeback.push(WritebackRegister::Standard(
+                            Register::ST,
+                            Some(Condition::DivideByZero.set(st, true)),
+                        ));
                     }
                     writeback
                 } else {
-                    let (res, ovf) = val_ry.overflowing_div(val_rz); 
-                    let mut writeback = vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(res)))];
+                    let (res, ovf) = val_ry.overflowing_div(val_rz);
+                    let mut writeback = vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(raw_cast_from_i32(res)),
+                    )];
                     if *c {
                         let mut st = state.registers[Register::ST as usize];
                         st = Condition::Underflow.set(st, ovf);
@@ -1179,7 +1246,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::ModuloSignedInteger { c, rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = raw_cast_to_i32(state.registers[*rz as usize]);
@@ -1187,12 +1254,18 @@ impl Instruction {
                     let mut writeback = vec![WritebackRegister::Standard(*rx, Some(0))];
                     if *c {
                         let st = state.registers[Register::ST as usize];
-                        writeback.push(WritebackRegister::Standard(Register::ST, Some(Condition::DivideByZero.set(st, true))));
+                        writeback.push(WritebackRegister::Standard(
+                            Register::ST,
+                            Some(Condition::DivideByZero.set(st, true)),
+                        ));
                     }
                     writeback
                 } else {
-                    let (res, ovf) = val_ry.overflowing_rem(val_rz); 
-                    let mut writeback = vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(res)))];
+                    let (res, ovf) = val_ry.overflowing_rem(val_rz);
+                    let mut writeback = vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(raw_cast_from_i32(res)),
+                    )];
                     if *c {
                         let mut st = state.registers[Register::ST as usize];
                         st = Condition::Underflow.set(st, ovf);
@@ -1207,7 +1280,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::BitwiseAND { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1216,8 +1289,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry & val_rz))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::BitwiseOR { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1226,8 +1299,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry | val_rz))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::BitwiseNOT { rx, ry } => {
                 let val_ry = state.registers[*ry as usize];
 
@@ -1235,8 +1308,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(!val_ry))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::BitwiseXOR { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1245,8 +1318,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry ^ val_rz))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::LogicalShiftLeft { rx, ry, value } => {
                 let val_ry = state.registers[*ry as usize];
 
@@ -1254,8 +1327,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry << *value))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::LogicalShiftRight { rx, ry, value } => {
                 let val_ry = state.registers[*ry as usize];
 
@@ -1263,35 +1336,44 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry >> *value))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::ArithmeticShiftLeft { rx, ry, value } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
 
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry << *value)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(raw_cast_from_i32(val_ry << *value)),
+                    )],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::ArithmeticShiftRight { rx, ry, value } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
 
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry >> *value)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(raw_cast_from_i32(val_ry >> *value)),
+                    )],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::RotateRight { rx, ry, value } => {
                 let val_ry = state.registers[*ry as usize];
 
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry.rotate_right(*value)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(val_ry.rotate_right(*value)),
+                    )],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::LogicalShiftLeftRegister { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1300,8 +1382,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry << val_rz))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::LogicalShiftRightRegister { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
@@ -1310,38 +1392,47 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry >> val_rz))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::ArithmeticShiftLeftRegister { rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = state.registers[*rz as usize];
 
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry << val_rz)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(raw_cast_from_i32(val_ry << val_rz)),
+                    )],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::ArithmeticShiftRightRegister { rx, ry, rz } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let val_rz = state.registers[*rz as usize];
 
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(val_ry >> val_rz)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(raw_cast_from_i32(val_ry >> val_rz)),
+                    )],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::RotateRightRegister { rx, ry, rz } => {
                 let val_ry = state.registers[*ry as usize];
                 let val_rz = state.registers[*rz as usize];
 
                 ExecuteResult {
                     memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Standard(*rx, Some(val_ry.rotate_right(val_rz)))],
+                    writeback: vec![WritebackRegister::Standard(
+                        *rx,
+                        Some(val_ry.rotate_right(val_rz)),
+                    )],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::MapUnsignedToSigned { rx, ry } => {
                 let val_ry = state.registers[*ry as usize];
 
@@ -1356,7 +1447,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, Some(res))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::MapSignedToUnsigned { rx, ry } => {
                 let val_ry = state.registers[*ry as usize];
 
@@ -1370,8 +1461,8 @@ impl Instruction {
                     memory: MemoryAction::None,
                     writeback: vec![WritebackRegister::Standard(*rx, Some(res))],
                     end_running: false,
-                }  
-            },
+                }
+            }
             Instruction::FloatingPointCompare { fx, fy } => {
                 let val_fx = state.f_registers[*fx as usize];
                 let val_fy = state.f_registers[*fy as usize];
@@ -1392,7 +1483,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::FloatingPointCompareSingleAgainstZero { fx } => {
                 let val_fx = state.f_registers[*fx as usize];
                 let mut st = state.registers[Register::ST as usize];
@@ -1412,7 +1503,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(Register::ST, Some(st))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::AddFloatingPoint { c, fx, fy, fz } => {
                 let val_fy = state.f_registers[*fy as usize];
                 let val_fz = state.f_registers[*fz as usize];
@@ -1432,7 +1523,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::SubtractFloatingPoint { c, fx, fy, fz } => {
                 let val_fy = state.f_registers[*fy as usize];
                 let val_fz = state.f_registers[*fz as usize];
@@ -1452,7 +1543,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::MultiplyFloatingPoint { c, fx, fy, fz } => {
                 let val_fy = state.f_registers[*fy as usize];
                 let val_fz = state.f_registers[*fz as usize];
@@ -1472,7 +1563,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::DivideFloatingPoint { c, fx, fy, fz } => {
                 let val_fy = state.f_registers[*fy as usize];
                 let val_fz = state.f_registers[*fz as usize];
@@ -1492,7 +1583,7 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
+            }
             Instruction::CastToFloat { c, fx, ry } => {
                 let val_ry = raw_cast_to_i32(state.registers[*ry as usize]);
                 let res = val_ry as f32;
@@ -1517,7 +1608,10 @@ impl Instruction {
             Instruction::CastFromFloat { c, rx, fy } => {
                 let val_fy = state.f_registers[*fy as usize];
                 let res = val_fy as i32;
-                let mut writeback = vec![WritebackRegister::Standard(*rx, Some(raw_cast_from_i32(res)))];
+                let mut writeback = vec![WritebackRegister::Standard(
+                    *rx,
+                    Some(raw_cast_from_i32(res)),
+                )];
 
                 if *c {
                     let mut st = state.registers[Register::ST as usize];
@@ -1536,6 +1630,299 @@ impl Instruction {
                     end_running: false,
                 }
             },
+            Instruction::NegateFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = -val_fy;
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            }
+            Instruction::AbsoluteValueFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.abs();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::RoundFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.round();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::RoundToZeroFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = if val_fy.is_sign_positive() {
+                    val_fy.floor()
+                } else {
+                    val_fy.ceil()
+                };
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::RoundToInfinityFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = if val_fy.is_sign_positive() {
+                    val_fy.ceil()
+                } else {
+                    val_fy.floor()
+                };
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::SquareRootFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.sqrt();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::LogBase10FloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.log10();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::LogNatrualFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.ln();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::ExponentialFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.exp();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::SineFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.sin();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::CosineFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.cos();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::TangentFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.tan();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::ArcsineFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.asin();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::ArccosineFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.acos();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
+            Instruction::ArctangentFloatingPoint { c, fx, fy } => {
+                let val_fy = state.f_registers[*fy as usize];
+                let res = val_fy.atan();
+                let mut writeback = vec![WritebackRegister::FloatingPoint(*fx, Some(res))];
+                if *c {
+                    let mut st = state.registers[Register::ST as usize];
+                    st = Condition::FloatingPointInfinity.set(st, res.is_infinite());
+                    st = Condition::FloatingPointNotANumber.set(st, res.is_nan());
+                    st = Condition::FloatingPointZero.set(st, res.is_subnormal());
+                    st = Condition::FloatingPointPositive.set(st, res.is_sign_positive());
+                    writeback.push(WritebackRegister::Standard(Register::ST, Some(st)));
+                }
+
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback,
+                    end_running: false,
+                }
+            },
             Instruction::SetTimer { tx, ry } => {
                 let val_ry = state.registers[*ry as usize];
                 ExecuteResult {
@@ -1543,7 +1930,7 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Timer(*tx, Some(val_ry))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::GetCurrentTimer { rx, ty } => {
                 let val_ty = state.timers[*ty as usize].value;
                 ExecuteResult {
@@ -1551,13 +1938,16 @@ impl Instruction {
                     writeback: vec![WritebackRegister::Standard(*rx, Some(val_ty))],
                     end_running: false,
                 }
-            },
+            }
             Instruction::CheckTimer { tx } => {
                 let mut writeback = Vec::new();
-                
+
                 let mut st = state.registers[Register::ST as usize];
                 if state.timers[*tx as usize].value == 0 {
-                    writeback.push(WritebackRegister::Timer(*tx, Some(state.timers[*tx as usize].previous_set)));
+                    writeback.push(WritebackRegister::Timer(
+                        *tx,
+                        Some(state.timers[*tx as usize].previous_set),
+                    ));
                     st = Condition::Equal.set(st, true);
                 } else {
                     st = Condition::Equal.set(st, false);
@@ -1570,13 +1960,11 @@ impl Instruction {
                     writeback,
                     end_running: false,
                 }
-            },
-            Instruction::ClearTimer { tx } => {
-                ExecuteResult {
-                    memory: MemoryAction::None,
-                    writeback: vec![WritebackRegister::Timer(*tx, Some(0))],
-                    end_running: false,
-                }
+            }
+            Instruction::ClearTimer { tx } => ExecuteResult {
+                memory: MemoryAction::None,
+                writeback: vec![WritebackRegister::Timer(*tx, Some(0))],
+                end_running: false,
             },
             Instruction::StallTimer { .. } => Default::default(),
         }
@@ -1638,7 +2026,7 @@ impl PipelineInner for ExecuteStage {
                     instruction: execute_state.instruction,
                     registers: execute.writeback,
                     holds: execute_state.registers,
-                    end_running: execute.end_running
+                    end_running: execute.end_running,
                 },
             });
 
@@ -1735,17 +2123,17 @@ impl PipelineInner for MemoryStage {
                                         if v.is_none() {
                                             *v = Some(res);
                                         }
-                                    },
+                                    }
                                     WritebackRegister::FloatingPoint(_f_register, v) => {
                                         if v.is_none() {
                                             *v = Some(raw_cast_to_f32(res));
                                         }
-                                    },
+                                    }
                                     WritebackRegister::Timer(_timer, v) => {
                                         if v.is_none() {
                                             *v = Some(res);
                                         }
-                                    },
+                                    }
                                 }
                             }
 
@@ -1862,8 +2250,7 @@ impl PipelineInner for WritebackStage {
                             }
                         }
                         WritebackRegister::FloatingPoint(f_register, value) => {
-                            state_ref.f_registers[f_register as usize] =
-                                value.unwrap();
+                            state_ref.f_registers[f_register as usize] = value.unwrap();
                         }
                         WritebackRegister::Timer(timer, value) => {
                             state_ref.timers[timer as usize].previous_set = value.unwrap();

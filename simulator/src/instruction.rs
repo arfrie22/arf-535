@@ -87,6 +87,21 @@ pub enum Instruction {
     DivideFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister, fz: FPRegister },
     CastToFloat { c: bool, fx: FPRegister, ry: Register },
     CastFromFloat { c: bool, rx: Register, fy: FPRegister },
+    NegateFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    AbsoluteValueFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    RoundFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    RoundToZeroFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    RoundToInfinityFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    SquareRootFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    LogBase10FloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    LogNatrualFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    ExponentialFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    SineFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    CosineFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    TangentFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    ArcsineFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    ArccosineFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
+    ArctangentFloatingPoint { c: bool, fx: FPRegister, fy: FPRegister },
     SetTimer { tx: Timer, ry: Register },
     GetCurrentTimer { rx: Register, ty: Timer },
     CheckTimer { tx: Timer },
@@ -181,6 +196,21 @@ impl From<u32> for Instruction {
             0xa5 => Self::DivideFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap(), fz: FPRegister::try_from(((value as usize) >> 8) & 0x1f).unwrap() },
             0xa6 => Self::CastToFloat { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
             0xa7 => Self::CastFromFloat { c: (((value as usize) >> 23) & 0x1 > 0), rx: Register::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xa8 => Self::NegateFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xa9 => Self::AbsoluteValueFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xaa => Self::RoundFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xab => Self::RoundToZeroFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xac => Self::RoundToInfinityFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xad => Self::SquareRootFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xae => Self::LogBase10FloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xaf => Self::LogNatrualFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb0 => Self::ExponentialFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb1 => Self::SineFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb2 => Self::CosineFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb3 => Self::TangentFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb4 => Self::ArcsineFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb5 => Self::ArccosineFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
+            0xb6 => Self::ArctangentFloatingPoint { c: (((value as usize) >> 23) & 0x1 > 0), fx: FPRegister::try_from(((value as usize) >> 18) & 0x1f).unwrap(), fy: FPRegister::try_from(((value as usize) >> 13) & 0x1f).unwrap() },
             0xc0 => Self::SetTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ry: Register::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xc1 => Self::GetCurrentTimer { rx: Register::try_from(((value as usize) >> 19) & 0x1f).unwrap(), ty: Timer::try_from(((value as usize) >> 14) & 0x1f).unwrap() },
             0xc2 => Self::CheckTimer { tx: Timer::try_from(((value as usize) >> 19) & 0x1f).unwrap() },
@@ -278,6 +308,21 @@ impl Into<u32> for Instruction {
             Self::DivideFloatingPoint { c, fx, fy, fz } => (0xa5 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13)| ((fz as u32) << 8),
             Self::CastToFloat { c, fx, ry } => (0xa6 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((ry as u32) << 13),
             Self::CastFromFloat { c, rx, fy } => (0xa7 << 24)| ((c as u32) << 23)| ((rx as u32) << 18)| ((fy as u32) << 13),
+            Self::NegateFloatingPoint { c, fx, fy } => (0xa8 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::AbsoluteValueFloatingPoint { c, fx, fy } => (0xa9 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::RoundFloatingPoint { c, fx, fy } => (0xaa << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::RoundToZeroFloatingPoint { c, fx, fy } => (0xab << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::RoundToInfinityFloatingPoint { c, fx, fy } => (0xac << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::SquareRootFloatingPoint { c, fx, fy } => (0xad << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::LogBase10FloatingPoint { c, fx, fy } => (0xae << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::LogNatrualFloatingPoint { c, fx, fy } => (0xaf << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::ExponentialFloatingPoint { c, fx, fy } => (0xb0 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::SineFloatingPoint { c, fx, fy } => (0xb1 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::CosineFloatingPoint { c, fx, fy } => (0xb2 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::TangentFloatingPoint { c, fx, fy } => (0xb3 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::ArcsineFloatingPoint { c, fx, fy } => (0xb4 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::ArccosineFloatingPoint { c, fx, fy } => (0xb5 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
+            Self::ArctangentFloatingPoint { c, fx, fy } => (0xb6 << 24)| ((c as u32) << 23)| ((fx as u32) << 18)| ((fy as u32) << 13),
             Self::SetTimer { tx, ry } => (0xc0 << 24)| ((tx as u32) << 19)| ((ry as u32) << 14),
             Self::GetCurrentTimer { rx, ty } => (0xc1 << 24)| ((rx as u32) << 19)| ((ty as u32) << 14),
             Self::CheckTimer { tx } => (0xc2 << 24)| ((tx as u32) << 19),
@@ -375,9 +420,24 @@ impl Instruction {
             Self::DivideFloatingPoint { fy, fz, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy, *fz], timers: vec![]  },
             Self::CastToFloat { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
             Self::CastFromFloat { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::NegateFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::AbsoluteValueFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::RoundFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::RoundToZeroFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::RoundToInfinityFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::SquareRootFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::LogBase10FloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::LogNatrualFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::ExponentialFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::SineFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::CosineFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::TangentFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::ArcsineFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::ArccosineFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
+            Self::ArctangentFloatingPoint { fy, .. } => RegisterSet{ registers: vec![], f_registers: vec![*fy], timers: vec![]  },
             Self::SetTimer { ry, .. } => RegisterSet{ registers: vec![*ry], f_registers: vec![], timers: vec![]  },
             Self::GetCurrentTimer { ty, .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*ty]  },
-            Self::CheckTimer { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
+            Self::CheckTimer { .. } => RegisterSet{ registers: vec![Register::try_from(30).unwrap()], f_registers: vec![], timers: vec![]  },
             Self::ClearTimer { .. } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![]  },
             Self::StallTimer { tx } => RegisterSet{ registers: vec![], f_registers: vec![], timers: vec![*tx]  },
             Self::Invalid(_value) => Default::default(),
@@ -793,6 +853,111 @@ impl Instruction {
                 }
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
+            Self::NegateFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::AbsoluteValueFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::RoundFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::RoundToZeroFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::RoundToInfinityFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::SquareRootFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::LogBase10FloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::LogNatrualFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::ExponentialFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::SineFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::CosineFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::TangentFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::ArcsineFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::ArccosineFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
+            Self::ArctangentFloatingPoint { c, fx, .. } => {
+                let mut registers = vec![];
+                if *c {
+                    registers.push(Register::ST);
+                }
+                RegisterSet{ registers, f_registers: vec![*fx], timers: vec![] }
+            },
             Self::SetTimer { tx, .. } => {
                 let registers = vec![];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
@@ -802,16 +967,16 @@ impl Instruction {
                 RegisterSet{ registers, f_registers: vec![], timers: vec![] }
             },
             Self::CheckTimer { tx } => {
-                let registers = vec![];
+                let registers = vec![Register::try_from(30).unwrap()];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
             },
             Self::ClearTimer { tx } => {
                 let registers = vec![];
                 RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
             },
-            Self::StallTimer { .. } => {
+            Self::StallTimer { tx } => {
                 let registers = vec![];
-                RegisterSet{ registers, f_registers: vec![], timers: vec![] }
+                RegisterSet{ registers, f_registers: vec![], timers: vec![*tx] }
             },
             Self::Invalid(_value) => Default::default(),
         }
@@ -902,6 +1067,21 @@ impl Instruction {
             Self::DivideFloatingPoint { .. } => true,
             Self::CastToFloat { .. } => true,
             Self::CastFromFloat { .. } => true,
+            Self::NegateFloatingPoint { .. } => true,
+            Self::AbsoluteValueFloatingPoint { .. } => true,
+            Self::RoundFloatingPoint { .. } => true,
+            Self::RoundToZeroFloatingPoint { .. } => true,
+            Self::RoundToInfinityFloatingPoint { .. } => true,
+            Self::SquareRootFloatingPoint { .. } => true,
+            Self::LogBase10FloatingPoint { .. } => true,
+            Self::LogNatrualFloatingPoint { .. } => true,
+            Self::ExponentialFloatingPoint { .. } => true,
+            Self::SineFloatingPoint { .. } => true,
+            Self::CosineFloatingPoint { .. } => true,
+            Self::TangentFloatingPoint { .. } => true,
+            Self::ArcsineFloatingPoint { .. } => true,
+            Self::ArccosineFloatingPoint { .. } => true,
+            Self::ArctangentFloatingPoint { .. } => true,
             Self::SetTimer { .. } => true,
             Self::GetCurrentTimer { .. } => true,
             Self::CheckTimer { .. } => true,

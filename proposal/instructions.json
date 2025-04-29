@@ -3057,6 +3057,606 @@
                     "f_registers": [],
                     "timers": []
                 }
+            },
+            {
+                "name": "Negate Floating-Point",
+                "assembly": {
+                    "pneumonic": "NEG",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := -Fy.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Absolute Value Floating-Point",
+                "assembly": {
+                    "pneumonic": "ABS",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := |Fy|.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Round Floating-Point",
+                "assembly": {
+                    "pneumonic": "RND",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx to Fy rounded to the nearest integer.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Round To Zero Floating-Point",
+                "assembly": {
+                    "pneumonic": "RNDZ",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := trunc(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Round To Infinity Floating-Point",
+                "assembly": {
+                    "pneumonic": "RNDI",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := trunc(Fy) + sgn(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Square Root Floating-Point",
+                "assembly": {
+                    "pneumonic": "ABS",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := sqrt(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Log Base 10 Floating-Point",
+                "assembly": {
+                    "pneumonic": "LOG",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := log(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Log Natrual Floating-Point",
+                "assembly": {
+                    "pneumonic": "LN",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := ln(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Exponential Floating-Point",
+                "assembly": {
+                    "pneumonic": "EXP",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := e^{Fy}.\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Sine Floating-Point",
+                "assembly": {
+                    "pneumonic": "SIN",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := sin(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Cosine Floating-Point",
+                "assembly": {
+                    "pneumonic": "COS",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := cos(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Tangent Floating-Point",
+                "assembly": {
+                    "pneumonic": "SIN",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := tan(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Arcsine Floating-Point",
+                "assembly": {
+                    "pneumonic": "ASN",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := arcsin(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Arccosine Floating-Point",
+                "assembly": {
+                    "pneumonic": "ACS",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := arccos(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
+            },
+            {
+                "name": "Arctangent Floating-Point",
+                "assembly": {
+                    "pneumonic": "ATN",
+                    "arguments": [
+                        { "type": "condition_bit", "argument": "c" },
+                        { "type": "f_register", "argument": "Fx" },
+                        { "type": "f_register", "argument": "Fy" }
+                    ]
+                },
+                "description": "Sets Fx := arctan(Fy).\\\nSets overflow bit if result is outside of floating-point range. Sets underflow bit if result is subnormal. Sets FZ bit if result $= plus.minus 0$. Sets FINF bit if result $= plus.minus infinity$. Sets FNAN bit if result is not-a-number.",
+                "bits": [
+                    {
+                        "short": "c",
+                        "long": "Condition Code Bit",
+                        "count": 1,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fx",
+                        "long": "Destination Register",
+                        "count": 5,
+                        "read": false,
+                        "write": true
+                    },
+                    {
+                        "short": "Fy",
+                        "long": "Source Register",
+                        "count": 5,
+                        "read": true,
+                        "write": false
+                    }
+                ],
+                "extra_reg": {
+                    "registers": [],
+                    "f_registers": [],
+                    "timers": []
+                }
             }
         ]
     },
