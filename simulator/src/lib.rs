@@ -220,7 +220,7 @@ impl Simulator {
         self.state.borrow_mut().registers[Register::A4 as usize] = self.adc_streams[3].get_next();
 
         self.state.borrow_mut().timers.iter_mut().for_each(|v| {
-            let _ = v.value.saturating_sub(1);
+            v.value = v.value.saturating_sub(1);
         });
 
         let stage = self.state.borrow().pipeline_stage.write_back.clone();

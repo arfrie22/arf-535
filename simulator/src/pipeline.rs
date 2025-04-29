@@ -1966,7 +1966,18 @@ impl Instruction {
                 writeback: vec![WritebackRegister::Timer(*tx, Some(0))],
                 end_running: false,
             },
-            Instruction::StallTimer { .. } => Default::default(),
+            Instruction::StallTimer { tx } => {
+                ExecuteResult {
+                    memory: MemoryAction::None,
+                    writeback: vec![
+                        WritebackRegister::Timer(
+                            *tx,
+                            Some(state.timers[*tx as usize].previous_set),
+                        )
+                    ],
+                    end_running: false,
+                }
+            },
         }
     }
 }

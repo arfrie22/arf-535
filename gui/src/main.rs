@@ -105,7 +105,7 @@ fn create_simulator(use_cache: bool) -> Simulator {
     let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache { data_cache } else { data_memory };
 
     let adc_streams =
-        core::array::from_fn(|_| Box::new(WavInput::new("wav/sine.wav")) as Box<dyn InputStream>);
+        core::array::from_fn(|_| Box::new(WavInput::new("wav/dtmf.wav")) as Box<dyn InputStream>);
     
     let dac_streams =
         core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
@@ -119,7 +119,7 @@ fn create_simulator(use_cache: bool) -> Simulator {
         used_data,
         adc_streams,
         dac_streams,
-        10_000_000,
+        88_200_000,
     )
 }
 
