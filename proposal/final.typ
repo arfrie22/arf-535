@@ -100,6 +100,7 @@ The panes that contain the status can be moved around by dragging on the name in
 \
 Once when a program is loaded in it can be single stepped which will run a single clock cycle, or it can be ran until it hits a trap. When the `Run` button is pressed the ui will update every second and the button is replaced with a `Cancel` button to stop the simulator. This feature is there incase the assembly has an infinite loop, as well as for making sure the code is working properly while still letting it run.
 
+#pagebreak()
 
 = Simulator Design
 
@@ -114,6 +115,8 @@ A big part of the design is focused around codegen. The insturction json was mad
 \
 The simulator code itself is the library that both the assembler library and the gui use. This was done to keep the simulator as being the bare minimum, all encompsing part that runs the simulation. I didn't want to split out common parts that both the simulator and assembler would use as you can use the simulator without the assembler and doing so would require less dependencies.
 
+#pagebreak()
+
 = Software Engineering
 
 I chose rust for this project for a few reasons. I wanted the code to be fast which ruled out a purly interpreted langauge. I also vastly prefer rust's semantics when it comes to errors and nullable values. I prefer those to be expicit rather than implicit like C-like langauges. I then chose to keep the whole project in rust, including parser and gui as it allowed me to only codegen the instructions once rather than having to keep the generations synced between different langauges. It also made it easier to bounce between files and update a function if it breaks in code or change what a data type returns. The codegen was done in python to make it easy. If I were to work on it more, I would covert the python over to rust build scripts to do everything at build time. This would ensure that every time I compile the code it would be up to date, without having to re-run the python script.
@@ -123,6 +126,8 @@ The version control was done in git. I would push changes once when I had workin
 
 \
 To manage the project independently I started by getting the bare minimum up and running, what I needed to get done for the demos. This left me with a simulator with no gui or assembeler. From there I knew I just needed to sit down for a while and write all of the tables for the gui. I spent the time to make a gui that would work and wasn't the most pretty, fully form over function. The gui ended up being the biggest struggle as I spent a bit trying to get a differnet ui libray to work, before switching to egui. Working byself made integration much easier. Since I spent most of the time writing code sequentially rather than in parallel I never had to worry about integration details as I would start by making sure it would integrate. However, it did introduce the issue that I was the only person who would check the code, and therefore if I had a wrong idea both my code and what I would do to check it would be wrong.
+
+#pagebreak()
 
 = Performance
 
@@ -140,6 +145,8 @@ The third benchmark (`sort.asm`) is randomized 1,000 element list that is sorted
 The last benchmark (`dtmf.asm`) is more a test of the analog specific and floating point features. This benchmark samples the ADC to decode DTMF tones to get what number was being typed. DTMF is what phones used and what gives each key press its distinct sound. It is two overlapping frequencies where there is a 4x4 grid made up of the possible frequencies. The target sample frequency is 44.1 kHz which matches the `dtmf.wav` file sample rate. The program takes 1,506,066,223 cycles to run and is able to complete each sample loop in about 260 cycles which means about 90% of the time it spends idling. That is because it needs to sample every 2,000 cycles to reach its real time target. This means that the clock rate of the CPU can be decresed as there is over 1,000 cycles of headroo. It takes 83.6628s to simulate the process of a 17s file. However this overhead lets the pipeline and clock be disabled while still hitting its target. 
 
 With no cache pipeline it takes 1,506,066,562 cycles there is very little improvement due to the fact that most of the time is being stalled to read a new sample, the pipeline has a minimal effect on the program. It is only on the last iteration that makes the difference in speed. The cache was a different story. With no cache the program was not able to meet its real time target due to fetching the instructions from the slow DRAM, and therefore could not parse the data.
+
+#pagebreak()
 
 = What I Learned
 
