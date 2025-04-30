@@ -4,9 +4,7 @@ use std::{cell::RefCell, io::Read, path::Path, rc::Rc, time::Instant};
 
 use assembler::{assemble, load_file};
 use displays::{
-    cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay,
-    memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay,
-    timer::TimerDisplay,
+    adc::ADCName, cache::CacheDisplay, condition::ConditionDisplay, f_register::FRegisterDisplay, memory::MemoryDisplay, pipeline::PipelineDisplay, register::RegisterDisplay, timer::TimerDisplay
 };
 use eframe::egui::{self, FontData, FontDefinitions, FontFamily, Label, RichText, Widget};
 use log::{error, info};
@@ -72,7 +70,7 @@ fn main() -> eframe::Result {
     )
 }
 
-fn create_simulator(use_cache: bool) -> Simulator {
+fn create_simulator(use_cache: bool, adc_streams: [Box<dyn InputStream>; 4], dac_streams: [Box<dyn OutputStream>; 4] ) -> Simulator {
     let raw_program_memory = Rc::new(RefCell::new(Memory::new()));
     let program_memory = Rc::new(RefCell::new(ClockedMemory::<PROG_M_CYCLES, _>::new(
         raw_program_memory.clone(),
@@ -104,12 +102,6 @@ fn create_simulator(use_cache: bool) -> Simulator {
     };
     let used_data: Rc<RefCell<dyn FrontMemory>> = if use_cache { data_cache } else { data_memory };
 
-    let adc_streams =
-        core::array::from_fn(|_| Box::new(WavInput::new("wav/dtmf.wav")) as Box<dyn InputStream>);
-    
-    let dac_streams =
-        core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
-
     Simulator::new(
         raw_program_memory,
         raw_data_memory,
@@ -126,6 +118,7 @@ fn create_simulator(use_cache: bool) -> Simulator {
 pub struct SimulatorGUI {
     tree: egui_tiles::Tree<Pane>,
     simulator: Rc<RefCell<Simulator>>,
+    adc_name: Rc<RefCell<ADCName>>,
     pipeline_display: Rc<RefCell<PipelineDisplay>>,
     register_display: Rc<RefCell<RegisterDisplay>>,
     f_register_display: Rc<RefCell<FRegisterDisplay>>,
@@ -142,9 +135,14 @@ pub struct SimulatorGUI {
 
 impl Default for SimulatorGUI {
     fn default() -> Self {
-        // Self::new(true, true, "test")
+        let adc_streams =
+            // core::array::from_fn(|_| Box::new(WavInput::new("wav/dtmf.wav")) as Box<dyn InputStream>);
+            core::array::from_fn(|_| Box::new(ConstantInput::new(0)) as Box<dyn InputStream>);
+    
+        let dac_streams =
+            core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
 
-        let simulator = Rc::new(RefCell::new(create_simulator(true)));
+        let simulator = Rc::new(RefCell::new(create_simulator(true, adc_streams, dac_streams)));
         let simulator_state = simulator.borrow().get_state();
         simulator_state.borrow_mut().single_instruction_pipeline = false;
 
@@ -153,6 +151,9 @@ impl Default for SimulatorGUI {
         let program_cache = simulator.borrow().get_program_cache();
         let data_cache = simulator.borrow().get_data_cache();
 
+        let adc_name = Rc::new(RefCell::new(ADCName::new(
+            "adc_name",
+        )));
         let pipeline_display = Rc::new(RefCell::new(PipelineDisplay::new(
             simulator_state.clone(),
             "pipeline",
@@ -219,6 +220,7 @@ impl Default for SimulatorGUI {
         Self {
             simulator,
             tree,
+            adc_name,
             pipeline_display,
             register_display,
             f_register_display,
@@ -237,7 +239,13 @@ impl Default for SimulatorGUI {
 
 impl SimulatorGUI {
     fn reset_simulator(&mut self) {
-        let simulator = Rc::new(RefCell::new(create_simulator(self.use_cache)));
+        let adc_streams =
+            core::array::from_fn(|i| self.adc_name.borrow().create_input_stream(i));
+    
+        let dac_streams =
+            core::array::from_fn(|_| Box::new(NoOperationOutput::new()) as Box<dyn OutputStream>);
+
+        let simulator = Rc::new(RefCell::new(create_simulator(self.use_cache, adc_streams, dac_streams)));
         let simulator_state = simulator.borrow().get_state();
         simulator_state.borrow_mut().single_instruction_pipeline = !self.use_pipeline;
 
@@ -360,40 +368,46 @@ impl SimulatorGUI {
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.text_edit_singleline(&mut self.file_name);
             ui.horizontal(|ui| {
-                if ui.button("Assemble").clicked() {
-                    self.assemble_file();
-                }
-                if ui.button("Load").clicked() {
-                    self.load_file();
-                }
-                ui.checkbox(&mut self.use_pipeline, "Use Pipeline");
-                ui.checkbox(&mut self.use_cache, "Use Cache");
-            });
+                ui.vertical(|ui| {
+                    ui.text_edit_singleline(&mut self.file_name);
+                    ui.horizontal(|ui| {
+                        if ui.button("Assemble").clicked() {
+                            self.assemble_file();
+                        }
+                        if ui.button("Load").clicked() {
+                            self.load_file();
+                        }
+                        ui.checkbox(&mut self.use_pipeline, "Use Pipeline");
+                        ui.checkbox(&mut self.use_cache, "Use Cache");
+                    });
 
-            ui.horizontal(|ui| {
-                if ui.button("Single Step").clicked() {
-                    self.cycle();
-                }
+                    ui.horizontal(|ui| {
+                        if ui.button("Single Step").clicked() {
+                            self.cycle();
+                        }
 
-                let state = self.simulator.borrow().get_state();
-                let mut state = state.borrow_mut();
+                        let state = self.simulator.borrow().get_state();
+                        let mut state = state.borrow_mut();
 
-                if state.running {
-                    if ui.button("Cancel").clicked() {
-                        state.running = false;
-                    }
-                } else {
-                    if ui.button("Run").clicked() {
-                        state.running = true;
-                    }
-                }
+                        if state.running {
+                            if ui.button("Cancel").clicked() {
+                                state.running = false;
+                            }
+                        } else {
+                            if ui.button("Run").clicked() {
+                                state.running = true;
+                            }
+                        }
 
-                ui.label(format!(
-                    "Cycle: {}",
-                    self.simulator.borrow().get_cycle_number()
-                ));
+                        ui.label(format!(
+                            "Cycle: {}",
+                            self.simulator.borrow().get_cycle_number()
+                        ));
+                    });
+                });
+
+                self.adc_name.borrow_mut().ui(ui);
             });
 
             ui.add_space(10.0);
@@ -422,14 +436,14 @@ impl egui_tiles::Behavior<Pane> for TreeBehavior {
         _tile_id: egui_tiles::TileId,
         pane: &mut Pane,
     ) -> egui_tiles::UiResponse {
-        Label::new(RichText::from(&pane.name).heading())
+        let rect = Label::new(RichText::from(&pane.name).heading())
             .selectable(false)
-            .ui(ui);
+            .ui(ui).rect;
 
         pane.inner.borrow_mut().ui(ui);
 
         let dragged = ui
-            .allocate_rect(ui.max_rect(), egui::Sense::click_and_drag())
+            .allocate_rect(rect, egui::Sense::click_and_drag())
             .on_hover_cursor(egui::CursorIcon::Grab)
             .dragged();
         if dragged {
