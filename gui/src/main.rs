@@ -10,12 +10,12 @@ use eframe::egui::{self, FontData, FontDefinitions, FontFamily, Label, RichText,
 use log::{error, info};
 use simulator::{
     memory::{ClockedMemory, DirectCache, FrontMemory, Memory},
-    streams::{ConstantInput, InputStream, NoOperationOutput, OutputStream, WavInput},
+    streams::{ConstantInput, InputStream, NoOperationOutput, OutputStream},
     Simulator,
 };
 
-const DATA_M_CYCLES: usize = 4;
-const PROG_M_CYCLES: usize = 10;
+const DATA_M_CYCLES: usize = 10;
+const PROG_M_CYCLES: usize = 100;
 
 const DATA_C_CYCLES: usize = 1;
 const PROG_C_CYCLES: usize = 1;
@@ -131,6 +131,7 @@ pub struct SimulatorGUI {
     file_name: String,
     use_pipeline: bool,
     use_cache: bool,
+    alap_start: Option<Instant>,
 }
 
 impl Default for SimulatorGUI {
@@ -233,6 +234,7 @@ impl Default for SimulatorGUI {
             file_name: "test".to_owned(),
             use_pipeline: true,
             use_cache: true,
+            alap_start: None,
         }
     }
 }
@@ -362,9 +364,6 @@ impl SimulatorGUI {
     }
 }
 
-// TODO: Simple program, more sophisticated (no pipe/cache, pipe only, cache only, both)
-// TODO: See memory access information
-
 impl eframe::App for SimulatorGUI {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -397,6 +396,7 @@ impl eframe::App for SimulatorGUI {
                         } else {
                             if ui.button("Run").clicked() {
                                 state.running = true;
+                                self.alap_start = Some(Instant::now());
                             }
                         }
 
@@ -419,6 +419,10 @@ impl eframe::App for SimulatorGUI {
         if self.simulator.borrow().get_state().borrow().running {
             self.cycle_remaining();
             ctx.request_repaint();
+        } else {
+            if let Some(start) = self.alap_start.take() {
+                println!("Ran for {} s", (Instant::now() - start).as_secs_f64());
+            }
         }
     }
 }
