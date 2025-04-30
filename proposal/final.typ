@@ -92,7 +92,7 @@ The memory address is the lower 16-bits, any of the higher 16-bits are discarded
 
 = Simulator
 
-To use the simulator write the assembly in the asm folder under the gui folder. The asm requires a `.prog` section and optionally a `.data` section
+To use the simulator write the assembly in the `/asm` folder under the gui folder. The asm requires a `.prog` section and optionally a `.data` section. If you need the ADCs you can enable them reading from a `.wav` file placed in the `/wav` folder. The clock rate is set to 88,200,000 Hz to be a multiple of the normal audio sampling frequency of 44.1 kHz. Currently the simulator has no support for writing the DAC to a `.wav` output.
 
 \
-I will start with the simulator and a very simple assembler. Once when they are both in a usable state I will start on the GUI. After the GUI shows basic information I would need for the rest of my debugging I will switch back to the assembler and simulator. After that I will add more polish to the GUI.
+The panes 

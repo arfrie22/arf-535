@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use eframe::egui::{self, Checkbox, Context, Id, Margin, TextEdit, UiBuilder, Vec2, Widget};
 use simulator::streams::{ConstantInput, InputStream, WavInput};
 
@@ -28,10 +30,15 @@ impl ADCName {
     }
 
     pub fn create_input_stream(&self, i: usize) -> Box<dyn InputStream> {
-        if i >= 4 || !self.states[i].use_file{
+        if i >= 4 || !self.states[i].use_file {
             Box::new(ConstantInput::new(0))
         } else {
-            Box::new(WavInput::new(&format!("wav/{}.wav", self.states[i].name)))
+            let name = format!("wav/{}.wav", self.states[i].name);
+            if Path::new(&name).exists() {
+                Box::new(WavInput::new(&name))
+            } else {
+                Box::new(ConstantInput::new(0))
+            }
         }
     }
 }
