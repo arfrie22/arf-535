@@ -78,6 +78,9 @@ There are 32 general purpose timers which are automatically decreased every cloc
 - Adding the optional l to the end of a branch instruction will update the link register to the next insturction.
 - Adding the optional c to the end of a supported alu operation will update the status register.
 
+
+I removed the duplicate instructions that update the link register, and turned it into a bit that needs to be set in the insturction. That removed the duplicate code. I ended up implementing all instructions, but most of them were not used in my benchmark. I added a lot of floating point operations based on the arm operations, but I ended up not needing them after reading more about Goertzel algorithm, and I could precompute all trig functions.
+
 #include "instructions.typ"
 
 #pagebreak()

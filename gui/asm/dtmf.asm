@@ -6,7 +6,7 @@ ldh r0 0
 SETT T0 r0
 
 ; number of total loops
-ldl r10 341
+ldl r10 500
 ldh r10 0
 ; output address
 lea r9 d:output
