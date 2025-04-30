@@ -204,14 +204,14 @@
                 "bits": [
                     {
                         "short": "l",
-                        "long": "Link Register Bit",
+                        "long": "LR",
                         "count": 1,
                         "read": false,
                         "write": true
                     },
                     {
                         "short": "Condition",
-                        "long": "Condition code bit",
+                        "long": "CC",
                         "count": 5
                     },
                     {
@@ -245,14 +245,14 @@
                 "bits": [
                     {
                         "short": "l",
-                        "long": "Link Register Bit",
+                        "long": "LR",
                         "count": 1,
                         "read": false,
                         "write": true
                     },
                     {
                         "short": "Condition",
-                        "long": "Condition code bit",
+                        "long": "CC",
                         "count": 5
                     },
                     {
@@ -288,14 +288,14 @@
                 "bits": [
                     {
                         "short": "l",
-                        "long": "Link Register Bit",
+                        "long": "LR",
                         "count": 1,
                         "read": false,
                         "write": true
                     },
                     {
                         "short": "Condition",
-                        "long": "Condition code bit",
+                        "long": "CC",
                         "count": 5
                     },
                     {
@@ -337,14 +337,14 @@
                 "bits": [
                     {
                         "short": "l",
-                        "long": "Link Register Bit",
+                        "long": "LR",
                         "count": 1,
                         "read": false,
                         "write": true
                     },
                     {
                         "short": "Condition",
-                        "long": "Condition code bit",
+                        "long": "CC",
                         "count": 5
                     },
                     {
@@ -378,14 +378,14 @@
                 "bits": [
                     {
                         "short": "l",
-                        "long": "Link Register Bit",
+                        "long": "LR",
                         "count": 1,
                         "read": false,
                         "write": true
                     },
                     {
                         "short": "Condition",
-                        "long": "Condition code bit",
+                        "long": "CC",
                         "count": 5
                     },
                     {
@@ -417,14 +417,14 @@
                 "bits": [
                     {
                         "short": "l",
-                        "long": "Link Register Bit",
+                        "long": "LR",
                         "count": 1,
                         "read": false,
                         "write": true
                     },
                     {
                         "short": "Condition",
-                        "long": "Condition code bit",
+                        "long": "CC",
                         "count": 5
                     },
                     {
@@ -1605,7 +1605,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1637,7 +1637,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1671,7 +1671,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1719,7 +1719,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1767,7 +1767,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1815,7 +1815,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1863,7 +1863,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1911,7 +1911,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -1959,7 +1959,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2007,7 +2007,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2055,7 +2055,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2103,7 +2103,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2801,7 +2801,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2849,7 +2849,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2897,7 +2897,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2945,7 +2945,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -2992,7 +2992,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3032,7 +3032,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3072,7 +3072,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3112,7 +3112,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3152,7 +3152,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3192,7 +3192,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3232,7 +3232,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3272,7 +3272,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3312,7 +3312,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3352,7 +3352,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3392,7 +3392,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3432,7 +3432,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3472,7 +3472,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3512,7 +3512,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3552,7 +3552,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3592,7 +3592,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true
@@ -3632,7 +3632,7 @@
                 "bits": [
                     {
                         "short": "c",
-                        "long": "Condition Code Bit",
+                        "long": "CC",
                         "count": 1,
                         "read": false,
                         "write": true

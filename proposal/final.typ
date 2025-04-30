@@ -75,6 +75,8 @@ There are 32 general purpose timers which are automatically decreased every cloc
 - _label_ is a label which represents an address
 - d:0xYYYYYYYY is an auto generated label for 0xYYYYYYYY in the data memory
 - p:0xYYYYYYYY is an auto generated label for 0xYYYYYYYY in the program memory
+- Adding the optional l to the end of a branch instruction will update the link register to the next insturction.
+- Adding the optional c to the end of a supported alu operation will update the status register.
 
 #include "instructions.typ"
 

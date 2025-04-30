@@ -55,7 +55,10 @@ with open('instructions.json') as f:
             opcode_name = opcode_data["name"]
             opcode_pneumonic = opcode_data["assembly"]["pneumonic"]
             for arg in opcode_data["assembly"]["arguments"]:
-                opcode_pneumonic += " " + arg["argument"]
+                if arg["type"].endswith("_bit"):
+                    opcode_pneumonic += "(" + arg["argument"] + ")"
+                else:
+                    opcode_pneumonic += " " + arg["argument"]
             opcode_description = opcode_data["description"]
             opcode_bits = opcode_data["bits"]
             opcode_bit_remaining = 32-8
