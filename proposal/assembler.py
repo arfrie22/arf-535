@@ -11,12 +11,12 @@ with open('instructions.json') as f:
     parses = "                        Rule::EOI | Rule::label_arg => continue,\n"
     for type_i, type_data in enumerate(data):
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
-            pneumonic = opcode_data["assembly"]["pneumonic"]
-            rule_name = "instruction_" + pneumonic + "_" + "{:02x}".format((type_i << 5) | opcode_i)
+            mnemonic = opcode_data["assembly"]["mnemonic"]
+            rule_name = "instruction_" + mnemonic + "_" + "{:02x}".format((type_i << 5) | opcode_i)
             rule_names.append(rule_name)
             all_rules.append("Rule::" + rule_name)
 
-            rule = rule_name + " = ${ ^\"" + pneumonic + "\""
+            rule = rule_name + " = ${ ^\"" + mnemonic + "\""
             parse = "                        Rule::" + rule_name + " => {\n"
 
             instruction = "                            data.instructions.push(Instruction::" + opcode_data["name"].replace(" ", "").replace("-", "")

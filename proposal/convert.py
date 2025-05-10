@@ -30,7 +30,7 @@ with open("toconv.txt") as f:
             output["name"] = get_parentheses_content(l)[0]
             state = 1
         elif state == 1:
-            output["pneumonic"] = l
+            output["mnemonic"] = l
             state = 2
         elif state == 2:
             if "description" in output:

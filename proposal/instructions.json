@@ -5,7 +5,7 @@
         "opcodes": [
             {
                 "name": "Trap",
-                "assembly": { "pneumonic": "TRAP", "arguments": [] },
+                "assembly": { "mnemonic": "TRAP", "arguments": [] },
                 "description": "Used in simulator to pause execution, and return control to the simulator's UI.",
                 "bits": [],
                 "extra_reg": {
@@ -17,7 +17,7 @@
             {
                 "name": "Push Integer Register",
                 "assembly": {
-                    "pneumonic": "PUSH",
+                    "mnemonic": "PUSH",
                     "arguments": [{ "type": "register", "argument": "Rx" }]
                 },
                 "description": "Pushes the value of Rx onto the stack (SP) and increase SP by 1.",
@@ -41,7 +41,7 @@
             {
                 "name": "Push Floating-Point Register",
                 "assembly": {
-                    "pneumonic": "PUSH",
+                    "mnemonic": "PUSH",
                     "arguments": [{ "type": "f_register", "argument": "Fx" }]
                 },
                 "description": "Pushes the value of Fx onto the stack (SP) and increase SP by 1.",
@@ -65,7 +65,7 @@
             {
                 "name": "Pop Integer Register",
                 "assembly": {
-                    "pneumonic": "POP",
+                    "mnemonic": "POP",
                     "arguments": [{ "type": "register", "argument": "Rx" }]
                 },
                 "description": "Pops the top value from the stack (SP) into Rx and decrease SP by 1",
@@ -89,7 +89,7 @@
             {
                 "name": "Pop Floating-Point Register",
                 "assembly": {
-                    "pneumonic": "POP",
+                    "mnemonic": "POP",
                     "arguments": [{ "type": "f_register", "argument": "Fx" }]
                 },
                 "description": "Pops the top value from the stack (SP) into Fx and decrease SP by 1",
@@ -113,7 +113,7 @@
             {
                 "name": "Swap Register",
                 "assembly": {
-                    "pneumonic": "SWP",
+                    "mnemonic": "SWP",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "f_register", "argument": "Fy" }
@@ -145,7 +145,7 @@
             {
                 "name": "Stall Immediate",
                 "assembly": {
-                    "pneumonic": "STALL",
+                    "mnemonic": "STALL",
                     "arguments": [{ "type": "number", "argument": "_value_" }]
                 },
                 "description": "Stalls the pipeline at execute for _value_ clock cycles.",
@@ -165,7 +165,7 @@
             {
                 "name": "Stall Register",
                 "assembly": {
-                    "pneumonic": "STALL",
+                    "mnemonic": "STALL",
                     "arguments": [{ "type": "register", "argument": "Rx" }]
                 },
                 "description": "Stalls the pipeline at execute for Rx clock cycles.",
@@ -193,7 +193,7 @@
             {
                 "name": "Register Jump",
                 "assembly": {
-                    "pneumonic": "B",
+                    "mnemonic": "B",
                     "arguments": [
                         { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
@@ -234,7 +234,7 @@
             {
                 "name": "Indirect Jump",
                 "assembly": {
-                    "pneumonic": "B",
+                    "mnemonic": "B",
                     "arguments": [
                         { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
@@ -277,7 +277,7 @@
             {
                 "name": "Indirect with Register Offset Jump",
                 "assembly": {
-                    "pneumonic": "B",
+                    "mnemonic": "B",
                     "arguments": [
                         { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
@@ -326,7 +326,7 @@
             {
                 "name": "Relative Jump",
                 "assembly": {
-                    "pneumonic": "BR",
+                    "mnemonic": "BR",
                     "arguments": [
                         { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
@@ -367,7 +367,7 @@
             {
                 "name": "Immediate Jump",
                 "assembly": {
-                    "pneumonic": "B",
+                    "mnemonic": "B",
                     "arguments": [
                         { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
@@ -406,7 +406,7 @@
             {
                 "name": "Immediate Relative Jump",
                 "assembly": {
-                    "pneumonic": "BO",
+                    "mnemonic": "BO",
                     "arguments": [
                         { "type": "link_bit", "argument": "l" },
                         { "type": "condition", "argument": "Condition" },
@@ -451,7 +451,7 @@
             {
                 "name": "Integer Load Low",
                 "assembly": {
-                    "pneumonic": "LDL",
+                    "mnemonic": "LDL",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "number", "argument": "_value_" }
@@ -481,7 +481,7 @@
             {
                 "name": "Integer Load High",
                 "assembly": {
-                    "pneumonic": "LDH",
+                    "mnemonic": "LDH",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "number", "argument": "_value_" }
@@ -511,7 +511,7 @@
             {
                 "name": "Swap Integer Registers",
                 "assembly": {
-                    "pneumonic": "SWP",
+                    "mnemonic": "SWP",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -543,7 +543,7 @@
             {
                 "name": "Copy Integer Register",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -575,7 +575,7 @@
             {
                 "name": "Load Integer Register Indirect",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "data_shift_imm", "argument": "Ry" }
@@ -609,7 +609,7 @@
             {
                 "name": "Load Integer Register Indirect with Register Offset",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "data_shift_register", "argument": "Ry" }
@@ -649,7 +649,7 @@
             {
                 "name": "Load Integer Register Indirect Program",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "prog_shift_imm", "argument": "Ry" }
@@ -683,7 +683,7 @@
             {
                 "name": "Load Integer Register Indirect with Register Offset Program",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "prog_shift_register", "argument": "Ry" }
@@ -723,7 +723,7 @@
             {
                 "name": "Store Integer Register Indirect",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "data_shift_imm", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -757,7 +757,7 @@
             {
                 "name": "Store Integer Register Indirect with Register Offset Indirect",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "data_shift_register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -797,7 +797,7 @@
             {
                 "name": "Store Integer Register Indirect Program",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "prog_shift_imm", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -831,7 +831,7 @@
             {
                 "name": "Store Integer Register Indirect with Register Offset Program",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "prog_shift_register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -871,7 +871,7 @@
             {
                 "name": "Integer Load Data",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "d_address", "argument": "_label_" }
@@ -901,7 +901,7 @@
             {
                 "name": "Integer Load Program",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "p_address", "argument": "_label_" }
@@ -931,7 +931,7 @@
             {
                 "name": "Integer Store Data",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "d_address", "argument": "_label_" }
@@ -961,7 +961,7 @@
             {
                 "name": "Integer Store Program",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "p_address", "argument": "_label_" }
@@ -991,7 +991,7 @@
             {
                 "name": "Integer Load Effective Data Address",
                 "assembly": {
-                    "pneumonic": "LEA",
+                    "mnemonic": "LEA",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "d_address", "argument": "_label_" }
@@ -1021,7 +1021,7 @@
             {
                 "name": "Integer Load Effective Program Address",
                 "assembly": {
-                    "pneumonic": "LEA",
+                    "mnemonic": "LEA",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "d_address", "argument": "_label_" }
@@ -1051,7 +1051,7 @@
             {
                 "name": "Load Integer Effective Address Register Indirect",
                 "assembly": {
-                    "pneumonic": "LEA",
+                    "mnemonic": "LEA",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "address_shift_imm", "argument": "Ry" }
@@ -1085,7 +1085,7 @@
             {
                 "name": "Load Integer Effective Address Register Indirect with Register Offset",
                 "assembly": {
-                    "pneumonic": "LEA",
+                    "mnemonic": "LEA",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "address_shift_register", "argument": "Ry" }
@@ -1125,7 +1125,7 @@
             {
                 "name": "Unsigned Zero Extend",
                 "assembly": {
-                    "pneumonic": "ZEX",
+                    "mnemonic": "ZEX",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -1159,7 +1159,7 @@
             {
                 "name": "Sign Extend",
                 "assembly": {
-                    "pneumonic": "SEX",
+                    "mnemonic": "SEX",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -1199,7 +1199,7 @@
             {
                 "name": "Floating-Point Load Low",
                 "assembly": {
-                    "pneumonic": "LDL",
+                    "mnemonic": "LDL",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "number", "argument": "_value_" }
@@ -1229,7 +1229,7 @@
             {
                 "name": "Floating-Point Load High",
                 "assembly": {
-                    "pneumonic": "LDH",
+                    "mnemonic": "LDH",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "number", "argument": "_value_" }
@@ -1259,7 +1259,7 @@
             {
                 "name": "Swap Floating-Point Registers",
                 "assembly": {
-                    "pneumonic": "SWP",
+                    "mnemonic": "SWP",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" }
@@ -1291,7 +1291,7 @@
             {
                 "name": "Copy Floating-Point Register",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" }
@@ -1323,7 +1323,7 @@
             {
                 "name": "Load Floating-Point Register Indirect",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "data_shift_imm", "argument": "Ry" }
@@ -1357,7 +1357,7 @@
             {
                 "name": "Load Floating-Point Register Indirect with Register Offset",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "data_shift_register", "argument": "Ry" }
@@ -1397,7 +1397,7 @@
             {
                 "name": "Store Floating-Point Register Indirect",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "data_shift_imm", "argument": "Rx" },
                         { "type": "f_register", "argument": "Fy" }
@@ -1431,7 +1431,7 @@
             {
                 "name": "Store Floating-Point Register Indirect with Register Offset",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "data_shift_register", "argument": "Rx" },
                         { "type": "f_register", "argument": "Fy" }
@@ -1471,7 +1471,7 @@
             {
                 "name": "Floating-Point Load Data",
                 "assembly": {
-                    "pneumonic": "LDR",
+                    "mnemonic": "LDR",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "d_address", "argument": "_label_" }
@@ -1501,7 +1501,7 @@
             {
                 "name": "Floating-Point Store Data",
                 "assembly": {
-                    "pneumonic": "STR",
+                    "mnemonic": "STR",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "d_address", "argument": "_label_" }
@@ -1537,7 +1537,7 @@
             {
                 "name": "Integer Compare",
                 "assembly": {
-                    "pneumonic": "CMP",
+                    "mnemonic": "CMP",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -1571,7 +1571,7 @@
             {
                 "name": "Integer Compare Single Against Zero",
                 "assembly": {
-                    "pneumonic": "CMP",
+                    "mnemonic": "CMP",
                     "arguments": [{ "type": "register", "argument": "Rx" }]
                 },
                 "description": "Stores the condition variables.\n- Sets EQ if $\"Rx\" = 0$\n- Sets GT if $\"Rx\" > 0$\n- Sets LT if $\"Rx\" < 0$\n- Sets GE if $\"Rx\" >= 0$\n- Sets LE if $\"Rx\" <= 0$\n- Sets EVEN if $\"Rx\" % 2 = 0$",
@@ -1595,7 +1595,7 @@
             {
                 "name": "Increment Integer Register",
                 "assembly": {
-                    "pneumonic": "INC",
+                    "mnemonic": "INC",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" }
@@ -1627,7 +1627,7 @@
             {
                 "name": "Decrement Integer Register",
                 "assembly": {
-                    "pneumonic": "DEC",
+                    "mnemonic": "DEC",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" }
@@ -1659,7 +1659,7 @@
             {
                 "name": "Add Unsigned Integer",
                 "assembly": {
-                    "pneumonic": "ADD",
+                    "mnemonic": "ADD",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1707,7 +1707,7 @@
             {
                 "name": "Subtract Unsigned Integer",
                 "assembly": {
-                    "pneumonic": "SUB",
+                    "mnemonic": "SUB",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1755,7 +1755,7 @@
             {
                 "name": "Multiply Unsigned Integer",
                 "assembly": {
-                    "pneumonic": "MUL",
+                    "mnemonic": "MUL",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1803,7 +1803,7 @@
             {
                 "name": "Divide Unsigned Integer",
                 "assembly": {
-                    "pneumonic": "DIV",
+                    "mnemonic": "DIV",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1851,7 +1851,7 @@
             {
                 "name": "Modulo Unsigned Integer",
                 "assembly": {
-                    "pneumonic": "MOD",
+                    "mnemonic": "MOD",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1899,7 +1899,7 @@
             {
                 "name": "Add Signed Integer",
                 "assembly": {
-                    "pneumonic": "ADDS",
+                    "mnemonic": "ADDS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1947,7 +1947,7 @@
             {
                 "name": "Subtract Signed Integer",
                 "assembly": {
-                    "pneumonic": "SUBS",
+                    "mnemonic": "SUBS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -1995,7 +1995,7 @@
             {
                 "name": "Multiply Signed Integer",
                 "assembly": {
-                    "pneumonic": "MULS",
+                    "mnemonic": "MULS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -2043,7 +2043,7 @@
             {
                 "name": "Divide Signed Integer",
                 "assembly": {
-                    "pneumonic": "DIVS",
+                    "mnemonic": "DIVS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -2091,7 +2091,7 @@
             {
                 "name": "Modulo Signed Integer",
                 "assembly": {
-                    "pneumonic": "MODS",
+                    "mnemonic": "MODS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -2139,7 +2139,7 @@
             {
                 "name": "Bitwise AND",
                 "assembly": {
-                    "pneumonic": "AND",
+                    "mnemonic": "AND",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2179,7 +2179,7 @@
             {
                 "name": "Bitwise OR",
                 "assembly": {
-                    "pneumonic": "OR",
+                    "mnemonic": "OR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2219,7 +2219,7 @@
             {
                 "name": "Bitwise NOT",
                 "assembly": {
-                    "pneumonic": "NOT",
+                    "mnemonic": "NOT",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -2251,7 +2251,7 @@
             {
                 "name": "Bitwise XOR",
                 "assembly": {
-                    "pneumonic": "XOR",
+                    "mnemonic": "XOR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2291,7 +2291,7 @@
             {
                 "name": "Logical Shift Left",
                 "assembly": {
-                    "pneumonic": "LSL",
+                    "mnemonic": "LSL",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2325,7 +2325,7 @@
             {
                 "name": "Logical Shift Right",
                 "assembly": {
-                    "pneumonic": "LSR",
+                    "mnemonic": "LSR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2359,7 +2359,7 @@
             {
                 "name": "Arithmetic Shift Left",
                 "assembly": {
-                    "pneumonic": "ASL",
+                    "mnemonic": "ASL",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2393,7 +2393,7 @@
             {
                 "name": "Arithmetic Shift Right",
                 "assembly": {
-                    "pneumonic": "ASR",
+                    "mnemonic": "ASR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2427,7 +2427,7 @@
             {
                 "name": "Rotate Right",
                 "assembly": {
-                    "pneumonic": "RTR",
+                    "mnemonic": "RTR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2461,7 +2461,7 @@
             {
                 "name": "Logical Shift Left Register",
                 "assembly": {
-                    "pneumonic": "LSL",
+                    "mnemonic": "LSL",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2501,7 +2501,7 @@
             {
                 "name": "Logical Shift Right Register",
                 "assembly": {
-                    "pneumonic": "LSR",
+                    "mnemonic": "LSR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2541,7 +2541,7 @@
             {
                 "name": "Arithmetic Shift Left Register",
                 "assembly": {
-                    "pneumonic": "ASL",
+                    "mnemonic": "ASL",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2581,7 +2581,7 @@
             {
                 "name": "Arithmetic Shift Right Register",
                 "assembly": {
-                    "pneumonic": "ASR",
+                    "mnemonic": "ASR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2621,7 +2621,7 @@
             {
                 "name": "Rotate Right Register",
                 "assembly": {
-                    "pneumonic": "RTR",
+                    "mnemonic": "RTR",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" },
@@ -2661,7 +2661,7 @@
             {
                 "name": "Map Unsigned To Signed",
                 "assembly": {
-                    "pneumonic": "MUS",
+                    "mnemonic": "MUS",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -2693,7 +2693,7 @@
             {
                 "name": "Map Signed To Unsigned",
                 "assembly": {
-                    "pneumonic": "MSU",
+                    "mnemonic": "MSU",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "register", "argument": "Ry" }
@@ -2731,7 +2731,7 @@
             {
                 "name": "Floating-Point Compare",
                 "assembly": {
-                    "pneumonic": "CMP",
+                    "mnemonic": "CMP",
                     "arguments": [
                         { "type": "f_register", "argument": "Fx" },
                         { "type": "f_register", "argument": "Fy" }
@@ -2765,7 +2765,7 @@
             {
                 "name": "Floating-Point Compare Single Against Zero",
                 "assembly": {
-                    "pneumonic": "CMP",
+                    "mnemonic": "CMP",
                     "arguments": [{ "type": "f_register", "argument": "Fx" }]
                 },
                 "description": "Stores the condition variables.\n- Sets EQ if $\"Fx\" = 0$\n- Sets GT if $\"Fx\" > 0$\n- Sets LT if $\"Fx\" < 0$\n- Sets GE if $\"Fx\" >= 0$\n- Sets LE if $\"Fx\" <= 0$\n- Sets FINF if $\"Fx\" = plus.minus infinity$\n- Sets FZ if $\"Fx\" = plus.minus 0$\n- Sets FNAN if $\"Fx\" = \"NAN\"$",
@@ -2789,7 +2789,7 @@
             {
                 "name": "Add Floating-Point",
                 "assembly": {
-                    "pneumonic": "ADD",
+                    "mnemonic": "ADD",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -2837,7 +2837,7 @@
             {
                 "name": "Subtract Floating-Point",
                 "assembly": {
-                    "pneumonic": "SUB",
+                    "mnemonic": "SUB",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -2885,7 +2885,7 @@
             {
                 "name": "Multiply Floating-Point",
                 "assembly": {
-                    "pneumonic": "MUL",
+                    "mnemonic": "MUL",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -2933,7 +2933,7 @@
             {
                 "name": "Divide Floating-Point",
                 "assembly": {
-                    "pneumonic": "DIV",
+                    "mnemonic": "DIV",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -2981,7 +2981,7 @@
             {
                 "name": "Cast To Float",
                 "assembly": {
-                    "pneumonic": "CST",
+                    "mnemonic": "CST",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3021,7 +3021,7 @@
             {
                 "name": "Cast From Float",
                 "assembly": {
-                    "pneumonic": "CST",
+                    "mnemonic": "CST",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "register", "argument": "Rx" },
@@ -3061,7 +3061,7 @@
             {
                 "name": "Negate Floating-Point",
                 "assembly": {
-                    "pneumonic": "NEG",
+                    "mnemonic": "NEG",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3101,7 +3101,7 @@
             {
                 "name": "Absolute Value Floating-Point",
                 "assembly": {
-                    "pneumonic": "ABS",
+                    "mnemonic": "ABS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3141,7 +3141,7 @@
             {
                 "name": "Round Floating-Point",
                 "assembly": {
-                    "pneumonic": "RND",
+                    "mnemonic": "RND",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3181,7 +3181,7 @@
             {
                 "name": "Round To Zero Floating-Point",
                 "assembly": {
-                    "pneumonic": "RNDZ",
+                    "mnemonic": "RNDZ",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3221,7 +3221,7 @@
             {
                 "name": "Round To Infinity Floating-Point",
                 "assembly": {
-                    "pneumonic": "RNDI",
+                    "mnemonic": "RNDI",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3261,7 +3261,7 @@
             {
                 "name": "Square Root Floating-Point",
                 "assembly": {
-                    "pneumonic": "ABS",
+                    "mnemonic": "ABS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3301,7 +3301,7 @@
             {
                 "name": "Log Base 10 Floating-Point",
                 "assembly": {
-                    "pneumonic": "LOG",
+                    "mnemonic": "LOG",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3341,7 +3341,7 @@
             {
                 "name": "Log Natrual Floating-Point",
                 "assembly": {
-                    "pneumonic": "LN",
+                    "mnemonic": "LN",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3381,7 +3381,7 @@
             {
                 "name": "Exponential Floating-Point",
                 "assembly": {
-                    "pneumonic": "EXP",
+                    "mnemonic": "EXP",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3421,7 +3421,7 @@
             {
                 "name": "Sine Floating-Point",
                 "assembly": {
-                    "pneumonic": "SIN",
+                    "mnemonic": "SIN",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3461,7 +3461,7 @@
             {
                 "name": "Cosine Floating-Point",
                 "assembly": {
-                    "pneumonic": "COS",
+                    "mnemonic": "COS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3501,7 +3501,7 @@
             {
                 "name": "Tangent Floating-Point",
                 "assembly": {
-                    "pneumonic": "SIN",
+                    "mnemonic": "SIN",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3541,7 +3541,7 @@
             {
                 "name": "Arcsine Floating-Point",
                 "assembly": {
-                    "pneumonic": "ASN",
+                    "mnemonic": "ASN",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3581,7 +3581,7 @@
             {
                 "name": "Arccosine Floating-Point",
                 "assembly": {
-                    "pneumonic": "ACS",
+                    "mnemonic": "ACS",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3621,7 +3621,7 @@
             {
                 "name": "Arctangent Floating-Point",
                 "assembly": {
-                    "pneumonic": "ATN",
+                    "mnemonic": "ATN",
                     "arguments": [
                         { "type": "condition_bit", "argument": "c" },
                         { "type": "f_register", "argument": "Fx" },
@@ -3667,7 +3667,7 @@
             {
                 "name": "Set Timer",
                 "assembly": {
-                    "pneumonic": "SETT",
+                    "mnemonic": "SETT",
                     "arguments": [
                         { "type": "timer", "argument": "Tx" },
                         { "type": "register", "argument": "Ry" }
@@ -3699,7 +3699,7 @@
             {
                 "name": "Get Current Timer",
                 "assembly": {
-                    "pneumonic": "GETT",
+                    "mnemonic": "GETT",
                     "arguments": [
                         { "type": "register", "argument": "Rx" },
                         { "type": "timer", "argument": "Ty" }
@@ -3731,7 +3731,7 @@
             {
                 "name": "Check Timer",
                 "assembly": {
-                    "pneumonic": "CHKT",
+                    "mnemonic": "CHKT",
                     "arguments": [{ "type": "timer", "argument": "Tx" }]
                 },
                 "description": "Sets the EQ flag if the current value of timer (timer) is zero and if it is restart the timer to the previously set value.",
@@ -3755,7 +3755,7 @@
             {
                 "name": "Clear Timer",
                 "assembly": {
-                    "pneumonic": "CLRT",
+                    "mnemonic": "CLRT",
                     "arguments": [{ "type": "timer", "argument": "Tx" }]
                 },
                 "description": "Sets the timer (timer) to zero.",
@@ -3777,7 +3777,7 @@
             {
                 "name": "Stall Timer",
                 "assembly": {
-                    "pneumonic": "STALL",
+                    "mnemonic": "STALL",
                     "arguments": [{ "type": "timer", "argument": "Tx" }]
                 },
                 "description": "Stalls the pipeline at execute until the timer is 0.",

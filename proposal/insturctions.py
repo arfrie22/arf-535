@@ -53,12 +53,12 @@ with open('instructions.json') as f:
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
             opcode_hex = "0x{:02x}".format(opcode_i)
             opcode_name = opcode_data["name"]
-            opcode_pneumonic = opcode_data["assembly"]["pneumonic"]
+            opcode_mnemonic = opcode_data["assembly"]["mnemonic"]
             for arg in opcode_data["assembly"]["arguments"]:
                 if arg["type"].endswith("_bit"):
-                    opcode_pneumonic += "(" + arg["argument"] + ")"
+                    opcode_mnemonic += "(" + arg["argument"] + ")"
                 else:
-                    opcode_pneumonic += " " + arg["argument"]
+                    opcode_mnemonic += " " + arg["argument"]
             opcode_description = opcode_data["description"]
             opcode_bits = opcode_data["bits"]
             opcode_bit_remaining = 32-8
@@ -73,6 +73,6 @@ with open('instructions.json') as f:
             output_file.write("breakable: false,")
             output_file.write("{text[")
             output_file.write(f"=== OPCODE: {opcode_hex} ({opcode_name}) \\\n")
-            output_file.write(opcode_pneumonic + " \\\n")
+            output_file.write(opcode_mnemonic + " \\\n")
             output_file.write(opcode_description + "]\n")
             output_file.write(generate_table(type_bin, opcode_i, opcode_bits, opcode_bit_remaining) + "}) \\\n")

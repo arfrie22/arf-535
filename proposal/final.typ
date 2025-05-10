@@ -75,21 +75,21 @@ There are 32 general purpose timers which are automatically decreased every cloc
 - _label_ is a label which represents an address
 - d:0xYYYYYYYY is an auto generated label for 0xYYYYYYYY in the data memory
 - p:0xYYYYYYYY is an auto generated label for 0xYYYYYYYY in the program memory
-- Adding the optional l to the end of a branch instruction will update the link register to the next insturction.
+- Adding the optional l to the end of a branch instruction will update the link register to the next instruction.
 - Adding the optional c to the end of a supported alu operation will update the status register.
 
 
-I removed the duplicate instructions that update the link register, and turned it into a bit that needs to be set in the insturction. That removed the duplicate code. I ended up implementing all instructions, but most of them were not used in my benchmark. I added a lot of floating point operations based on the arm operations, but I ended up not needing them after reading more about Goertzel algorithm, and I could precompute all trig functions.
+I removed the duplicate instructions that update the link register, and turned it into a bit that needs to be set in the instruction. That removed the duplicate code. I ended up implementing all instructions, but most of them were not used in my benchmark. I added a lot of floating point operations based on the arm operations, but I ended up not needing them after reading more about Goertzel algorithm, and I could precompute all trig functions.
 
 #include "instructions.typ"
 
 #pagebreak()
 
 = Memory
-The plan is to have 2 64 line caches, one for memory and the other for data. Where each line is 4 words. This number might be changed depending on the efficiency of the simulator and therefore the maximum reasonable size of the benchmark. \
-The memory is split into two distinct banks, where the program memory is what is loaded from the ASM / machine code and is in DRAM. The data memory bank will be in SRAM (though it might be clocked down for the purpose of the benchmarks). \
+There are 2 64 line caches, one for memory and the other for data. Where each line is 4 words. The size of the benchmarks were made to be large enough so it will be bigger than cache. \
+The memory is split into two distinct banks, where the program memory is what is loaded from the ASM / machine code and is in DRAM (100 cycles). The data memory bank will be in SRAM (10 cycles). \
 Each bank will store 65,536 words (2^16). \
-The cache will be a write-though, no allocate direct cache. There will be a 6 bit index, a 2 bit offset, and a 8 bit tag. There will be a seperate cache for data and program memory.
+The cache will be a write-though, no allocate direct cache. There will be a 6 bit index, a 2 bit offset, and a 8 bit tag. There will be a separate cache for data and program memory.
 
 The memory address is the lower 16-bits, any of the higher 16-bits are discarded.
 
@@ -99,11 +99,33 @@ The memory address is the lower 16-bits, any of the higher 16-bits are discarded
 
 To use the simulator write the assembly in the `/asm` folder under the gui folder. The asm requires a `.prog` section and optionally a `.data` section. If you need the ADCs you can enable them reading from a `.wav` file placed in the `/wav` folder. The clock rate is set to 88,200,000 Hz to be a multiple of the normal audio sampling frequency of 44.1 kHz. Currently the simulator has no support for writing the DAC to a `.wav` output. The cache and pipeline can be disabled (the pipeline does this by limiting the normal pipeline to allow for one instruction inside of it). The assembly file then must be assembled into a `.o` file which is placed in the `compiled` folder. After it has been assembled it can be loaded in.
 
+#figure(
+  image("images/main.png", width: 80%),
+  caption: [
+    The main view of my GUI after loading the `dtmf` program using the `dtmf` wav file on the first ADC register
+  ],
+)
+
 \
-The panes that contain the status can be moved around by dragging on the name in the tab or the header above the table. Any integer number is displayed as hex, execpt for floating point numbres which are displayed as the base 10 representation. The dividers between the tables can be dragged to be resized.
+The panes that contain the status can be moved around by dragging on the name in the tab or the header above the table. Any integer number is displayed as hex, execpt for floating point numbers which are displayed as the base 10 representation. The dividers between the tables can be dragged to be resized.
+
+#figure(
+  image("images/moved.png", width: 80%),
+  caption: [
+    Panes moved around
+  ],
+)
 
 \
 Once when a program is loaded in it can be single stepped which will run a single clock cycle, or it can be ran until it hits a trap. When the `Run` button is pressed the ui will update every second and the button is replaced with a `Cancel` button to stop the simulator. This feature is there incase the assembly has an infinite loop, as well as for making sure the code is working properly while still letting it run.
+
+#figure(
+  image("images/ran.png", width: 80%),
+  caption: [
+    GUI after cycles
+  ],
+)
+
 
 #pagebreak()
 
@@ -112,10 +134,10 @@ Once when a program is loaded in it can be single stepped which will run a singl
 The are 3 parts to the Simulator GUI, the UI code, the simulator code, and the assmebler code. The UI uses `egui` to create all of the widget and many `egui_table` based widgets for all the displays. The movable panes are done with `egui_pane` which handles the dragging and splitting.
 
 \
-The assembler is made using the `pest` library. The syntax is generated using a python script that reads the instructions, which are stored in a json file to allow the base code for the instructions to be autogenerated and kept up to date with the instruction manual. It breaks up each insturction line into a whole insturction. It does not first parse the pneumonic then find the arguments that would work for it. This was done to make the parsing simplier and easier to autogen. The downside is it can result in less than helpful assembler errors at times.
+The assembler is made using the `pest` library. The syntax is generated using a python script that reads the instructions, which are stored in a json file to allow the base code for the instructions to be autogenerated and kept up to date with the instruction manual. It breaks up each instruction line into a whole instruction. It does not first parse the mnemonic then find the arguments that would work for it. This was done to make the parsing simplier and easier to autogen. The downside is it can result in less than helpful assembler errors at times.
 
 \
-A big part of the design is focused around codegen. The insturction json was made to be detailed enough so that all trivial parts of the insturctions could be generated (every part execpt the execute pipeline). This made it very easy to add new instructions, change the order of them, or their requirements in the assembly langauge. I switched the writeups from Google Docs to typst to allow for easy generation of the instruction page, while being easier to get a good looking format than LaTeX.
+A big part of the design is focused around codegen. The instruction json was made to be detailed enough so that all trivial parts of the instructions could be generated (every part execpt the execute pipeline). This made it very easy to add new instructions, change the order of them, or their requirements in the assembly langauge. I switched the writeups from Google Docs to typst to allow for easy generation of the instruction page, while being easier to get a good looking format than LaTeX.
 
 \
 The simulator code itself is the library that both the assembler library and the gui use. This was done to keep the simulator as being the bare minimum, all encompsing part that runs the simulation. I didn't want to split out common parts that both the simulator and assembler would use as you can use the simulator without the assembler and doing so would require less dependencies.
@@ -155,10 +177,10 @@ With no cache pipeline it takes 1,506,066,562 cycles there is very little improv
 
 = What I Learned
 
-Since I did the project byself I was able to leran many facets of making a simulator. I got a lot more comfortable with writing parsing grammars as well as learned how to avoid many pitfalls. The order you parse matters a lot if it is ambiguous. For my number parsing the order as digit then hex digit, however since hex digits start with `0x` it would fail to parse since it would start parsing the number `0` then read the `x` and throw the error. This was solved by making the order hex digit before digit. There were many small pitfalls like this I had to avoid when making the parser. Since most insturction's first argument is a register it avoid any issues that would arise from parsing two instructions with the same pneumonic.
+Since I did the project byself I was able to leran many facets of making a simulator. I got a lot more comfortable with writing parsing grammars as well as learned how to avoid many pitfalls. The order you parse matters a lot if it is ambiguous. For my number parsing the order as digit then hex digit, however since hex digits start with `0x` it would fail to parse since it would start parsing the number `0` then read the `x` and throw the error. This was solved by making the order hex digit before digit. There were many small pitfalls like this I had to avoid when making the parser. Since most instruction's first argument is a register it avoid any issues that would arise from parsing two instructions with the same mnemonic.
 
 \
-There was a lot of thinking originally about what instructions I wanted to do before I decided that I should spend the time to write codegen. This was one of my favorite decisions. It took the pressure off insturctions as I could change them around as needed, only having to update the JSON file.
+There was a lot of thinking originally about what instructions I wanted to do before I decided that I should spend the time to write codegen. This was one of my favorite decisions. It took the pressure off instructions as I could change them around as needed, only having to update the JSON file.
 
 \
 I wish I had more time to write tests. A lot of my issues later on came from improerly implmeneted parts of the code or regression on previous issues. However, I didn't want to spend too much time on it as making progress on the actual simulator was just as, if not more importatnt. The best testing came from the more thoughout and planned out programs where I would use a bunch of functions and realize they were bugged, rather than just testing a single instruction works in a vaccum.

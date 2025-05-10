@@ -6,12 +6,12 @@ with open('instructions.json') as f:
     for type_i, type_data in enumerate(data):
         for opcode_i, opcode_data in enumerate(type_data["opcodes"]):
             extra = {
-                    "pneumonic": "",
+                    "mnemonic": "",
                     "arguments": [],
             }
 
             full: list[str] = opcode_data["assembly"]["full"].split(" ")
-            extra["pneumonic"] = full[0]
+            extra["mnemonic"] = full[0]
             for i, arg in enumerate(full[1:]):
                 argument = {
                     "type": "",
